@@ -1,0 +1,57 @@
+#panel {
+    margin: 0;
+    padding: 0;
+}
+
+#panel-left {
+    border-right: 1px #ddd solid;
+    height: 100vh;
+    width: 200px;
+    float: left;
+    background: rgb(252, 252, 253);
+}
+
+#panel-header {
+    border-bottom: 1px #ddd solid;
+    margin: 0;
+    padding: 0;
+}
+
+#panel-main {
+    height: calc(100vh - 42px);
+    width: calc(100vw - 200px);
+    margin: 0;
+    padding: 0;
+}
+
+.filter-tree {
+    font-size: 24px;
+}
+
+.filter-tree {
+    background: rgb(252, 252, 253) !important;
+}
+
+.filter-tree span {
+    font-size: 16px !important;
+}
+
+.filter-tree .el-tree-node__expand-icon {
+    font-size: 18px !important;
+}
+
+.menu {
+    padding: 0 !important;
+}
+
+.menu .menu-button {
+    display: block;
+    padding: 5px 10px;
+    font-size: 16px;
+    color: #606266;
+    cursor: pointer;
+}
+
+.menu .menu-button:hover {
+    background: #409EFF;
+}

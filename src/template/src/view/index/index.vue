@@ -13,10 +13,10 @@
                             :props="defaultProps"
                             :filter-node-method="filterNode"
                             ref="tree"
-                            icon-class="el-icon-folder-opened"
                             expand-on-click-node
                             draggable
-                            @node-contextmenu="treeMenu"
+                            @node-contextmenu="treeRightMenu"
+                            default-expand-all
                     >
                     </el-tree>
                 </div>
@@ -24,51 +24,42 @@
 
             <el-container>
                 <el-header id="panel-header" height="40px">Header</el-header>
-                <el-main id="panel-main">Main</el-main>
+                <el-main id="panel-main">
+                    <router-view></router-view>
+                </el-main>
             </el-container>
         </el-container>
 
-        <!--<el-popover
+        <el-popover
+                popper-class="menu"
                 placement="right"
-                width="200"
+                width="150"
                 trigger="manual"
-                content="这里面是右键菜单"
-                v-model="visible"
-        >
-        </el-popover>-->
-
-        <!-- 挂一个遮罩-->
+                v-model="menuVisible">
+            <a class="menu-button">添加主机</a>
+            <a class="menu-button" @click="openShell">打开终端</a>
+            <a class="menu-button">打开桌面</a>
+        </el-popover>
     </div>
 </template>
 
 <script>
+    import '@/static/css/index.css';
+
     export default {
         name: "Index",
         data() {
             return {
-                visible: true,
+                menuVisible: false,
                 search: '',
                 data: [
                     {
-                        id: 1,
-                        label: '一级 1',
-                        children: [{
-                            id: 4,
-                            label: '二级 1-1',
-                            children: [{
-                                id: 9,
-                                label: '三级 1-1-1'
-                            }, {
-                                id: 10,
-                                label: '三级 1-1-2'
-                            }]
-                        }]
-                    }, {
                         id: 2,
                         label: '一级 2',
                         children: [{
                             id: 5,
-                            label: '二级 2-1'
+                            label: '二级 2-1',
+                            host: '127.0.0.1'
                         }, {
                             id: 6,
                             label: '二级 2-2'
@@ -100,37 +91,29 @@
                 if (!value) return true;
                 return data.label.indexOf(value) !== -1;
             },
-            treeMenu(event, nodeObj, node, data) {
-                console.log(nodeObj, node, data)
+            /*eslint no-unused-vars: ["error", { "args": "none" }]*/
+            treeRightMenu(MouseEvent, object, node, val) {
+                localStorage.setItem('currentSelectTree', JSON.stringify(object));
+                this.menuVisible = false; // 先把模态框关死，目的是 第二次或者第n次右键鼠标的时候 它默认的是true
+                this.menuVisible = true;  // 显示模态窗口，跳出自定义菜单栏
+                var menu = document.querySelector('.menu');
+                menu.style.left = MouseEvent.clientX + 'px';
+                document.addEventListener('click', this.clearEventRightMenu); // 给整个document添加监听鼠标事件，点击任何位置执行foo方法
+                menu.style.top = MouseEvent.clientY - 10 + 'px';
+            },
+            clearEventRightMenu() { // 取消鼠标监听事件 菜单栏
+                this.menuVisible = false;
+                document.removeEventListener('click', this.foo);
+            },
+            openShell() {
+                this.$router.push({
+                    path: '/shell/' + this.$md5((new Date()).getTime().toString()),
+                });
             }
         },
     }
 </script>
 
-<style scoped>
-    #panel {
-        margin: 0;
-        padding: 0;
-    }
+<style>
 
-    #panel-left {
-        border-right: 1px #d4d4d4 solid;
-        height: 100vh;
-        width: 200px;
-        float: left;
-    }
-
-    #panel-header {
-        border: 1px red solid;
-        margin: 0;
-        padding: 0;
-    }
-
-    #panel-main {
-        border: 1px black solid;
-        height: calc(100vh - 42px);
-        width: calc(100vw - 200px);
-        margin: 0;
-        padding: 0;
-    }
 </style>

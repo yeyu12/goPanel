@@ -1,8 +1,9 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+import Vue from 'vue';
+import Router from 'vue-router';
 
-import Index from '@/view/index/index'
-import Login from '@/view/login/index'
+import Index from '@/view/index/index';
+import Login from '@/view/login/index';
+import Shell from '@/view/shell/index';
 
 Vue.use(Router);
 
@@ -11,6 +12,13 @@ export default new Router({
         path: '/',
         name: 'index',
         component: Index,
+        children: [
+            {
+                path: 'shell/:date',
+                name: 'Shell',
+                component: Shell
+            }
+        ]
     }, {
         path: '/login',
         name: 'login',
