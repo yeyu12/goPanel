@@ -18,7 +18,9 @@ func Ssh(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	defer ws.Close()
+	defer func() {
+		ws.Close()
+	}()
 
 	cols, _ := common.StringUtils(c.Param("cols")).Uint32()
 	rows, _ := common.StringUtils(c.Param("rows")).Uint32()
@@ -39,8 +41,8 @@ func Ssh(c *gin.Context) {
 		}
 	}()
 
-	wsRead := make(chan []byte, 1024)
-	wsWrite := make(chan []byte, 1024)
+	wsRead := make(chan []byte, 5120)
+	wsWrite := make(chan []byte, 10240)
 	var ch chan bool
 
 	go sh.Read(sshChannel, wsWrite)
