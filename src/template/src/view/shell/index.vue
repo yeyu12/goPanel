@@ -91,12 +91,9 @@
                 }, 5000);
             }
         },
-        destroy() {
-            console.log(123)
+        destroyed() {
             clearTimeout(this.wsTimer);
-            this.ws.onclose = (evt) => {
-                console.log("中断ws")
-            }
+            this.ws.close();
         }
     };
 </script>
