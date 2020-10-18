@@ -16,7 +16,6 @@
             return {
                 ws: {},
                 term: {},
-                lockReconnect: false,
                 timeout: {},
                 fitAddon: {},
                 termDispose: {},
@@ -57,6 +56,11 @@
                 this.ws.binaryType = "arraybuffer";
                 //连接成功
                 this.ws.onopen = (evt) => {
+                    if (this.wsTimer) {
+                        clearInterval(this.wsTimer)
+                        this.wsTimer = 0;
+                    }
+
                     this.term.writeln("");
                 }
 
@@ -80,19 +84,17 @@
                 };
             },
             reconnect() {
-                if (this.lockReconnect) return;
-                this.lockReconnect = true;
-
-                this.wsTimer = setTimeout(() => {
-                    this.termDispose.dispose()
-                    this.connWebsocket();
-                    this.term.reset();
-                    this.lockReconnect = false;
-                }, 5000);
+                if (!this.wsTimer) {
+                    this.wsTimer = setInterval(() => {
+                        this.termDispose.dispose()
+                        this.connWebsocket();
+                        this.term.reset();
+                    }, 10000);
+                }
             }
         },
         destroyed() {
-            clearTimeout(this.wsTimer);
+            clearInterval(this.wsTimer);
             this.ws.close();
         }
     };

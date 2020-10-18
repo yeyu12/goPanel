@@ -7,10 +7,12 @@ import (
 	"goPanel/src/panel/library/ssh"
 	"log"
 	"net/http"
+	"time"
 )
 
 func Ssh(c *gin.Context) {
 	ws, err := (&websocket.Upgrader{
+		HandshakeTimeout: time.Duration(time.Second * 30),
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
