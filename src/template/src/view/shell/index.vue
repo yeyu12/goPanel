@@ -14,9 +14,13 @@
     export default {
         data() {
             return {
-                copy: "",
-                isBackspace: false,
-                lock: true
+                ws: {},
+                term: {},
+                lockReconnect: false,
+                timeout: {},
+                fitAddon: {},
+                termDispose: {},
+                wsTimer: 0
             };
         },
         created() {
@@ -25,56 +29,70 @@
         },
         /*eslint no-unused-vars: ["error", { "args": "none" }]*/
         mounted() {
-            let fitAddon = new FitAddon();
+            this.fitAddon = new FitAddon();
             let terminalContainer = document.getElementById("terminal-container");
-            let term = new Terminal({
-                // 光标闪烁
+            this.term = new Terminal({
                 cursorBlink: true,
                 rendererType: "canvas", //渲染类型
                 disableStdin: false, //是否应禁用输入。
                 cursorStyle: "block", //光标样式
                 tabStopWidth: 4
             });
-            term.loadAddon(fitAddon);
-            term.open(terminalContainer, true);
-            term.focus();
-            fitAddon.fit();
+            this.term.loadAddon(this.fitAddon);
+            this.term.open(terminalContainer, true);
+            this.term.focus();
+            this.fitAddon.fit();
 
-            let websocket = new WebSocket("ws://127.0.0.1:10010/ws/ssh/" + term.cols + "/" + term.rows + "/127.0.0.1"); //地址
-            websocket.binaryType = "arraybuffer";
-            //连接成功
-            websocket.onopen = (evt) => {
-                term.writeln("");
-            }
-
-            // 输入
-            term.onData(data => {
-                websocket.send(data);
-            });
-
-            // 返回
-            websocket.onmessage = function (evt) {
-                term.write(evt.data)
-            };
-
-            //关闭
-            websocket.onclose = function (evt) {
-                console.log("close", evt);
-            };
-            //错误
-            websocket.onerror = function (evt) {
-                console.log("error", evt);
-            };
-        }
-        ,
+            this.connWebsocket();
+        },
         methods: {
             formatWs(event, data) {
                 return JSON.stringify({
                     event,
                     data: new TextEncoder().encode(data)
                 })
+            },
+            connWebsocket() {
+                this.ws = new WebSocket("ws://127.0.0.1:10010/ws/ssh/" + this.term.cols + "/" + this.term.rows + "/127.0.0.1"); //地址
+                this.ws.binaryType = "arraybuffer";
+                //连接成功
+                this.ws.onopen = (evt) => {
+                    this.term.writeln("");
+                }
+
+                // 输入
+                this.termDispose = this.term.onData(data => {
+                    this.ws.send(data);
+                });
+
+                // 返回
+                this.ws.onmessage = (evt) => {
+                    this.term.write(evt.data)
+                };
+
+                //关闭
+                this.ws.onclose = (evt) => {
+                    this.reconnect()
+                };
+                //错误
+                this.ws.onerror = (evt) => {
+                    this.reconnect();
+                };
+            },
+            reconnect() {
+                if (this.lockReconnect) return;
+                this.lockReconnect = true;
+
+                this.wsTimer = setTimeout(() => {
+                    this.termDispose.dispose()
+                    this.connWebsocket();
+                    this.term.reset();
+                    this.lockReconnect = false;
+                }, 5000);
             }
+        },
+        beforeDestroy() {
+            clearTimeout(this.wsTimer);
         }
-    }
-    ;
+    };
 </script>
