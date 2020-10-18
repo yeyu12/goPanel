@@ -30,6 +30,14 @@ func Ssh(c *gin.Context) {
 		Cols: cols,
 		Rows: rows,
 	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := sshChannel.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	wsRead := make(chan []byte, 1024)
 	wsWrite := make(chan []byte, 1024)
@@ -46,8 +54,9 @@ func Ssh(c *gin.Context) {
 
 		for {
 			mt, message, err := ws.ReadMessage()
-			if err != nil {
-				log.Fatal(err)
+			// 其他错误，如果是 1001 和 1000 就不打印日志
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseNormalClosure) {
+				log.Printf("ReadMessage other remote:%v error: %v \n", ws.RemoteAddr(), err)
 				return
 			}
 
@@ -69,6 +78,7 @@ func Ssh(c *gin.Context) {
 				err = ws.WriteMessage(websocket.TextMessage, message)
 				if err != nil {
 					log.Fatal(err)
+					return
 				}
 			}
 		}
