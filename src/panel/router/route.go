@@ -34,6 +34,6 @@ func (r *Route) loadRoute() {
 	// websocket
 	routeWs := r.g.Group("/ws")
 	{
-		routeWs.GET("/ssh", controllers.Ssh)
+		routeWs.GET("/ssh/:cols/:rows/:host", controllers.Ssh)
 	}
 }

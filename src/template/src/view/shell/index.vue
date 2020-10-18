@@ -40,43 +40,23 @@
             term.focus();
             fitAddon.fit();
 
-            let websocket = new WebSocket("ws://127.0.0.1:10010/ws/ssh"); //地址
+            let websocket = new WebSocket("ws://127.0.0.1:10010/ws/ssh/" + term.cols + "/" + term.rows + "/127.0.0.1"); //地址
             websocket.binaryType = "arraybuffer";
             //连接成功
-            websocket.onopen = function (evt) {
+            websocket.onopen = (evt) => {
                 term.writeln("");
-            };
+            }
 
             // 输入
             term.onData(data => {
-                // console.log(data)
-                websocket.send(data)
+                websocket.send(data);
             });
 
+            // 返回
             websocket.onmessage = function (evt) {
                 term.write(evt.data)
             };
 
-            //输入
-            /*term.on("data", function (data) {
-                console.log(new TextEncoder().encode(data));
-
-                if (that.lock) return;
-                websocket.send(new TextEncoder().encode("\x00" + data));
-                that.lock = true;
-            });*/
-            //返回
-            /*websocket.onmessage = function (evt) {
-                if (that.isBackspace) {
-                    if (evt.data !== '^~^') {
-                        term.write('\b \b');
-                    }
-                } else {
-                    term.write(evt.data);
-                }
-
-                that.lock = false;
-            };*/
             //关闭
             websocket.onclose = function (evt) {
                 console.log("close", evt);
@@ -85,31 +65,16 @@
             websocket.onerror = function (evt) {
                 console.log("error", evt);
             };
-            //选中 复制
-            /*term.on("selection", function () {
-                if (term.hasSelection()) {
-                    this.copy = term.getSelection();
-                }
-            });*/
-
-            // term.attachCustomKeyEventHandler(function (ev) {
-            //     that.isBackspace = false;
-            //
-            //     if (ev.key === 'Enter') {
-            //         term.writeln("");
-            //     }
-            //
-            //     if (ev.key === 'Backspace') {
-            //         that.isBackspace = true;
-            //     }
-            //
-            //     if (ev.keyCode == 67 && ev.ctrlKey) {
-            //         websocket.send(new TextEncoder().encode("\x00\n"));
-            //     }
-            //     if (ev.keyCode == 86 && ev.ctrlKey) {
-            //         websocket.send(new TextEncoder().encode("\x00" + this.copy));
-            //     }
-            // });
-        },
-    };
+        }
+        ,
+        methods: {
+            formatWs(event, data) {
+                return JSON.stringify({
+                    event,
+                    data: new TextEncoder().encode(data)
+                })
+            }
+        }
+    }
+    ;
 </script>
