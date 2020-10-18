@@ -94,11 +94,11 @@
             /*eslint no-unused-vars: ["error", { "args": "none" }]*/
             treeRightMenu(MouseEvent, object, node, val) {
                 localStorage.setItem('currentSelectTree', JSON.stringify(object));
-                this.menuVisible = false; // 先把模态框关死，目的是 第二次或者第n次右键鼠标的时候 它默认的是true
-                this.menuVisible = true;  // 显示模态窗口，跳出自定义菜单栏
+                this.menuVisible = false;
+                this.menuVisible = true;
                 var menu = document.querySelector('.menu');
                 menu.style.left = MouseEvent.clientX + 'px';
-                document.addEventListener('click', this.clearEventRightMenu); // 给整个document添加监听鼠标事件，点击任何位置执行foo方法
+                document.addEventListener('click', this.clearEventRightMenu);
                 menu.style.top = MouseEvent.clientY - 10 + 'px';
             },
             clearEventRightMenu() { // 取消鼠标监听事件 菜单栏

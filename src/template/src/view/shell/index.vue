@@ -40,7 +40,7 @@
             term.focus();
             fitAddon.fit();
 
-            let websocket = new WebSocket("ws://192.168.30.124:8082/ws"); //地址
+            let websocket = new WebSocket("ws://127.0.0.1:10010/ws/ssh"); //地址
             websocket.binaryType = "arraybuffer";
             //连接成功
             websocket.onopen = function (evt) {
@@ -49,8 +49,14 @@
 
             // 输入
             term.onData(data => {
-                console.log(data)
+                // console.log(data)
+                websocket.send(data)
             });
+
+            websocket.onmessage = function (evt) {
+                term.write(evt.data)
+            };
+
             //输入
             /*term.on("data", function (data) {
                 console.log(new TextEncoder().encode(data));
