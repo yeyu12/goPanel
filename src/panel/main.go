@@ -21,6 +21,7 @@ func main() {
 // 创建表
 func createTable() {
 	core.CreateTables(
+		new(models.UserModel),
 		new(models.MachineModel),
 		new(models.MachineGroupModel),
 	)

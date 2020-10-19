@@ -7,12 +7,15 @@ import (
 	"goPanel/src/panel/validations"
 )
 
-func JsonPost(dataStruct interface{}, data []byte) interface{} {
+type BaseController struct {
+}
+
+func (c *BaseController) JsonPost(dataStruct interface{}, data []byte) interface{} {
 	_ = json.Unmarshal(data, &dataStruct)
 	return dataStruct
 }
 
-func Validations(g *gin.Context, vali interface{}) error {
+func (c *BaseController) Validations(g *gin.Context, vali interface{}) error {
 	if err := validations.Validate.Struct(vali); err != nil {
 		return validations.Translate(err.(validator.ValidationErrors))
 	}

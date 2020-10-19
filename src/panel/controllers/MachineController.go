@@ -7,16 +7,24 @@ import (
 	"io/ioutil"
 )
 
-func MachineList(g *gin.Context) {
+type MachineController struct {
+	BaseController
+}
+
+func NewMachineController() *MachineController {
+	return &MachineController{}
+}
+
+func (c *MachineController) MachineList(g *gin.Context) {
 	common.RetJson(g, 200, "成功", "")
 }
 
-func MachineAdd(g *gin.Context) {
+func (c *MachineController) MachineAdd(g *gin.Context) {
 	inputData, _ := ioutil.ReadAll(g.Request.Body)
 	var userVail validations.MachineAdd
-	JsonPost(&userVail, inputData)
+	c.JsonPost(&userVail, inputData)
 
-	if err := Validations(g, userVail); err != nil {
+	if err := c.Validations(g, userVail); err != nil {
 		common.RetJson(g, 4000, err.Error(), "")
 		return
 	}
@@ -24,10 +32,10 @@ func MachineAdd(g *gin.Context) {
 	common.RetJson(g, 200, "成功", "")
 }
 
-func MachineEdit(g *gin.Context) {
+func (c *MachineController) MachineEdit(g *gin.Context) {
 	common.RetJson(g, 200, "成功", "")
 }
 
-func MachineDel(g *gin.Context) {
+func (c *MachineController) MachineDel(g *gin.Context) {
 	common.RetJson(g, 200, "成功", "")
 }

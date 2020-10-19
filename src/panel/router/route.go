@@ -25,7 +25,16 @@ func (r *Route) loadGlobalMiddleware() {
 	)
 }
 
+var (
+	userController    = controllers.NewUserController()
+	machineController = controllers.NewMachineController()
+	wsController      = controllers.NewWsController()
+)
+
 func (r *Route) loadRoute() {
+	r.g.POST("/login", userController.Login)
+
+	r.g.Use(new(middlewares.TokenMiddleware).Middleware())
 	routeIndex := r.g.Group("/index")
 	{
 		routeIndex.GET("/index", controllers.Index)
@@ -34,14 +43,14 @@ func (r *Route) loadRoute() {
 	// websocket
 	routeWs := r.g.Group("/ws")
 	{
-		routeWs.GET("/ssh/:cols/:rows/:host", controllers.Ssh)
+		routeWs.GET("/ssh/:cols/:rows/:host", wsController.Ssh)
 	}
 
 	routeMachine := r.g.Group("/machine")
 	{
-		routeMachine.GET("/list/:page", controllers.MachineList)
-		routeMachine.POST("/add", controllers.MachineAdd)
-		routeMachine.POST("/edit", controllers.MachineEdit)
-		routeMachine.POST("/del", controllers.MachineDel)
+		routeMachine.GET("/list/:page", machineController.MachineList)
+		routeMachine.POST("/add", machineController.MachineAdd)
+		routeMachine.POST("/edit", machineController.MachineEdit)
+		routeMachine.POST("/del", machineController.MachineDel)
 	}
 }

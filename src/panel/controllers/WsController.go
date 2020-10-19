@@ -10,13 +10,21 @@ import (
 	"time"
 )
 
-func Ssh(c *gin.Context) {
+type WsController struct {
+	BaseController
+}
+
+func NewWsController() *WsController {
+	return &WsController{}
+}
+
+func (c *WsController) Ssh(g *gin.Context) {
 	ws, err := (&websocket.Upgrader{
 		HandshakeTimeout: time.Duration(time.Second * 30),
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
-	}).Upgrade(c.Writer, c.Request, nil)
+	}).Upgrade(g.Writer, g.Request, nil)
 	if err != nil {
 		return
 	}
@@ -24,12 +32,12 @@ func Ssh(c *gin.Context) {
 		_ = ws.Close()
 	}()
 
-	cols, _ := common.StringUtils(c.Param("cols")).Uint32()
-	rows, _ := common.StringUtils(c.Param("rows")).Uint32()
-	host := c.Param("host")
+	cols, _ := common.StringUtils(g.Param("cols")).Uint32()
+	rows, _ := common.StringUtils(g.Param("rows")).Uint32()
+	host := g.Param("host")
 
 	// 通过ip获取相关ssh客户端数据
-	sh := ssh.NewSsh(host, "yeyu", "ZpB123", 22)
+	sh := ssh.NewSsh(host, "fengxiao", "ZpB123", 22)
 	sshChannel, err := sh.RunShell(ssh.TermConfig{
 		Cols: cols,
 		Rows: rows,
