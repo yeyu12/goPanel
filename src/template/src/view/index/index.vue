@@ -81,6 +81,11 @@
                 }
             }
         },
+        created() {
+            if(!localStorage.getItem('panel-token')) {
+                this.$router.push('/login')
+            }
+        },
         watch: {
             search(val) {
                 this.$refs.tree.filter(val);
