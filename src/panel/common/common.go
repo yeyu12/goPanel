@@ -56,6 +56,7 @@ func IsWindows() bool {
 	if runtime.GOOS == "windows" {
 		return true
 	}
+
 	return false
 }
 
@@ -87,7 +88,7 @@ func CreatePath(path string) bool {
 func GetCurrentDir() string {
 	fpt, err := filepath.Abs("")
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 
 	return fpt

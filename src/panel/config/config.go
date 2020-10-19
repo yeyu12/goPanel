@@ -2,10 +2,10 @@ package config
 
 import (
 	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
 	"goPanel/src/panel/common"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"log"
 )
 
 var (

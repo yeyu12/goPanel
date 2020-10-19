@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"goPanel/src/panel/common"
 	"goPanel/src/panel/validations"
 	"io/ioutil"
@@ -18,7 +17,6 @@ func MachineAdd(g *gin.Context) {
 	JsonPost(&userVail, inputData)
 
 	if err := Validations(g, userVail); err != nil {
-		log.Info(err)
 		common.RetJson(g, 4000, err.Error(), "")
 		return
 	}

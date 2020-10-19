@@ -3,9 +3,9 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
 	"goPanel/src/panel/common"
 	"goPanel/src/panel/library/ssh"
-	"log"
 	"net/http"
 	"time"
 )
@@ -21,7 +21,7 @@ func Ssh(c *gin.Context) {
 		return
 	}
 	defer func() {
-		ws.Close()
+		_ = ws.Close()
 	}()
 
 	cols, _ := common.StringUtils(c.Param("cols")).Uint32()
@@ -35,12 +35,12 @@ func Ssh(c *gin.Context) {
 		Rows: rows,
 	})
 	if err != nil {
-		log.Println("111", err)
+		log.Println(err)
 		return
 	}
 	defer func() {
 		if err := sshChannel.Close(); err != nil {
-			log.Fatal(err)
+			log.Error(err)
 		}
 	}()
 
@@ -61,7 +61,7 @@ func Ssh(c *gin.Context) {
 			mt, message, err := ws.ReadMessage()
 			// 其他错误，如果是 1001 和 1000 就不打印日志
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseNormalClosure) {
-				log.Printf("ReadMessage other remote:%v error: %v \n", ws.RemoteAddr(), err)
+				log.Debug("ReadMessage other remote:%v error: %v \n", ws.RemoteAddr(), err)
 				return
 			}
 
@@ -82,7 +82,7 @@ func Ssh(c *gin.Context) {
 			case message := <-wsWrite:
 				err = ws.WriteMessage(websocket.TextMessage, message)
 				if err != nil {
-					log.Fatal(err)
+					log.Debug(err)
 					return
 				}
 			}
