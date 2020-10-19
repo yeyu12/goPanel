@@ -48,9 +48,9 @@ func (r *Route) loadRoute() {
 
 	routeMachine := r.g.Group("/machine")
 	{
-		routeMachine.GET("/list/:page", machineController.MachineList)
-		routeMachine.POST("/add", machineController.MachineAdd)
-		routeMachine.POST("/edit", machineController.MachineEdit)
-		routeMachine.POST("/del", machineController.MachineDel)
+		routeMachine.GET("/list/:page", machineController.List)
+		routeMachine.POST("/add", machineController.Add)
+		routeMachine.POST("/edit", machineController.Edit)
+		routeMachine.POST("/del", machineController.Del)
 	}
 }

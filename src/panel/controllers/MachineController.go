@@ -15,13 +15,13 @@ func NewMachineController() *MachineController {
 	return &MachineController{}
 }
 
-func (c *MachineController) MachineList(g *gin.Context) {
+func (c *MachineController) List(g *gin.Context) {
 	common.RetJson(g, 200, "成功", "")
 }
 
-func (c *MachineController) MachineAdd(g *gin.Context) {
+func (c *MachineController) Add(g *gin.Context) {
 	inputData, _ := ioutil.ReadAll(g.Request.Body)
-	var userVail validations.MachineAdd
+	var userVail validations.Add
 	c.JsonPost(&userVail, inputData)
 
 	if err := c.Validations(g, userVail); err != nil {
@@ -32,10 +32,10 @@ func (c *MachineController) MachineAdd(g *gin.Context) {
 	common.RetJson(g, 200, "成功", "")
 }
 
-func (c *MachineController) MachineEdit(g *gin.Context) {
+func (c *MachineController) Edit(g *gin.Context) {
 	common.RetJson(g, 200, "成功", "")
 }
 
-func (c *MachineController) MachineDel(g *gin.Context) {
+func (c *MachineController) Del(g *gin.Context) {
 	common.RetJson(g, 200, "成功", "")
 }
