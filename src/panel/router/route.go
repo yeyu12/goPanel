@@ -36,4 +36,12 @@ func (r *Route) loadRoute() {
 	{
 		routeWs.GET("/ssh/:cols/:rows/:host", controllers.Ssh)
 	}
+
+	routeMachine := r.g.Group("/machine")
+	{
+		routeMachine.GET("/list/:page", controllers.MachineList)
+		routeMachine.POST("/add", controllers.MachineAdd)
+		routeMachine.POST("/edit", controllers.MachineEdit)
+		routeMachine.POST("/del", controllers.MachineDel)
+	}
 }

@@ -81,13 +81,12 @@ func (s *Ssh) exec(cmd string) (string, error) {
 func (s *Ssh) RunShell(term TermConfig) (gossh.Channel, error) {
 	shConn, err := s.connect()
 	if err != nil {
-		log.Fatal(err)
 		return nil, err
 	}
 
 	channel, incomingRequests, err := shConn.client.Conn.OpenChannel("session", nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return nil, err
 	}
 
@@ -96,7 +95,7 @@ func (s *Ssh) RunShell(term TermConfig) (gossh.Channel, error) {
 			if req.WantReply {
 				err = req.Reply(false, nil)
 				if err != nil {
-					log.Fatal(err)
+					log.Println(err)
 					return
 				}
 			}
@@ -105,7 +104,7 @@ func (s *Ssh) RunShell(term TermConfig) (gossh.Channel, error) {
 
 	err = s.Pty(channel, term)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return nil, err
 	}
 
@@ -140,13 +139,13 @@ func (s *Ssh) Pty(channel gossh.Channel, term TermConfig) error {
 
 	ok, err := channel.SendRequest("pty-req", true, gossh.Marshal(&req))
 	if !ok || err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return err
 	}
 
 	ok, err = channel.SendRequest("shell", true, nil)
 	if !ok || err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return err
 	}
 
@@ -165,7 +164,7 @@ func (s *Ssh) Read(channel gossh.Channel, wsWrite chan []byte) {
 		for {
 			r, size, err := br.ReadRune()
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 				return
 			}
 			if size > 0 {

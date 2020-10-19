@@ -35,7 +35,8 @@ func Ssh(c *gin.Context) {
 		Rows: rows,
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Println("111", err)
+		return
 	}
 	defer func() {
 		if err := sshChannel.Close(); err != nil {

@@ -1,0 +1,10 @@
+app:
+  debug: true
+  # 0 Panic,1 Fatal,2 Error, 3 Warn, 4 Info, 5 Debug, 6 Trace
+  log_level: 5
+  # 日志输出类型，0 string, 1 json
+  log_output_type: 0
+  # 日志输出方式，0控制台，1文件
+  log_output_flag: 0
+  # 日志目录
+  log_path: ./runtime/log/
