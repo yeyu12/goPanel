@@ -25,15 +25,15 @@ func (r *Route) loadGlobalMiddleware() {
 	)
 }
 
-var (
-	userController    = controllers.NewUserController()
-	machineController = controllers.NewMachineController()
-	wsController      = controllers.NewWsController()
-)
-
 func (r *Route) loadRoute() {
-	r.g.POST("/login", userController.Login)
-	r.g.POST("/userAdd", userController.UserAdd)
+	r.g.POST("/login", controllers.NewUserController().Login)
+	r.g.POST("/userAdd", controllers.NewUserController().UserAdd)
+
+	// websocket
+	routeWs := r.g.Group("/ws")
+	{
+		routeWs.GET("/ssh", controllers.NewWsController().Ssh)
+	}
 
 	r.g.Use(new(middlewares.TokenMiddleware).Middleware())
 	routeIndex := r.g.Group("/index")
@@ -41,17 +41,11 @@ func (r *Route) loadRoute() {
 		routeIndex.GET("/index", controllers.Index)
 	}
 
-	// websocket
-	routeWs := r.g.Group("/ws")
-	{
-		routeWs.GET("/ssh/:cols/:rows/:host", wsController.Ssh)
-	}
-
 	routeMachine := r.g.Group("/machine")
 	{
-		routeMachine.GET("/list/:page", machineController.List)
-		routeMachine.POST("/add", machineController.Add)
-		routeMachine.POST("/edit", machineController.Edit)
-		routeMachine.POST("/del", machineController.Del)
+		routeMachine.GET("/list/:page", controllers.NewMachineController().List)
+		routeMachine.POST("/add", controllers.NewMachineController().Add)
+		routeMachine.POST("/edit", controllers.NewMachineController().Edit)
+		routeMachine.POST("/del", controllers.NewMachineController().Del)
 	}
 }

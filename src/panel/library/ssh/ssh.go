@@ -146,7 +146,7 @@ func (s *Ssh) Pty(channel gossh.Channel, term TermConfig) error {
 	return nil
 }
 
-func (s *Ssh) Read(channel gossh.Channel, wsWrite chan []byte) {
+func (s *Ssh) Read(channel gossh.Channel, sshRead chan []byte) {
 	br := bufio.NewReader(channel)
 	buf := []byte{}
 
@@ -170,7 +170,7 @@ func (s *Ssh) Read(channel gossh.Channel, wsWrite chan []byte) {
 		select {
 		case <-t.C:
 			if len(buf) != 0 {
-				wsWrite <- buf
+				sshRead <- buf
 				buf = []byte{}
 			}
 
@@ -187,10 +187,10 @@ func (s *Ssh) Read(channel gossh.Channel, wsWrite chan []byte) {
 	}
 }
 
-func (s *Ssh) Write(channel gossh.Channel, wsRead chan []byte) {
+func (s *Ssh) Write(channel gossh.Channel, sshWrite chan []byte) {
 	for {
 		select {
-		case sw := <-wsRead:
+		case sw := <-sshWrite:
 			if _, err := channel.Write(sw); nil != err {
 				return
 			}

@@ -37,3 +37,11 @@ func (m *UserModel) UsernameData(db *xorm.Engine, username string) UserModel {
 
 	return user
 }
+
+func (m *UserModel) TokenByData(db *xorm.Engine, username string) UserModel {
+	var user UserModel
+	db.Where("token = ?", username).Get(&user)
+	user.Passwd = ""
+
+	return user
+}

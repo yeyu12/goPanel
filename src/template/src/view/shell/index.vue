@@ -19,7 +19,8 @@
                 timeout: {},
                 fitAddon: {},
                 termDispose: {},
-                wsTimer: 0
+                wsTimer: 0,
+                isReconnection: true
             };
         },
         created() {
@@ -46,13 +47,16 @@
         },
         methods: {
             formatWs(event, data) {
-                return JSON.stringify({
+                return new TextEncoder().encode(JSON.stringify({
                     event,
-                    data: new TextEncoder().encode(data)
-                })
+                    data: data
+                }))
+            },
+            unFormatWs(data) {
+                return JSON.parse(new TextDecoder().decode(data))
             },
             connWebsocket() {
-                this.ws = new WebSocket("ws://127.0.0.1:10010/ws/ssh/" + this.term.cols + "/" + this.term.rows + "/127.0.0.1"); //地址
+                this.ws = new WebSocket("ws://127.0.0.1:10010/ws/ssh"); //地址
                 this.ws.binaryType = "arraybuffer";
                 //连接成功
                 this.ws.onopen = (evt) => {
@@ -61,17 +65,39 @@
                         this.wsTimer = 0;
                     }
 
+                    this.ws.send(this.formatWs('init', {
+                        token: window.localStorage.getItem('panel-token'),
+                        cols: this.term.cols,
+                        rows: this.term.rows,
+                        host: '127.0.0.1'
+                    }))
+
                     this.term.writeln("");
                 }
 
                 // 输入
                 this.termDispose = this.term.onData(data => {
-                    this.ws.send(data);
+                    this.ws.send(this.formatWs('data', data));
                 });
 
                 // 返回
                 this.ws.onmessage = (evt) => {
-                    this.term.write(evt.data)
+                    let wsData = this.unFormatWs(evt.data);
+                    switch (wsData.event) {
+                        case "data":
+                            this.term.write(wsData.data)
+                            break;
+                        case "err":
+                            this.isReconnection = false;
+
+                            this.$notify.error({
+                                title: '错误',
+                                message: wsData.data,
+                                duration: 0,
+                                showClose: false
+                            });
+                            break;
+                    }
                 };
 
                 //关闭
@@ -84,7 +110,7 @@
                 };
             },
             reconnect() {
-                if (!this.wsTimer) {
+                if (!this.wsTimer && this.isReconnection) {
                     this.wsTimer = setInterval(() => {
                         this.termDispose.dispose()
                         this.connWebsocket();

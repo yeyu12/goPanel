@@ -20,3 +20,7 @@ func (s *UserService) UserAdd(db *xorm.Engine, data models.UserModel) (int64, er
 func (s *UserService) UsernameData(db *xorm.Engine, username string) models.UserModel {
 	return s.userModel.UsernameData(db, username)
 }
+
+func (s *UserService) TokenByData(db *xorm.Engine, token string) models.UserModel {
+	return s.userModel.TokenByData(db, token)
+}
