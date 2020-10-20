@@ -13,7 +13,7 @@
                 <input type="text" placeholder="账号" autocomplete="off" class="login_txtbx" v-model="username">
             </p>
             <p class="p pwd_icon">
-                <input type="password" placeholder="密码" autocomplete="off" class="login_txtbx" v-model="passwd">
+                <input type="password" placeholder="密码" autocomplete="off" class="login_txtbx" v-model="passwd" @keypress="enter">
             </p>
             <!--<div class="p val_icon">
                 <div class="checkcode">
@@ -170,6 +170,11 @@
                 }).catch(err => {
                     this.$message.error("服务器出小差！");
                 })
+            },
+            enter(e){
+                if (e.which == 13) {
+                    this.login();
+                }
             }
         }
     }

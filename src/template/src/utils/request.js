@@ -2,6 +2,36 @@ import axios from 'axios';
 
 let axiosObj = axios.create();
 
+// 添加请求拦截器
+axiosObj.interceptors.request.use(
+    config => {
+        config.url = "http://127.0.0.1:10010" + config.url;
+        config.headers = {
+            ...config.headers,
+            'Account-Token': window.localStorage.getItem('panel-token') || '',
+        };
+
+        return config;
+    },
+    error => {
+        return Promise.reject(error);
+    }
+);
+
+// 添加响应拦截器
+// 统一在window unhandledrejection事件处理未捕获的promise事件
+axiosObj.interceptors.response.use(
+    response => {
+        return Promise.resolve(response);
+    },
+    error => {
+        // 对响应错误做点什么
+        return Promise.reject({
+            ...error,
+        });
+    }
+);
+
 export const get = (url, val, config = {}) => {
     return axiosObj.get(url, {
         params: val,
