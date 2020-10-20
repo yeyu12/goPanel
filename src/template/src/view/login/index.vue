@@ -4,18 +4,18 @@
             <div class="login_tit">
                 <div>
                     <i class="tit-bg left"></i>
-                    GoPanel · 面板系统
+                    GoPanel · 登录
                     <i class="tit-bg right"></i>
                 </div>
                 <p>Strive&nbsp;&nbsp;&nbsp;&nbsp;Everyday</p>
             </div>
             <p class="p user_icon">
-                <input type="text" placeholder="账号" autocomplete="off" class="login_txtbx">
+                <input type="text" placeholder="账号" autocomplete="off" class="login_txtbx" v-model="username">
             </p>
             <p class="p pwd_icon">
-                <input type="text" placeholder="密码" autocomplete="off" class="login_txtbx">
+                <input type="password" placeholder="密码" autocomplete="off" class="login_txtbx" v-model="passwd">
             </p>
-            <div class="p val_icon">
+            <!--<div class="p val_icon">
                 <div class="checkcode">
                     <input type="text" id="J_codetext" placeholder="验证码" autocomplete="off" maxlength="4"
                            class="login_txtbx">
@@ -23,9 +23,9 @@
                     </canvas>
                 </div>
                 <a class="ver_btn" onselectstart="return false">看不清，换一张</a>
-            </div>
+            </div>-->
             <div class="signup">
-                <a class="gv" href="#" onclick="validate()">登&nbsp;&nbsp;录</a>
+                <a class="gv" href="javascript:" @click="login">登&nbsp;&nbsp;录</a>
                 <a class="gv" href="#">注&nbsp;&nbsp;册</a>
             </div>
         </div>
@@ -36,7 +36,9 @@
 
 <script>
     import '@/static/css/login.css';
+    import {login} from '@/api/user';
 
+    /*eslint no-unused-vars: ["error", { "args": "none" }]*/
     export default {
         name: "Login",
         data() {
@@ -53,23 +55,25 @@
                 ctx2: "",
                 half: 0,
                 gradient2: "",
+                username: "",
+                passwd: ""
             }
         },
         mounted() {
-            this.canvas = document.getElementById('canvas')
-            this.ctx = this.canvas.getContext('2d')
-            this.w = this.canvas.width = window.innerWidth
-            this.h = this.canvas.height = window.innerHeight
-            this.hue = 217
-            this.stars = []
-            this.count = 0
+            this.canvas = document.getElementById('canvas');
+            this.ctx = this.canvas.getContext('2d');
+            this.w = this.canvas.width = window.innerWidth;
+            this.h = this.canvas.height = window.innerHeight;
+            this.hue = 217;
+            this.stars = [];
+            this.count = 0;
             this.maxStars = 2500; //星星数量
 
-            this.canvas2 = document.createElement('canvas')
+            this.canvas2 = document.createElement('canvas');
             this.ctx2 = this.canvas2.getContext('2d');
             this.canvas2.width = 100;
             this.canvas2.height = 100;
-            this.half = this.canvas2.width / 2
+            this.half = this.canvas2.width / 2;
             this.gradient2 = this.ctx2.createRadialGradient(this.half, this.half, 0, this.half, this.half, this.half);
             this.gradient2.addColorStop(0.025, '#CCC');
             this.gradient2.addColorStop(0.1, 'hsl(' + this.hue + ', 61%, 33%)');
@@ -95,7 +99,7 @@
 
                 than.count++;
                 than.stars[than.count] = this;
-            }
+            };
 
             than = this;
             Star.prototype.draw = function () {
@@ -112,7 +116,7 @@
                 than.ctx.globalAlpha = this.alpha;
                 than.ctx.drawImage(than.canvas2, x - this.radius / 2, y - this.radius / 2, this.radius, this.radius);
                 this.timePassed += this.speed;
-            }
+            };
 
             for (var i = 0; i < this.maxStars; i++) {
                 new Star();
@@ -139,13 +143,12 @@
                 let max = Math.max(x, y),
                     diameter = Math.round(Math.sqrt(max * max + max * max));
                 return diameter / 2;
-                //星星移动范围，值越大范围越小，
             },
             animation() {
                 this.ctx.globalCompositeOperation = 'source-over';
                 this.ctx.globalAlpha = 0.5; //尾巴
                 this.ctx.fillStyle = 'hsla(' + this.hue + ', 64%, 6%, 2)';
-                this.ctx.fillRect(0, 0, this.w, this.h)
+                this.ctx.fillRect(0, 0, this.w, this.h);
 
                 this.ctx.globalCompositeOperation = 'lighter';
                 for (var i = 1, l = this.stars.length; i < l; i++) {
@@ -153,6 +156,20 @@
                 }
 
                 window.requestAnimationFrame(this.animation);
+            },
+            login() {
+                login({username: this.username, passwd: this.passwd}).then(data => {
+                    if (data.code !== 200) {
+                        this.$message.error(data.message);
+                    } else {
+                        localStorage.setItem('panel-token', data.data.token);
+                        localStorage.setItem('panel-userinfo', this.$base64.encode(JSON.stringify(data.data)));
+
+                        this.$router.push('/')
+                    }
+                }).catch(err => {
+                    this.$message.error("服务器出小差！");
+                })
             }
         }
     }

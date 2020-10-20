@@ -22,3 +22,9 @@ func (c *BaseController) Validations(g *gin.Context, vali interface{}) error {
 
 	return nil
 }
+
+func (c *BaseController) Panic(err error) {
+	if err != nil {
+
+	}
+}

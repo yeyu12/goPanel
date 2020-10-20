@@ -33,6 +33,7 @@ var (
 
 func (r *Route) loadRoute() {
 	r.g.POST("/login", userController.Login)
+	r.g.POST("/userAdd", userController.UserAdd)
 
 	r.g.Use(new(middlewares.TokenMiddleware).Middleware())
 	routeIndex := r.g.Group("/index")

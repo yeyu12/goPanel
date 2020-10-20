@@ -36,9 +36,12 @@
                 width="150"
                 trigger="manual"
                 v-model="menuVisible">
-            <a class="menu-button">添加主机</a>
+            <a class="menu-button">添加</a>
+            <a class="menu-button">编辑</a>
+            <a class="menu-button">删除</a>
             <a class="menu-button" @click="openShell">打开终端</a>
             <a class="menu-button">打开桌面</a>
+
         </el-popover>
     </div>
 </template>
@@ -46,6 +49,7 @@
 <script>
     import '@/static/css/index.css';
 
+    /*eslint no-unused-vars: ["error", { "args": "none" }]*/
     export default {
         name: "Index",
         data() {
@@ -96,7 +100,6 @@
                 if (!value) return true;
                 return data.label.indexOf(value) !== -1;
             },
-            /*eslint no-unused-vars: ["error", { "args": "none" }]*/
             treeRightMenu(MouseEvent, object, node, val) {
                 localStorage.setItem('currentSelectTree', JSON.stringify(object));
                 this.menuVisible = false;

@@ -16,9 +16,24 @@ type UserModel struct {
 	UpdateTime          time.Time `json:"update_time"`
 }
 
-func (m *UserModel) UsernameAndPasswdByData(db *xorm.Engine, data map[string]string) *UserModel {
-	var user *UserModel
-	_ = db.Where("username = ?", data["username"]).Where("passwd = ?", data["passwd"]).Find(user)
+func (m *UserModel) UsernameAndPasswdByData(db *xorm.Engine, data map[string]string) UserModel {
+	var user UserModel
+	db.Where("username = ?", data["username"]).Where("passwd = ?", data["passwd"]).Get(&user)
+	user.Passwd = ""
+
+	return user
+}
+
+func (m *UserModel) UserAdd(db *xorm.Engine, data UserModel) (int64, error) {
+	id, err := db.InsertOne(data)
+
+	return id, err
+}
+
+func (m *UserModel) UsernameData(db *xorm.Engine, username string) UserModel {
+	var user UserModel
+	db.Where("username = ?", username).Get(&user)
+	user.Passwd = ""
 
 	return user
 }

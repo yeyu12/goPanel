@@ -7,9 +7,11 @@ import (
 	core_log "goPanel/src/panel/core/log"
 	"goPanel/src/panel/models"
 	"goPanel/src/panel/router"
+	"time"
 )
 
 func main() {
+	_, _ = time.LoadLocation("Asia/Shanghai")
 	core_log.LogSetOutput(config.Conf.App.LogPath)
 	createTable()
 

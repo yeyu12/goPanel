@@ -17,8 +17,9 @@ func RetJson(g *gin.Context, code int32, msg string, data interface{}) {
 		"message": msg,
 		"data":    data,
 	})
-
 	g.Abort()
+
+	return
 }
 
 func GetEnvDefaultBool(key string, defaultValue bool) bool {

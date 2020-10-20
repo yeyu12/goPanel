@@ -4,6 +4,7 @@ import (
 	"github.com/go-xorm/xorm"
 	_ "github.com/mattn/go-sqlite3"
 	"goPanel/src/panel/config"
+	"time"
 	"xorm.io/core"
 )
 
@@ -20,6 +21,10 @@ func init() {
 		panic(err)
 	}
 
+	Db.DatabaseTZ = time.Local
+	Db.TZLocation = time.Local
+	Db.SetMaxIdleConns(5)
+	Db.SetMaxOpenConns(1000)
 	Db.ShowSQL(true)
 	Db.Logger().SetLevel(core.LOG_DEBUG)
 }

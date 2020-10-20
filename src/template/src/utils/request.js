@@ -3,7 +3,7 @@ import axios from 'axios';
 let axiosObj = axios.create();
 
 export const get = (url, val, config = {}) => {
-    return myAxios.get(url, {
+    return axiosObj.get(url, {
         params: val,
         ...config,
         data: {customParams: config.customParams},
@@ -11,7 +11,7 @@ export const get = (url, val, config = {}) => {
 };
 // 删除公用方法
 export const del = (url, data, config = {}) => {
-    return myAxios.delete(url, {
+    return axiosObj.delete(url, {
         data: config.customParams
             ? {...data, customParams: config.customParams}
             : data,
@@ -22,7 +22,7 @@ export const del = (url, data, config = {}) => {
 export const post = (url, val, config = {}) => {
     let contentType;
 
-    return myAxios.request({
+    return axiosObj.request({
         url,
         data: config.customParams
             ? {...val, customParams: config.customParams}
@@ -39,7 +39,7 @@ export const post = (url, val, config = {}) => {
 export const put = (url, val, config = {}) => {
     let contentType;
 
-    return myAxios.request({
+    return axiosObj.request({
         url,
         data: val,
         method: 'put',
@@ -52,7 +52,7 @@ export const put = (url, val, config = {}) => {
 
 // formadata post 提交数据
 export const postFormData = (url, val, config = {}) => {
-    return myAxios.request({
+    return axiosObj.request({
         url,
         data: val,
         method: 'post',
