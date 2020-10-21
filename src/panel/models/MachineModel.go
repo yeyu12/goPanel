@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"github.com/go-xorm/xorm"
+	"time"
+)
 
 // 主机
 type MachineModel struct {
@@ -14,4 +17,22 @@ type MachineModel struct {
 	LoginNum       int64     `json:"login_num"`   // 登录次数
 	UpdateTime     time.Time `json:"update_time"` // 更新次数
 	CreateUid      int64     `json:"create_uid"`  // 创建人
+}
+
+func (m *MachineModel) Add(db *xorm.Engine, data MachineModel) (int64, error) {
+	id, err := db.InsertOne(data)
+
+	return id, err
+}
+
+func (m *MachineModel) Update(db *xorm.Engine, data MachineModel) (affected int64, err error) {
+	affected, err = db.Where("id = ?", data.Id).Update(data)
+	return
+}
+
+func (m *MachineModel) IdByDetails(db *xorm.Engine, id int64) MachineModel {
+	var machineGroupData MachineModel
+	db.Where("id = ?", id).Get(&machineGroupData)
+
+	return machineGroupData
 }

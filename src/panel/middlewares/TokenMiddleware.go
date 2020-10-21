@@ -3,6 +3,7 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"goPanel/src/panel/common"
+	core "goPanel/src/panel/core/database"
 	"goPanel/src/panel/services"
 )
 
@@ -20,6 +21,9 @@ func (m *TokenMiddleware) Middleware() gin.HandlerFunc {
 			common.RetJson(g, code, msg, "")
 			return
 		}
+
+		userData := m.userService.TokenByData(core.Db, token)
+		g.Set("userinfo", &userData)
 
 		// 处理请求
 		g.Next()

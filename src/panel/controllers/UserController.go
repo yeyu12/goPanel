@@ -28,7 +28,7 @@ func (c *UserController) Login(g *gin.Context) {
 	var userVail validations.Login
 	c.JsonPost(&userVail, inputData)
 
-	if err := c.Validations(g, userVail); err != nil {
+	if err := c.Validations(userVail); err != nil {
 		common.RetJson(g, constants.ERROR_FAIL, err.Error(), "")
 		return
 	}
@@ -77,7 +77,7 @@ func (c *UserController) UserAdd(g *gin.Context) {
 	var userVail validations.UserAdd
 	c.JsonPost(&userVail, inputData)
 
-	if err := c.Validations(g, userVail); err != nil {
+	if err := c.Validations(userVail); err != nil {
 		common.RetJson(g, constants.ERROR_FAIL, err.Error(), "")
 		return
 	}
