@@ -45,11 +45,11 @@
                 width="150"
                 trigger="manual"
                 v-model="menuVisible">
-            <a class="menu-button">添加</a>
+            <a class="menu-button" @click="create" v-if="isDir">添加</a>
             <a class="menu-button">编辑</a>
             <a class="menu-button">删除</a>
-            <a class="menu-button" @click="openShell">打开终端</a>
-            <a class="menu-button">打开桌面</a>
+            <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
+            <a class="menu-button" v-if="!isDir">打开桌面</a>
         </el-popover>
 
         <el-dialog
@@ -129,6 +129,8 @@
                 menuVisible: false,
                 search: '',
                 machineData: [],
+                isDir: false,
+                dirData: {},
                 defaultProps: {
                     children: 'children',
                     label: 'name'
@@ -161,6 +163,12 @@
                 menu.style.left = MouseEvent.clientX + 'px';
                 document.addEventListener('click', this.clearEventRightMenu);
                 menu.style.top = MouseEvent.clientY - 10 + 'px';
+
+                if (object.is_dir) {
+                    this.isDir = true;
+                } else {
+                    this.isDir = false;
+                }
             },
             clearEventRightMenu() { // 取消鼠标监听事件 菜单栏
                 this.menuVisible = false;
@@ -182,7 +190,7 @@
                 this.isAddComputer = true;
                 this.isAddMenu = false;
             },
-            getMachineData(){
+            getMachineData() {
                 list().then(ret => {
                     if (ret.code === 200) {
                         this.machineData = ret.data;
@@ -198,11 +206,15 @@
                     this.isAddDir = false;
                 } else if (flag === ADD_MACHINE_COMPUTER) {
                     saveData = this.form.computer;
-                    saveData.machine_group_id = saveData.machine_group_id ? saveData.machine_group_id : 0;
+                    saveData.machine_group_id = this.dirData.is_dir ? this.dirData.is_dir : 0;
                     saveData.port = saveData.port ? parseInt(saveData.port) : 22;
                     saveData.user = saveData.user ? saveData.user : 'root';
                     this.isAddComputer = false;
                 }
+
+                this.dirData = {};
+
+                console.log(saveData);
 
                 add(saveData).then(res => {
                     if (res.code === 200) {
@@ -218,6 +230,10 @@
                 }).catch(err => {
                     this.$message.error('服务器出小差！');
                 })
+            },
+            create() {
+                this.dirData = JSON.parse(window.localStorage.getItem('currentSelectTree'))
+                this.isAddComputer = true;
             }
         },
     }

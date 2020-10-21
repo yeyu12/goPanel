@@ -9,6 +9,7 @@ import (
 type MachineGroupModel struct {
 	Id         int64     `json:"id"`
 	Name       string    `json:"name"`
+	IsDir      int       `json:"is_dir" xorm:"default(1)"`
 	CreateTime time.Time `json:"create_time"`
 	CreateUid  int64     `json:"create_uid"`
 }
@@ -21,6 +22,7 @@ func (m *MachineGroupModel) Get(db *xorm.Engine) *[]MachineGroupModel {
 }
 
 func (m *MachineGroupModel) Add(db *xorm.Engine, data MachineGroupModel) (int64, error) {
+	data.IsDir = 1
 	id, err := db.InsertOne(data)
 
 	return id, err

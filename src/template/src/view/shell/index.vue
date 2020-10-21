@@ -93,7 +93,7 @@
                             this.$notify.error({
                                 title: '错误',
                                 message: wsData.data,
-                                duration: 0,
+                                duration: 10000,
                                 showClose: false
                             });
                             break;
