@@ -3,17 +3,23 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"goPanel/src/panel/common"
-	"goPanel/src/panel/constants"
+	"goPanel/src/panel/services"
 )
 
 type TokenMiddleware struct {
+	userService *services.UserService
 }
 
-func (core *TokenMiddleware) Middleware() gin.HandlerFunc {
+func (m *TokenMiddleware) Middleware() gin.HandlerFunc {
 	return func(g *gin.Context) {
-		//token := g.Request.Header.Get("Account-Token")
+		m.userService = new(services.UserService)
+		token := g.Request.Header.Get("Account-Token")
 
-		common.RetJson(g, constants.PLEASE_LOG_IN_FIRST, constants.PLEASE_LOG_IN_FIRST_MSG, "")
+		state, msg, code := m.userService.IsUserLogin(token)
+		if !state {
+			common.RetJson(g, code, msg, "")
+			return
+		}
 
 		// 处理请求
 		g.Next()

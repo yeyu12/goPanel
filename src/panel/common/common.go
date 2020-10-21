@@ -3,6 +3,7 @@ package common
 import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"goPanel/src/panel/library/snowFlake"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -93,4 +94,11 @@ func GetCurrentDir() string {
 	}
 
 	return fpt
+}
+
+func GetToken() (string, error) {
+	sf := snowFlake.NewSnowFlake(1, 1)
+	token, err := sf.NextID()
+
+	return strconv.Itoa(int(token)), err
 }

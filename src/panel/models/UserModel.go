@@ -45,3 +45,8 @@ func (m *UserModel) TokenByData(db *xorm.Engine, username string) UserModel {
 
 	return user
 }
+
+func (m *UserModel) UpdateUser(db *xorm.Engine, data UserModel) (affected int64, err error) {
+	affected, err = db.Where("id = ?", data.Id).Update(data)
+	return
+}

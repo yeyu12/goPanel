@@ -2,6 +2,7 @@ package constants
 
 const (
 	SUCCESS                       = 200
+	MISSING_PARAMETER_FAIL        = 2000
 	ERROR_FAIL                    = 4000
 	PLEASE_LOG_IN_FIRST           = 3000
 	USERNAME_OR_PASSWD_ERROR_FAIL = 4001

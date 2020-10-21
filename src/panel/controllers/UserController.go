@@ -5,12 +5,10 @@ import (
 	"goPanel/src/panel/common"
 	"goPanel/src/panel/constants"
 	core "goPanel/src/panel/core/database"
-	"goPanel/src/panel/library/snowFlake"
 	"goPanel/src/panel/models"
 	"goPanel/src/panel/services"
 	"goPanel/src/panel/validations"
 	"io/ioutil"
-	"strconv"
 	"time"
 )
 
@@ -49,6 +47,22 @@ func (c *UserController) Login(g *gin.Context) {
 		return
 	}
 
+	token, err := common.GetToken()
+	if err != nil {
+		common.RetJson(g, constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, "")
+		return
+	}
+
+	// 更新数据
+	data.Token = token
+	data.TokenExpirationTime = time.Now()
+
+	affected, err := c.userService.UpdateUser(core.Db, data)
+	if affected == 0 || err != nil {
+		common.RetJson(g, constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, "")
+		return
+	}
+
 	data.Passwd = ""
 
 	common.RetJson(g,
@@ -75,15 +89,14 @@ func (c *UserController) UserAdd(g *gin.Context) {
 		return
 	}
 
-	sf := snowFlake.NewSnowFlake(1, 1)
-	token, err := sf.NextID()
+	token, err := common.GetToken()
 	if err != nil {
 		common.RetJson(g, constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, "")
 		return
 	}
 
 	// 构建数据
-	userAddData.Token = strconv.Itoa(int(token))
+	userAddData.Token = token
 	userAddData.Passwd = common.StringUtils(common.StringUtils(userAddData.Passwd).SHA1()).MD5()
 	userAddData.CreateTime = time.Now()
 	userAddData.TokenExpirationTime = time.Now()

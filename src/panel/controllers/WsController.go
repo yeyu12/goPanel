@@ -6,7 +6,6 @@ import (
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/panel/constants"
-	core "goPanel/src/panel/core/database"
 	"goPanel/src/panel/library/ssh"
 	"goPanel/src/panel/services"
 	gossh "golang.org/x/crypto/ssh"
@@ -73,7 +72,7 @@ func (c *WsController) Ssh(g *gin.Context) {
 
 	select {
 	case <-c.initializer:
-		sh, sshChannel, err := c.sshConn(c.WsInit.Host, "yeyu", "ZpB123", 22, c.WsInit.Cols, c.WsInit.Rows)
+		sh, sshChannel, err := c.sshConn(c.WsInit.Host, "fengxiao", "ZpB123", 22, c.WsInit.Cols, c.WsInit.Rows)
 		if err != nil {
 			log.Error(err)
 			ret := &WsMessageData{
@@ -131,7 +130,7 @@ func (c *WsController) wsRead() {
 				_ = json.Unmarshal(reqDataJson, &c.WsInit)
 
 				// 验证登录情况
-				if state, msg := c.isUserLogin(); !state {
+				if state, msg, _ := c.userService.IsUserLogin(c.WsInit.Token); !state {
 					ret := &WsMessageData{
 						Event: constants.WS_EVENT_ERR,
 						Data:  msg,
@@ -209,21 +208,5 @@ func (c *WsController) sshWrite() {
 		case msg := <-c.WsRead:
 			c.SshWrite <- msg
 		}
-	}
-}
-
-// 用户是否登录
-func (c *WsController) isUserLogin() (state bool, msg string) {
-	if c.WsInit.Token == "" {
-		return false, constants.PLEASE_LOG_IN_FIRST_MSG
-	} else {
-		userData := c.userService.TokenByData(core.Db, c.WsInit.Token)
-		if userData.Id == 0 {
-			return false, constants.TOKEN_INVALID_MSG
-		} else if (time.Now().Unix() - userData.TokenExpirationTime.Unix()) > 86400 {
-			return false, constants.TOKEN_BE_OVERDUE_MSG
-		}
-
-		return true, ""
 	}
 }

@@ -1,6 +1,8 @@
 import axios from 'axios';
+import router from '@/router/index'
 
 let axiosObj = axios.create();
+let loginStatus = [3000, 4003, 4004];
 
 // 添加请求拦截器
 axiosObj.interceptors.request.use(
@@ -22,6 +24,10 @@ axiosObj.interceptors.request.use(
 // 统一在window unhandledrejection事件处理未捕获的promise事件
 axiosObj.interceptors.response.use(
     response => {
+        if (loginStatus.indexOf(response.data.code) > -1) {
+            router.app.$router.push('/login')
+        }
+
         return Promise.resolve(response);
     },
     error => {
