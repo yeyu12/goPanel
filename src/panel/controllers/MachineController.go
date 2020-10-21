@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"goPanel/src/panel/common"
 	"goPanel/src/panel/constants"
@@ -26,7 +27,28 @@ func NewMachineController() *MachineController {
 }
 
 func (c *MachineController) List(g *gin.Context) {
-	common.RetJson(g, 200, "成功", "")
+	groupData := c.machineGroupService.Get(core.Db)
+	var retData []map[string]interface{}
+	groupJson, _ := json.Marshal(groupData)
+	_ = json.Unmarshal(groupJson, &retData)
+
+	for index, item := range retData {
+		where := map[string]interface{}{
+			"machine_group_id": item["id"],
+		}
+
+		retData[index]["children"] = c.machineService.Get(core.Db, where)
+	}
+
+	machineData := c.machineService.Get(core.Db, map[string]interface{}{})
+	var machineMap []map[string]interface{}
+	machineJson, _ := json.Marshal(machineData)
+	_ = json.Unmarshal(machineJson, &machineMap)
+
+	retData = append(retData, machineMap...)
+
+	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, retData)
+	return
 }
 
 func (c *MachineController) Add(g *gin.Context) {

@@ -43,7 +43,7 @@ func (r *Route) loadRoute() {
 
 	routeMachine := r.g.Group("/machine")
 	{
-		routeMachine.GET("/list/:page", controllers.NewMachineController().List)
+		routeMachine.GET("/list", controllers.NewMachineController().List)
 		routeMachine.POST("/add", controllers.NewMachineController().Add)
 		routeMachine.POST("/edit", controllers.NewMachineController().Edit)
 		routeMachine.POST("/del", controllers.NewMachineController().Del)

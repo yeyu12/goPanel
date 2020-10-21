@@ -13,7 +13,7 @@ import (
 func main() {
 	_, _ = time.LoadLocation("Asia/Shanghai")
 	core_log.LogSetOutput(config.Conf.App.LogPath)
-	//createTable()
+	createTable()
 
 	g := gin.Default()
 	g = (new(router.Route)).Init(g)

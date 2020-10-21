@@ -13,6 +13,13 @@ type MachineGroupModel struct {
 	CreateUid  int64     `json:"create_uid"`
 }
 
+func (m *MachineGroupModel) Get(db *xorm.Engine) *[]MachineGroupModel {
+	var data []MachineGroupModel
+	db.Asc("id").Find(&data)
+
+	return &data
+}
+
 func (m *MachineGroupModel) Add(db *xorm.Engine, data MachineGroupModel) (int64, error) {
 	id, err := db.InsertOne(data)
 

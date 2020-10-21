@@ -18,7 +18,7 @@
 
                     <el-tree
                             class="filter-tree"
-                            :data="data"
+                            :data="machineData"
                             :props="defaultProps"
                             :filter-node-method="filterNode"
                             ref="tree"
@@ -76,7 +76,7 @@
                 center>
             <el-form :model="form.computer" label-width="80px">
                 <el-form-item label="名称">
-                    <el-input v-model="form.computer.alias" placeholder="请输入主机名称"></el-input>
+                    <el-input v-model="form.computer.name" placeholder="请输入主机名称"></el-input>
                 </el-form-item>
                 <el-form-item label="地址">
                     <el-input v-model="form.computer.host" placeholder="请输入主机地址"></el-input>
@@ -99,7 +99,7 @@
 
 <script>
     import '@/static/css/index.css';
-    import {add} from "../../api/machine";
+    import {add, list} from "../../api/machine";
 
     const ADD_MACHINE_DIR = 1;
     const ADD_MACHINE_COMPUTER = 2;
@@ -115,7 +115,7 @@
                         flag: ADD_MACHINE_DIR
                     },
                     computer: {
-                        alias: '',
+                        name: '',
                         host: '',
                         user: '',
                         port: '',
@@ -128,32 +128,10 @@
                 isAddDir: false,
                 menuVisible: false,
                 search: '',
-                data: [
-                    {
-                        id: 2,
-                        label: '一级 2',
-                        children: [{
-                            id: 5,
-                            label: '二级 2-1',
-                            host: '127.0.0.1'
-                        }, {
-                            id: 6,
-                            label: '二级 2-2'
-                        }]
-                    }, {
-                        id: 3,
-                        label: '一级 3',
-                        children: [{
-                            id: 7,
-                            label: '二级 3-1'
-                        }, {
-                            id: 8,
-                            label: '二级 3-2'
-                        }]
-                    }],
+                machineData: [],
                 defaultProps: {
                     children: 'children',
-                    label: 'label'
+                    label: 'name'
                 }
             }
         },
@@ -166,6 +144,9 @@
             search(val) {
                 this.$refs.tree.filter(val);
             }
+        },
+        mounted() {
+            this.getMachineData()
         },
         methods: {
             filterNode(value, data) {
@@ -201,6 +182,15 @@
                 this.isAddComputer = true;
                 this.isAddMenu = false;
             },
+            getMachineData(){
+                list().then(ret => {
+                    if (ret.code === 200) {
+                        this.machineData = ret.data;
+                    }
+                }).catch(err => {
+                    this.$message.error('服务器出小差！');
+                })
+            },
             save(flag) {
                 let saveData = {};
                 if (flag === ADD_MACHINE_DIR) {
@@ -220,6 +210,8 @@
                             message: res.message,
                             type: 'success'
                         });
+
+                        this.getMachineData()
                     } else {
                         this.$message.error(res.message);
                     }

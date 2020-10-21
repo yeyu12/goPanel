@@ -9,6 +9,10 @@ type MachineService struct {
 	machineModel *models.MachineModel
 }
 
+func (s *MachineService) Get(db *xorm.Engine, where map[string]interface{}) *[]models.MachineModel {
+	return s.machineModel.Get(db, where)
+}
+
 func (s *MachineService) Add(db *xorm.Engine, data models.MachineModel) (int64, error) {
 	return s.machineModel.Add(db, data)
 }
