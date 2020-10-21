@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	gossh "golang.org/x/crypto/ssh"
 	"net"
 	"time"
@@ -155,6 +156,11 @@ func (s *Ssh) Read(channel gossh.Channel, sshRead chan []byte) {
 	rn := make(chan rune)
 
 	go func() {
+		defer func() {
+			err := recover()
+			log.Info(err)
+		}()
+
 		for {
 			r, size, err := br.ReadRune()
 			if err != nil {
