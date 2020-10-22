@@ -167,6 +167,9 @@
         watch: {
             search(val) {
                 this.$refs.tree.filter(val);
+            },
+            "$store.state.TopMenu.defaultTagMenu"(val){
+                this.defaultTopTagMenu = this.$store.state.TopMenu.defaultTagMenu;
             }
         },
         mounted() {
@@ -264,7 +267,6 @@
             },
             clickTagMenu(tag, event) {
                 this.$store.commit("TopMenu/upDefaultTagMenu", tag.name);
-                console.log(tag, event)
             },
             removeTagMenu(index) {
                 this.$store.commit("TopMenu/removeTagMenu", index);
@@ -273,7 +275,7 @@
         computed: {
             topTagMenu() {
                 return this.$store.state.TopMenu.openTagMenu;
-            },
+            }
         }
     }
 </script>
