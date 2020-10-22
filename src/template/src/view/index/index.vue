@@ -110,7 +110,7 @@
 
 <script>
     import '@/static/css/index.css';
-    import {add, list} from "../../api/machine";
+    import {add, list} from '../../api/machine';
 
     const ADD_MACHINE_DIR = 1;
     const ADD_MACHINE_COMPUTER = 2;
@@ -146,7 +146,7 @@
                 defaultProps: {
                     children: 'children',
                     label: 'name'
-                }
+                },
             }
         },
         created() {
@@ -168,7 +168,7 @@
             search(val) {
                 this.$refs.tree.filter(val);
             },
-            "$store.state.TopMenu.defaultTagMenu"(val){
+            "$store.state.TopMenu.defaultTagMenu"(val) {
                 this.defaultTopTagMenu = this.$store.state.TopMenu.defaultTagMenu;
             }
         },
@@ -276,7 +276,7 @@
             topTagMenu() {
                 return this.$store.state.TopMenu.openTagMenu;
             }
-        }
+        },
     }
 </script>
 
