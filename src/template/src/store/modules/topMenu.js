@@ -19,6 +19,7 @@ const mutations = {
         state.openTagMenu = data;
     },
     removeTagMenu(state, index) {
+        // TODO 要设置保存的数据
         state.openTagMenu.splice(parseInt(index), 1);
         window.localStorage.setItem('panel-tag-menu', JSON.stringify(state.openTagMenu));
     },
