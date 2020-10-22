@@ -12,7 +12,6 @@
 }
 
 #panel-header {
-    border-bottom: 1px #ddd solid;
     margin: 0;
     padding: 0;
 }
@@ -54,4 +53,62 @@
 
 .menu .menu-button:hover {
     background: #409EFF;
+}
+
+
+#panel-add-menu {
+    position: absolute;
+    z-index: 888;
+}
+
+.box-card {
+    width: 200px;
+    height: 40px;
+    margin: 0 0 0 2px !important;
+    padding: 0 !important;
+}
+
+#panel-header .el-tabs__content {
+    display: none !important;
+}
+
+#panel-header .el-tabs--border-card > .el-tabs__header .el-tabs__item.is-active {
+    color: black !important;
+}
+
+#panel-header .el-tabs--border-card > .el-tabs__header .el-tabs__item:hover {
+    color: #909399;
+}
+
+#panel-header .el-tabs--border-card {
+    box-shadow: none !important;
+}
+
+#panel-setting {
+    display: inline-block;
+    float: right;
+    height: 38px;
+    width: 50px;
+    background: #F5F7FA;
+    border-bottom: 1px solid #E4E7ED;
+    cursor: pointer;
+}
+
+#panel-setting .el-icon-setting {
+    height: 40px;
+    font-size: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #65686e
+}
+
+#panel-header-menu {
+    width: calc(100vw - 250px);
+    display: inline-block;
+    height: 38px;
+    position: absolute;
+    background: #F5F7FA;
+    border: 0 !important;
+    border-bottom: 1px #E4E7ED solid !important;
 }

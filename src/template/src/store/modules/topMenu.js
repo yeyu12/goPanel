@@ -1,0 +1,36 @@
+const state = {
+    MENU_SHELL_TYPE: 'shell',
+    openTagMenu: [],
+    defaultTagMenu: '0'
+};
+
+const actions = {};
+
+const mutations = {
+    openTagMenuPush(state, data) {
+        state.openTagMenu.push(data);
+        window.localStorage.setItem('panel-tag-menu', JSON.stringify(state.openTagMenu));
+    },
+    openTagMenuClear(state) {
+        state.openTagMenu = [];
+        window.localStorage.removeItem('panel-tag-menu');
+    },
+    openTagMenu(state, data) {
+        state.openTagMenu = data;
+    },
+    removeTagMenu(state, index) {
+        state.openTagMenu.splice(parseInt(index), 1);
+        window.localStorage.setItem('panel-tag-menu', JSON.stringify(state.openTagMenu));
+    },
+    upDefaultTagMenu(state, index) {
+        state.defaultTagMenu = index;
+        window.localStorage.setItem('panel-default-tag-menu', index);
+    }
+};
+
+export default {
+    namespaced: true,
+    state,
+    actions,
+    mutations
+}

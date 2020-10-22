@@ -14,7 +14,7 @@ export default new Router({
         component: Index,
         children: [
             {
-                path: 'shell/:date',
+                path: 'shell',
                 name: 'Shell',
                 component: Shell
             }

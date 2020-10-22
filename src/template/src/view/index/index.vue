@@ -32,7 +32,18 @@
             </el-aside>
 
             <el-container>
-                <el-header id="panel-header" height="40px">Header</el-header>
+                <el-header id="panel-header" height="40px">
+                    <el-tabs type="border-card" closable id="panel-header-menu" v-model="defaultTopTagMenu"
+                             @tab-click="clickTagMenu"
+                             @tab-remove="removeTagMenu"
+                    >
+                        <el-tab-pane v-for="(item, index) in topTagMenu" :label="item.name" :data-menu="item"
+                                     :key="index" :name="index.toString()"></el-tab-pane>
+                    </el-tabs>
+                    <div id="panel-setting">
+                        <i class="el-icon-setting"></i>
+                    </div>
+                </el-header>
                 <el-main id="panel-main">
                     <router-view></router-view>
                 </el-main>
@@ -45,7 +56,7 @@
                 width="150"
                 trigger="manual"
                 v-model="menuVisible">
-            <a class="menu-button" @click="create" v-if="isDir">添加</a>
+            <a class="menu-button" @click="createComputer" v-if="isDir">添加</a>
             <a class="menu-button">编辑</a>
             <a class="menu-button">删除</a>
             <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
@@ -131,6 +142,7 @@
                 machineData: [],
                 isDir: false,
                 dirData: {},
+                defaultTopTagMenu: '0',
                 defaultProps: {
                     children: 'children',
                     label: 'name'
@@ -140,6 +152,16 @@
         created() {
             if (!localStorage.getItem('panel-token')) {
                 this.$router.push('/login')
+            }
+
+            let menuData = JSON.parse(window.localStorage.getItem('panel-tag-menu'));
+            menuData && this.$store.commit("TopMenu/openTagMenu", menuData);
+
+            let defaultMenuIndex = window.localStorage.getItem('panel-default-tag-menu');
+
+            if (defaultMenuIndex !== undefined) {
+                this.$store.commit("TopMenu/upDefaultTagMenu", defaultMenuIndex);
+                this.defaultTopTagMenu = defaultMenuIndex;
             }
         },
         watch: {
@@ -153,7 +175,7 @@
         methods: {
             filterNode(value, data) {
                 if (!value) return true;
-                return data.label.indexOf(value) !== -1;
+                return data.name.indexOf(value) !== -1;
             },
             treeRightMenu(MouseEvent, object, node, val) {
                 localStorage.setItem('currentSelectTree', JSON.stringify(object));
@@ -172,12 +194,19 @@
             },
             clearEventRightMenu() { // 取消鼠标监听事件 菜单栏
                 this.menuVisible = false;
-                document.removeEventListener('click', this.foo);
             },
             openShell() {
-                this.$router.push({
-                    path: '/shell/' + this.$md5((new Date()).getTime().toString()),
-                });
+                let jumpRoute = '/shell';
+                if (this.$route.path !== jumpRoute) {
+                    this.$router.push({
+                        path: '/shell',
+                    });
+                }
+
+                // 设置顶部菜单保存vuex中
+                let menuData = JSON.parse(window.localStorage.getItem('currentSelectTree'));
+                menuData['menu_type'] = this.$store.state.TopMenu.MENU_SHELL_TYPE;
+                this.$store.commit("TopMenu/openTagMenuPush", menuData);
             },
             showAddMenu() {
                 this.isAddMenu = !this.isAddMenu;
@@ -214,8 +243,6 @@
 
                 this.dirData = {};
 
-                console.log(saveData);
-
                 add(saveData).then(res => {
                     if (res.code === 200) {
                         this.$message({
@@ -231,24 +258,26 @@
                     this.$message.error('服务器出小差！');
                 })
             },
-            create() {
-                this.dirData = JSON.parse(window.localStorage.getItem('currentSelectTree'))
+            createComputer() {
+                this.dirData = JSON.parse(window.localStorage.getItem('currentSelectTree'));
                 this.isAddComputer = true;
+            },
+            clickTagMenu(tag, event) {
+                this.$store.commit("TopMenu/upDefaultTagMenu", tag.name);
+                console.log(tag, event)
+            },
+            removeTagMenu(index) {
+                this.$store.commit("TopMenu/removeTagMenu", index);
             }
         },
+        computed: {
+            topTagMenu() {
+                return this.$store.state.TopMenu.openTagMenu;
+            },
+        }
     }
 </script>
 
 <style>
-    #panel-add-menu {
-        position: absolute;
-        z-index: 888;
-    }
 
-    .box-card {
-        width: 200px;
-        height: 40px;
-        margin: 0 0 0 2px !important;
-        padding: 0 !important;
-    }
 </style>
