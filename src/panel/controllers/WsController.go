@@ -51,6 +51,8 @@ func NewWsController() *WsController {
 
 func (c *WsController) Ssh(g *gin.Context) {
 	var ch chan bool
+	var closeSsh = make(chan bool, 4)
+
 	ws, err := (&websocket.Upgrader{
 		HandshakeTimeout: time.Duration(time.Second * 30),
 		CheckOrigin: func(r *http.Request) bool {
@@ -58,6 +60,7 @@ func (c *WsController) Ssh(g *gin.Context) {
 		},
 	}).Upgrade(g.Writer, g.Request, nil)
 	if err != nil {
+		log.Error(err)
 		return
 	}
 	defer func() {
@@ -66,15 +69,14 @@ func (c *WsController) Ssh(g *gin.Context) {
 	c.Ws = ws
 
 	// 读ws客户端数据
-	go c.wsRead()
+	go c.wsRead(closeSsh)
 	// 写ws客户端数据
-	go c.wsWrite()
+	go c.wsWrite(closeSsh)
 
 	select {
 	case <-c.initializer:
-		sh, sshChannel, err := c.sshConn(c.WsInit.Host, "fengxiao", "ZpB123", 22, c.WsInit.Cols, c.WsInit.Rows)
+		sh, sshChannel, err := c.sshConn(c.WsInit.Host, "yeyu", "ZpB123", 22, c.WsInit.Cols, c.WsInit.Rows)
 		if err != nil {
-			log.Error(err)
 			ret := &WsMessageData{
 				Event: constants.WS_EVENT_ERR,
 				Data:  constants.SSH_CONNECTION_FAILED_MSG,
@@ -85,17 +87,16 @@ func (c *WsController) Ssh(g *gin.Context) {
 		}
 		defer func() {
 			if err := sshChannel.Close(); err != nil {
-				log.Error(err)
 				return
 			}
 		}()
 
 		// 转换为ws和ssh所识别的数据
-		go c.sshRead()
-		go c.sshWrite()
+		go c.sshRead(closeSsh)
+		go c.sshWrite(closeSsh)
 
-		go sh.Read(sshChannel, c.SshRead)
-		go sh.Write(sshChannel, c.SshWrite)
+		go sh.Read(closeSsh, sshChannel, c.SshRead)
+		go sh.Write(closeSsh, sshChannel, c.SshWrite)
 	}
 
 	defer func() {
@@ -106,9 +107,10 @@ func (c *WsController) Ssh(g *gin.Context) {
 }
 
 // 读ws数据
-func (c *WsController) wsRead() {
+func (c *WsController) wsRead(closeChan chan bool) {
 	defer func() {
 		recover()
+		close(closeChan)
 		c.Ws.Close()
 	}()
 
@@ -152,9 +154,10 @@ func (c *WsController) wsRead() {
 }
 
 // 写ws数据
-func (c *WsController) wsWrite() {
+func (c *WsController) wsWrite(closeChan chan bool) {
 	defer func() {
 		recover()
+		close(closeChan)
 		c.Ws.Close()
 	}()
 
@@ -178,7 +181,6 @@ func (c *WsController) sshConn(host, username, passwd string, port int, cols, ro
 		Rows: rows,
 	})
 	if err != nil {
-		log.Info(err)
 		return nil, nil, err
 	}
 
@@ -186,7 +188,7 @@ func (c *WsController) sshConn(host, username, passwd string, port int, cols, ro
 }
 
 // 读ssh数据写入到ws中
-func (c *WsController) sshRead() {
+func (c *WsController) sshRead(closeChan chan bool) {
 	for {
 		select {
 		case msg := <-c.SshRead:
@@ -197,16 +199,24 @@ func (c *WsController) sshRead() {
 
 			wsMessJson, _ := json.Marshal(wsMess)
 			c.WsWrite <- wsMessJson
+		case <-closeChan:
+			goto CLOSE
 		}
 	}
+
+CLOSE:
 }
 
 // 读ws数据写ssh数据
-func (c *WsController) sshWrite() {
+func (c *WsController) sshWrite(closeChan chan bool) {
 	for {
 		select {
 		case msg := <-c.WsRead:
 			c.SshWrite <- msg
+		case <-closeChan:
+			goto CLOSE
 		}
 	}
+
+CLOSE:
 }
