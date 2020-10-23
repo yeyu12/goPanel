@@ -28,7 +28,7 @@ func (c *wsSsh) sshConn(host, username, passwd string, port int, cols, rows uint
 }
 
 // 读ssh数据写入到ws中
-func (c *wsSsh) SshReadByWsWrite(wsWrite chan []byte) {
+func (c *wsSsh) sshReadByWsWrite(wsWrite chan []byte) {
 	defer func() {
 		log.Error(recover())
 	}()
@@ -54,7 +54,7 @@ func (c *wsSsh) SshReadByWsWrite(wsWrite chan []byte) {
 }
 
 // 读ws数据写ssh数据
-func (c *wsSsh) ReadWsBySshWrite(wsRead chan []byte) {
+func (c *wsSsh) readWsBySshWrite(wsRead chan []byte) {
 	defer func() {
 		log.Error(recover())
 	}()

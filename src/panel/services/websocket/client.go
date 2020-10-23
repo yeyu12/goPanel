@@ -99,8 +99,8 @@ func (c *Client) Read() {
 					// 读ws  转换sshWrite    sshWrite写入通道
 					// 写ws  转换sshRead     sshRead读通道
 					// 转换为ws和ssh所识别的数据
-					go c.wsShell.SshReadByWsWrite(c.Send)
-					go c.wsShell.ReadWsBySshWrite(c.wsRead)
+					go c.wsShell.sshReadByWsWrite(c.Send)
+					go c.wsShell.readWsBySshWrite(c.wsRead)
 					go sh.Read(sshChannel, c.wsShell.SshRead)
 					go sh.Write(sshChannel, c.wsShell.SshWrite)
 
