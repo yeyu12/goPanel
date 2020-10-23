@@ -32,7 +32,7 @@ func (r *Route) loadRoute() {
 	// websocket
 	routeWs := r.g.Group("/ws")
 	{
-		routeWs.GET("/ssh", controllers.NewWsController().Ssh)
+		routeWs.GET("/ssh", controllers.NewWsController().SshN)
 	}
 
 	r.g.Use(new(middlewares.TokenMiddleware).Middleware())

@@ -16,6 +16,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.4
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.7.0
 	github.com/ugorji/go v1.1.12 // indirect
 	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897

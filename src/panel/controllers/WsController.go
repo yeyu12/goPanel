@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/panel/constants"
 	"goPanel/src/panel/library/ssh"
+	websocket2 "goPanel/src/panel/library/websocket"
 	"goPanel/src/panel/services"
 	gossh "golang.org/x/crypto/ssh"
 	"net/http"
@@ -26,6 +28,7 @@ type WsController struct {
 }
 
 type WsMessageData struct {
+	Type  int         `json:"type"`
 	Event string      `json:"event"`
 	Data  interface{} `json:"data"`
 }
@@ -39,14 +42,40 @@ type WsInitData struct {
 
 func NewWsController() *WsController {
 	return &WsController{
+		Ws:          new(websocket.Conn),
 		WsInit:      new(WsInitData),
 		userService: new(services.UserService),
 		initializer: make(chan bool, 1),
-		WsRead:      make(chan []byte, 5120),
-		WsWrite:     make(chan []byte, 10240),
-		SshRead:     make(chan []byte, 10240),
-		SshWrite:    make(chan []byte, 5120),
+		WsRead:      make(chan []byte, 1024),
+		WsWrite:     make(chan []byte, 1024),
+		SshRead:     make(chan []byte, 1024),
+		SshWrite:    make(chan []byte, 1024),
 	}
+}
+
+func (c *WsController) SshN(g *gin.Context) {
+	ws, err := (&websocket.Upgrader{
+		HandshakeTimeout: time.Duration(time.Second * 30),
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}).Upgrade(g.Writer, g.Request, nil)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	client := &websocket2.Client{
+		ID:         uuid.NewV4().String(),
+		Socket:     ws,
+		Send:       make(chan []byte),
+		ClientType: websocket2.CLIENT_SHELL_TYPE,
+	}
+
+	websocket2.Manager.Register <- client
+
+	go client.Read()
+	go client.Write()
 }
 
 func (c *WsController) Ssh(g *gin.Context) {
@@ -75,7 +104,7 @@ func (c *WsController) Ssh(g *gin.Context) {
 
 	select {
 	case <-c.initializer:
-		sh, sshChannel, err := c.sshConn(c.WsInit.Host, "yeyu", "ZpB123", 22, c.WsInit.Cols, c.WsInit.Rows)
+		sh, sshChannel, err := c.sshConn(c.WsInit.Host, "fengxiao", "ZpB123", 22, c.WsInit.Cols, c.WsInit.Rows)
 		if err != nil {
 			ret := &WsMessageData{
 				Event: constants.WS_EVENT_ERR,
@@ -111,7 +140,7 @@ func (c *WsController) wsRead(closeChan chan bool) {
 	defer func() {
 		recover()
 		close(closeChan)
-		c.Ws.Close()
+		_ = c.Ws.Close()
 	}()
 
 	for {
@@ -121,6 +150,8 @@ func (c *WsController) wsRead(closeChan chan bool) {
 			log.Info("ReadMessage other remote:%v error: %v \n", c.Ws.RemoteAddr(), err)
 			return
 		}
+
+		log.Error(&c.Ws)
 
 		if mt == websocket.BinaryMessage {
 			reqMess := new(WsMessageData)

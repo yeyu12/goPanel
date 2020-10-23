@@ -25,8 +25,8 @@ func init() {
 	Db.TZLocation = time.Local
 	Db.SetMaxIdleConns(5)
 	Db.SetMaxOpenConns(1000)
-	Db.ShowSQL(true)
-	Db.Logger().SetLevel(core.LOG_DEBUG)
+	Db.ShowSQL(false)
+	Db.Logger().SetLevel(core.LOG_ERR)
 }
 
 func CreateTables(beans ...interface{}) {

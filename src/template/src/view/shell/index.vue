@@ -1,6 +1,6 @@
 <template>
     <div class="container" style="padding: 0;margin: 0">
-        <div id="terminal-container" style="height: calc(100vh - 40px);"></div>
+        <div :id="'terminal-container-'+tagIndex" style="height: calc(100vh - 40px);"></div>
     </div>
 </template>
 
@@ -23,6 +23,10 @@
                 isReconnection: true
             };
         },
+        props: [
+            'menu',
+            'tagIndex'
+        ],
         created() {
             library.add(faBars, faClipboard, faDownload, faKey, faCog);
             dom.watch();
@@ -30,7 +34,7 @@
         /*eslint no-unused-vars: ["error", { "args": "none" }]*/
         mounted() {
             this.fitAddon = new FitAddon();
-            let terminalContainer = document.getElementById("terminal-container");
+            let terminalContainer = document.getElementById("terminal-container-" + this.tagIndex);
             this.term = new Terminal({
                 cursorBlink: true,
                 rendererType: "canvas", //渲染类型
@@ -51,6 +55,10 @@
                     event,
                     data: data
                 }))
+                // return JSON.stringify({
+                //     event,
+                //     data: data
+                // })
             },
             unFormatWs(data) {
                 return JSON.parse(new TextDecoder().decode(data))
@@ -110,13 +118,13 @@
                 };
             },
             reconnect() {
-                if (!this.wsTimer && this.isReconnection) {
+                /*if (!this.wsTimer && this.isReconnection) {
                     this.wsTimer = setInterval(() => {
                         this.termDispose.dispose()
                         this.connWebsocket();
                         this.term.reset();
                     }, 10000);
-                }
+                }*/
             }
         },
         destroyed() {

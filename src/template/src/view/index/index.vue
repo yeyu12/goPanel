@@ -38,15 +38,17 @@
                              @tab-remove="removeTagMenu"
                     >
                         <el-tab-pane v-for="(item, index) in topTagMenu" :label="item.name" :data-menu="item"
-                                     :key="index" :name="index.toString()"></el-tab-pane>
+                                     :key="index" :name="index.toString()" lazy>
+                            <component :is="item.menu_type" :menu="item" :tag-index="index"></component>
+                        </el-tab-pane>
                     </el-tabs>
                     <div id="panel-setting">
                         <i class="el-icon-setting"></i>
                     </div>
                 </el-header>
-                <el-main id="panel-main">
+                <!--<el-main id="panel-main">
                     <router-view></router-view>
-                </el-main>
+                </el-main>-->
             </el-container>
         </el-container>
 
@@ -111,6 +113,7 @@
 <script>
     import '@/static/css/index.css';
     import {add, list} from '../../api/machine';
+    import shell from '../shell/index';
 
     const ADD_MACHINE_DIR = 1;
     const ADD_MACHINE_COMPUTER = 2;
@@ -199,12 +202,12 @@
                 this.menuVisible = false;
             },
             openShell() {
-                let jumpRoute = '/shell';
+                /*let jumpRoute = '/shell';
                 if (this.$route.path !== jumpRoute) {
                     this.$router.push({
                         path: '/shell',
                     });
-                }
+                }*/
 
                 // 设置顶部菜单保存vuex中
                 let menuData = JSON.parse(window.localStorage.getItem('currentSelectTree'));
@@ -277,6 +280,9 @@
                 return this.$store.state.TopMenu.openTagMenu;
             }
         },
+        components: {
+            shell
+        }
     }
 </script>
 
