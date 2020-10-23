@@ -202,17 +202,10 @@
                 this.menuVisible = false;
             },
             openShell() {
-                /*let jumpRoute = '/shell';
-                if (this.$route.path !== jumpRoute) {
-                    this.$router.push({
-                        path: '/shell',
-                    });
-                }*/
-
                 // 设置顶部菜单保存vuex中
                 let menuData = JSON.parse(window.localStorage.getItem('currentSelectTree'));
                 menuData['menu_type'] = this.$store.state.TopMenu.MENU_SHELL_TYPE;
-                this.$store.commit("TopMenu/openTagMenuPush", menuData);
+                this.$store.commit('TopMenu/openTagMenuPush', menuData);
             },
             showAddMenu() {
                 this.isAddMenu = !this.isAddMenu;

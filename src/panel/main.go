@@ -5,9 +5,9 @@ import (
 	"goPanel/src/panel/config"
 	core "goPanel/src/panel/core/database"
 	core_log "goPanel/src/panel/core/log"
-	"goPanel/src/panel/library/websocket"
 	"goPanel/src/panel/models"
 	"goPanel/src/panel/router"
+	"goPanel/src/panel/services/websocket"
 	"time"
 )
 
@@ -16,7 +16,7 @@ func main() {
 	core_log.LogSetOutput(config.Conf.App.LogPath)
 	createTable()
 
-	go websocket.Manager.Start()
+	go websocket.WsManager.Start()
 
 	g := gin.Default()
 	g = (new(router.Route)).Init(g)

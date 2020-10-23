@@ -9,4 +9,5 @@ const (
 	USERNAME_ALREADY_EXISTS       = 4002
 	TOKEN_INVALID                 = 4003
 	TOKEN_BE_OVERDUE              = 4004
+	SSH_CONNECTION_FAILED         = 4005
 )

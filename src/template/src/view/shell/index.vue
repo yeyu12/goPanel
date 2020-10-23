@@ -53,12 +53,9 @@
             formatWs(event, data) {
                 return new TextEncoder().encode(JSON.stringify({
                     event,
-                    data: data
+                    data,
+                    type: 0
                 }))
-                // return JSON.stringify({
-                //     event,
-                //     data: data
-                // })
             },
             unFormatWs(data) {
                 return JSON.parse(new TextDecoder().decode(data))
@@ -77,7 +74,7 @@
                         token: window.localStorage.getItem('panel-token'),
                         cols: this.term.cols,
                         rows: this.term.rows,
-                        host: '127.0.0.1'
+                        host: '127.0.0.1',
                     }))
 
                     this.term.writeln("");
