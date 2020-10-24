@@ -42,36 +42,44 @@
                             <component :is="item.menu_type" :menu="item" :tag-index="index"></component>
                         </el-tab-pane>
                     </el-tabs>
-                    <div id="panel-setting">
+                    <el-dropdown id="panel-setting" @command="handleCommand" trigger="click">
                         <i class="el-icon-setting"></i>
-                    </div>
+
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item icon="el-icon-plus">黄金糕</el-dropdown-item>
+                            <el-dropdown-item icon="el-icon-circle-plus">狮子头</el-dropdown-item>
+                            <el-dropdown-item icon="el-icon-circle-plus-outline">螺蛳粉</el-dropdown-item>
+                            <el-dropdown-item icon="el-icon-check">双皮奶</el-dropdown-item>
+                            <el-dropdown-item icon="el-icon-switch-button" command="loginout" divided>退出登录
+                            </el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
                 </el-header>
-                <!--<el-main id="panel-main">
-                    <router-view></router-view>
-                </el-main>-->
             </el-container>
         </el-container>
 
-        <el-popover
-                popper-class="menu"
-                placement="right"
-                width="150"
-                trigger="manual"
-                v-model="menuVisible">
-            <a class="menu-button" @click="createComputer" v-if="isDir">添加</a>
-            <a class="menu-button">编辑</a>
-            <a class="menu-button">删除</a>
-            <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
-            <a class="menu-button" v-if="!isDir">打开桌面</a>
-        </el-popover>
+        <transition name="el-fade-in-linear">
+            <el-popover
+                    popper-class="menu"
+                    placement="right"
+                    width="150"
+                    trigger="manual"
+                    v-model="menuVisible">
+                <a class="menu-button" @click="createComputer" v-if="isDir">添加</a>
+                <a class="menu-button">编辑</a>
+                <a class="menu-button">删除</a>
+                <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
+<!--                <a class="menu-button" v-if="!isDir">打开桌面</a>-->
+            </el-popover>
+        </transition>
 
         <el-dialog
                 title="添加目录"
                 :visible.sync="isAddDir"
                 width="500px"
                 center>
-            <el-form :model="form.dir" label-width="80px">
-                <el-form-item label="目录名称">
+            <el-form :model="form.dir" label-width="100px">
+                <el-form-item label="目录名称：">
                     <el-input v-model="form.dir.name" placeholder="请输入目录名"></el-input>
                 </el-form-item>
             </el-form>
@@ -88,16 +96,19 @@
                 width="500px"
                 center>
             <el-form :model="form.computer" label-width="80px">
-                <el-form-item label="名称">
+                <el-form-item label="名称：">
                     <el-input v-model="form.computer.name" placeholder="请输入主机名称"></el-input>
                 </el-form-item>
-                <el-form-item label="地址">
+                <el-form-item label="地址：">
                     <el-input v-model="form.computer.host" placeholder="请输入主机地址"></el-input>
                 </el-form-item>
-                <el-form-item label="用户名">
+                <el-form-item label="用户名：">
                     <el-input v-model="form.computer.user" placeholder="请输入主机用户名，默认root"></el-input>
                 </el-form-item>
-                <el-form-item label="端口">
+                <el-form-item label="密码：">
+                    <el-input v-model="form.computer.passwd" type="password" placeholder="请输入主机密码"></el-input>
+                </el-form-item>
+                <el-form-item label="端口：">
                     <el-input v-model="form.computer.port" placeholder="请输入主机端口，默认22"></el-input>
                 </el-form-item>
             </el-form>
@@ -266,6 +277,15 @@
             },
             removeTagMenu(index) {
                 this.$store.commit("TopMenu/removeTagMenu", index);
+            },
+            handleCommand(command) {
+                eval("this." + command + "()")
+            },
+            loginout() {
+                localStorage.removeItem('panel-token');
+                localStorage.removeItem('panel-userinfo');
+
+                this.$router.push('/login')
             }
         },
         computed: {

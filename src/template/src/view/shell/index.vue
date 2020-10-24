@@ -115,13 +115,13 @@
                 };
             },
             reconnect() {
-                /*if (!this.wsTimer && this.isReconnection) {
+                if (!this.wsTimer && this.isReconnection) {
                     this.wsTimer = setInterval(() => {
                         this.termDispose.dispose()
                         this.connWebsocket();
                         this.term.reset();
                     }, 10000);
-                }*/
+                }
             }
         },
         destroyed() {

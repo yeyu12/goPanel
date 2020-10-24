@@ -52,7 +52,8 @@
 }
 
 .menu .menu-button:hover {
-    background: #409EFF;
+    background-color: #ecf5ff;
+    color: #66b1ff;
 }
 
 
