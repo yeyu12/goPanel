@@ -11,3 +11,9 @@ export function save(params) {
         return data.data;
     })
 }
+
+export function del(params) {
+    return post("/machine/del", params).then((data) => {
+        return data.data;
+    })
+}

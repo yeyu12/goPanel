@@ -34,6 +34,11 @@ func (m *MachineGroupModel) Update(db *xorm.Engine, data MachineGroupModel) (aff
 	return
 }
 
+func (m *MachineGroupModel) Del(db *xorm.Engine, id int64) (affected int64, err error) {
+	affected, err = db.Id(id).Delete(new(MachineGroupModel))
+	return
+}
+
 func (m *MachineGroupModel) IdByDetails(db *xorm.Engine, id int64) MachineGroupModel {
 	var machineGroupData MachineGroupModel
 	db.Where("id = ?", id).Get(&machineGroupData)

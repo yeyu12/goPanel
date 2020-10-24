@@ -24,6 +24,8 @@ func (m *MachineModel) Get(db *xorm.Engine, where map[string]interface{}) *[]Mac
 	dbs := db.Asc("id")
 	if where["machine_group_id"] != nil {
 		dbs = db.Where("machine_group_id = ?", where["machine_group_id"])
+	} else {
+		dbs = db.Where("machine_group_id = ?", 0)
 	}
 	dbs.Find(&data)
 
@@ -38,6 +40,11 @@ func (m *MachineModel) Add(db *xorm.Engine, data MachineModel) (int64, error) {
 
 func (m *MachineModel) Update(db *xorm.Engine, data MachineModel) (affected int64, err error) {
 	affected, err = db.Where("id = ?", data.Id).Update(data)
+	return
+}
+
+func (m *MachineModel) Del(db *xorm.Engine, id int64) (affected int64, err error) {
+	affected, err = db.Id(id).Delete(new(MachineModel))
 	return
 }
 

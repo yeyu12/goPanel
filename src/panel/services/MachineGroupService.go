@@ -21,6 +21,10 @@ func (s *MachineGroupService) Update(db *xorm.Engine, data models.MachineGroupMo
 	return s.machineGroupModel.Update(db, data)
 }
 
+func (s *MachineGroupService) Del(db *xorm.Engine, id int64) (int64, error) {
+	return s.machineGroupModel.Del(db, id)
+}
+
 func (s *MachineGroupService) IdByDetails(db *xorm.Engine, id int64) models.MachineGroupModel {
 	return s.machineGroupModel.IdByDetails(db, id)
 }

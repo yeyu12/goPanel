@@ -67,7 +67,7 @@
                     v-model="menuVisible">
                 <a class="menu-button" @click="createComputer" v-if="isDir">添加</a>
                 <a class="menu-button" @click="editTree">编辑</a>
-                <a class="menu-button">删除</a>
+                <a class="menu-button" @click="delTree">删除</a>
                 <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
                 <!--                <a class="menu-button" v-if="!isDir">打开桌面</a>-->
             </el-popover>
@@ -123,7 +123,7 @@
 
 <script>
     import '@/static/css/index.css';
-    import {save, list} from '../../api/machine';
+    import {save, list, del} from '../../api/machine';
     import shell from '../shell/index';
 
     const ADD_MACHINE_DIR = 1;
@@ -326,7 +326,34 @@
                 }
             },
             delTree() {
+                this.dirData = JSON.parse(window.localStorage.getItem('currentSelectTree'));
+                let req = {};
+                if (this.dirData.is_dir) {
+                    req = {
+                        id: this.dirData.id,
+                        flag: ADD_MACHINE_DIR
+                    }
+                } else {
+                    req = {
+                        id: this.dirData.id,
+                        flag: ADD_MACHINE_COMPUTER
+                    }
+                }
 
+                del(req).then(res => {
+                    if (res.code === 200) {
+                        this.$message({
+                            message: res.message,
+                            type: 'success'
+                        });
+
+                        this.getMachineData()
+                    } else {
+                        this.$message.error(res.message);
+                    }
+                }).catch(err => {
+                    this.$message.error('服务器出小差！');
+                })
             },
             clickTagMenu(tag, event) {
                 this.$store.commit("TopMenu/upDefaultTagMenu", tag.name);

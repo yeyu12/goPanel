@@ -96,8 +96,37 @@ func (c *MachineController) Save(g *gin.Context) {
 }
 
 func (c *MachineController) Del(g *gin.Context) {
+	inputData, _ := ioutil.ReadAll(g.Request.Body)
+	var delVail validations.MachineDel
+	c.JsonPost(&delVail, inputData)
 
-	common.RetJson(g, 200, "成功", "")
+	if err := c.Validations(delVail); err != nil {
+		common.RetJson(g, constants.MISSING_PARAMETER_FAIL, err.Error(), "")
+		return
+	}
+
+	log.Error(delVail)
+
+	switch delVail.Flag {
+	case CREATE_DIR:
+		_, err := c.machineGroupService.Del(core.Db, delVail.Id)
+		if err != nil {
+			common.RetJson(g, constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, "")
+			return
+		}
+
+		break
+	case CREATE_COMPUTER:
+		_, err := c.machineService.Del(core.Db, delVail.Id)
+		if err != nil {
+			common.RetJson(g, constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, "")
+			return
+		}
+
+		break
+	}
+
+	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, "")
 	return
 }
 

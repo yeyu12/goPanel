@@ -4,6 +4,11 @@ type MachineAdd struct {
 	Flag int `json:"flag" validate:"required" label:"类型"`
 }
 
+type MachineDel struct {
+	Flag int   `json:"flag" validate:"required" label:"类型"`
+	Id   int64 `json:"id" validate:"required" label:"ID"`
+}
+
 type MachineAddDir struct {
 	Id   int    `json:"id" label:"ID"`
 	Name string `json:"name" validate:"required" label:"目录名称"`
