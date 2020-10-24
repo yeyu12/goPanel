@@ -30,7 +30,7 @@ func init() {
 // 设置日志输出方式
 func LogSetOutput(path string) {
 	if config.Conf.App.LogOutputFlag == 1 && path != "" {
-		if !common.PathExists(path) && !common.CreatePath(path) {
+		if !common.DirOrFileByIsExists(path) && !common.CreatePath(path) {
 			return
 		}
 

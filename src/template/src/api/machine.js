@@ -6,8 +6,8 @@ export function list() {
     })
 }
 
-export function add(params) {
-    return post("/machine/add", params).then((data) => {
+export function save(params) {
+    return post("/machine/save", params).then((data) => {
         return data.data;
     })
 }

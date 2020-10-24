@@ -47,7 +47,7 @@ func (c *UserController) Login(g *gin.Context) {
 		return
 	}
 
-	token, err := common.GetToken()
+	token, err := common.GenToken()
 	if err != nil {
 		common.RetJson(g, constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, "")
 		return
@@ -89,7 +89,7 @@ func (c *UserController) UserAdd(g *gin.Context) {
 		return
 	}
 
-	token, err := common.GetToken()
+	token, err := common.GenToken()
 	if err != nil {
 		common.RetJson(g, constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, "")
 		return

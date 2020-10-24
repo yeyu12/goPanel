@@ -12,6 +12,7 @@ type MachineGroupModel struct {
 	IsDir      int       `json:"is_dir" xorm:"default(1)"`
 	CreateTime time.Time `json:"create_time"`
 	CreateUid  int64     `json:"create_uid"`
+	UpdateTime time.Time `json:"update_time"`
 }
 
 func (m *MachineGroupModel) Get(db *xorm.Engine) *[]MachineGroupModel {

@@ -42,7 +42,7 @@
                             <component :is="item.menu_type" :menu="item" :tag-index="index"></component>
                         </el-tab-pane>
                     </el-tabs>
-                    <el-dropdown id="panel-setting" @command="handleCommand" trigger="click">
+                    <el-dropdown id="panel-setting" @command="handleCommand">
                         <i class="el-icon-setting"></i>
 
                         <el-dropdown-menu slot="dropdown">
@@ -69,7 +69,7 @@
                 <a class="menu-button">编辑</a>
                 <a class="menu-button">删除</a>
                 <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
-<!--                <a class="menu-button" v-if="!isDir">打开桌面</a>-->
+                <!--                <a class="menu-button" v-if="!isDir">打开桌面</a>-->
             </el-popover>
         </transition>
 
@@ -123,7 +123,7 @@
 
 <script>
     import '@/static/css/index.css';
-    import {add, list} from '../../api/machine';
+    import {save, list} from '../../api/machine';
     import shell from '../shell/index';
 
     const ADD_MACHINE_DIR = 1;
@@ -253,7 +253,7 @@
 
                 this.dirData = {};
 
-                add(saveData).then(res => {
+                save(saveData).then(res => {
                     if (res.code === 200) {
                         this.$message({
                             message: res.message,
