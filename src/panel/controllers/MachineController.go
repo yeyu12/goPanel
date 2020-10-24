@@ -96,7 +96,9 @@ func (c *MachineController) Save(g *gin.Context) {
 }
 
 func (c *MachineController) Del(g *gin.Context) {
+
 	common.RetJson(g, 200, "成功", "")
+	return
 }
 
 // 添加目录

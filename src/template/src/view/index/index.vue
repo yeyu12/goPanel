@@ -66,7 +66,7 @@
                     trigger="manual"
                     v-model="menuVisible">
                 <a class="menu-button" @click="createComputer" v-if="isDir">添加</a>
-                <a class="menu-button">编辑</a>
+                <a class="menu-button" @click="editTree">编辑</a>
                 <a class="menu-button">删除</a>
                 <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
                 <!--                <a class="menu-button" v-if="!isDir">打开桌面</a>-->
@@ -74,7 +74,7 @@
         </transition>
 
         <el-dialog
-                title="添加目录"
+                title="添加/修改目录"
                 :visible.sync="isAddDir"
                 width="500px"
                 center>
@@ -91,7 +91,7 @@
         </el-dialog>
 
         <el-dialog
-                title="添加主机"
+                title="添加/修改主机"
                 :visible.sync="isAddComputer"
                 width="500px"
                 center>
@@ -105,7 +105,7 @@
                 <el-form-item label="用户名：">
                     <el-input v-model="form.computer.user" placeholder="请输入主机用户名，默认root"></el-input>
                 </el-form-item>
-                <el-form-item label="密码：">
+                <el-form-item label="密码：" v-if="form.computer.id === 0">
                     <el-input v-model="form.computer.passwd" type="password" placeholder="请输入主机密码"></el-input>
                 </el-form-item>
                 <el-form-item label="端口：">
@@ -136,10 +136,12 @@
             return {
                 form: {
                     dir: {
+                        id: 0,
                         name: '',
                         flag: ADD_MACHINE_DIR
                     },
                     computer: {
+                        id: 0,
                         name: '',
                         host: '',
                         user: '',
@@ -222,10 +224,24 @@
                 this.isAddMenu = !this.isAddMenu;
             },
             showAddDir() {
+                this.form.dir = {
+                    id: 0,
+                    name: '',
+                    flag: ADD_MACHINE_DIR
+                };
                 this.isAddDir = true;
                 this.isAddMenu = false;
             },
             showAddComputer() {
+                this.form.computer = {
+                    id: 0,
+                    name: '',
+                    host: '',
+                    user: '',
+                    port: '',
+                    machine_group_id: 0,
+                    flag: ADD_MACHINE_COMPUTER
+                };
                 this.isAddComputer = true;
                 this.isAddMenu = false;
             },
@@ -260,6 +276,17 @@
                             type: 'success'
                         });
 
+                        if (res.data.is_dir === undefined) {
+                            let computerCache = {};
+                            let computer = window.localStorage.getItem('panel-computer');
+                            if (computer) {
+                                computerCache = JSON.parse(computer);
+                            }
+
+                            computerCache[res.data.host + ':' + res.data.port] = res.data.passwd;
+                            window.localStorage.setItem('panel-computer', JSON.stringify(computerCache))
+                        }
+
                         this.getMachineData()
                     } else {
                         this.$message.error(res.message);
@@ -271,6 +298,35 @@
             createComputer() {
                 this.dirData = JSON.parse(window.localStorage.getItem('currentSelectTree'));
                 this.isAddComputer = true;
+            },
+            editTree() {
+                this.dirData = JSON.parse(window.localStorage.getItem('currentSelectTree'));
+                if (this.dirData.is_dir) {
+                    this.form.dir = {
+                        id: this.dirData.id,
+                        name: this.dirData.name,
+                        flag: ADD_MACHINE_DIR
+                    };
+
+                    this.isAddDir = true;
+                    this.isAddMenu = false;
+                } else {
+                    this.form.computer = {
+                        id: this.dirData.id,
+                        name: this.dirData.name,
+                        host: this.dirData.host,
+                        user: this.dirData.user,
+                        port: this.dirData.port,
+                        machine_group_id: this.dirData.machine_group_id,
+                        flag: ADD_MACHINE_COMPUTER
+                    };
+
+                    this.isAddComputer = true;
+                    this.isAddMenu = false;
+                }
+            },
+            delTree() {
+
             },
             clickTagMenu(tag, event) {
                 this.$store.commit("TopMenu/upDefaultTagMenu", tag.name);
