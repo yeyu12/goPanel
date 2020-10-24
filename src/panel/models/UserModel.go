@@ -8,9 +8,9 @@ import (
 // 用户
 type UserModel struct {
 	Id                  int64     `json:"id"`
-	Username            string    `json:"username"`
-	Passwd              string    `json:"passwd"`
-	Token               string    `json:"token"`
+	Username            string    `json:"username" xorm:"varchar(30) notnull index(up)"`
+	Passwd              string    `json:"passwd" xorm:"varchar(50) notnull index(up)"`
+	Token               string    `json:"token" xorm:"varchar(50) notnull index"`
 	TokenExpirationTime time.Time `json:"token_expiration_time"` // token过期时间
 	CreateTime          time.Time `json:"create_time"`
 	UpdateTime          time.Time `json:"update_time"`

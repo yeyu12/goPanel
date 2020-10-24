@@ -105,7 +105,7 @@
                 <el-form-item label="用户名：">
                     <el-input v-model="form.computer.user" placeholder="请输入主机用户名，默认root"></el-input>
                 </el-form-item>
-                <el-form-item label="密码：" v-if="form.computer.id === 0">
+                <el-form-item label="密码：">
                     <el-input v-model="form.computer.passwd" type="password" placeholder="请输入主机密码"></el-input>
                 </el-form-item>
                 <el-form-item label="端口：">
