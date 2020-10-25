@@ -27,7 +27,7 @@ func (r *Route) loadGlobalMiddleware() {
 
 func (r *Route) loadRoute() {
 	r.g.POST("/login", controllers.NewUserController().Login)
-	r.g.POST("/userAdd", controllers.NewUserController().UserAdd)
+	r.g.POST("/register", controllers.NewUserController().UserAdd)
 
 	// websocket
 	routeWs := r.g.Group("/ws")

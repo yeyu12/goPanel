@@ -81,6 +81,17 @@ func (c *UserController) UserAdd(g *gin.Context) {
 		common.RetJson(g, constants.ERROR_FAIL, err.Error(), "")
 		return
 	}
+
+	if userVail.Passwd == "" {
+		common.RetJson(g, constants.PASSWORD_CANNOT_BE_EMPTY, constants.PASSWORD_CANNOT_BE_EMPTY_MSG, "")
+		return
+	}
+
+	if userVail.Passwd != userVail.RepeatPasswd {
+		common.RetJson(g, constants.TWO_PASSWORD_INCONSISTENCY, constants.TWO_PASSWORD_INCONSISTENCY_MEG, "")
+		return
+	}
+
 	var userAddData models.UserModel
 	c.JsonPost(&userAddData, inputData)
 

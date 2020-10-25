@@ -5,3 +5,9 @@ export function login(params) {
         return data.data;
     })
 }
+
+export function register(params) {
+    return post("/register", params).then((data) => {
+        return data.data;
+    })
+}

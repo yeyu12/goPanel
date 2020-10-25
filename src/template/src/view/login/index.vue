@@ -9,13 +9,28 @@
                 </div>
                 <p>Strive&nbsp;&nbsp;&nbsp;&nbsp;Everyday</p>
             </div>
-            <p class="p user_icon">
-                <input type="text" placeholder="账号" autocomplete="off" class="login_txtbx" v-model="username">
-            </p>
-            <p class="p pwd_icon">
-                <input type="password" placeholder="密码" autocomplete="off" class="login_txtbx" v-model="passwd"
-                       @keypress="enter">
-            </p>
+            <div v-if="isLogin">
+                <p class="p user_icon">
+                    <input type="text" placeholder="账号" autocomplete="off" class="login_txtbx" v-model="username">
+                </p>
+                <p class="p pwd_icon">
+                    <input type="password" placeholder="密码" autocomplete="off" class="login_txtbx" v-model="passwd"
+                           @keypress="enter">
+                </p>
+            </div>
+            <div v-else>
+                <p class="p user_icon">
+                    <input type="text" placeholder="账号" autocomplete="off" class="login_txtbx" v-model="username">
+                </p>
+                <p class="p pwd_icon">
+                    <input type="password" placeholder="密码" autocomplete="off" class="login_txtbx" v-model="passwd">
+                </p>
+                <p class="p rpwd_icon">
+                    <input type="password" placeholder="重复密码" autocomplete="off" class="login_txtbx"
+                           v-model="repeat_passwd"
+                           @keypress="enter">
+                </p>
+            </div>
             <!--<div class="p val_icon">
                 <div class="checkcode">
                     <input type="text" id="J_codetext" placeholder="验证码" autocomplete="off" maxlength="4"
@@ -26,8 +41,12 @@
                 <a class="ver_btn" onselectstart="return false">看不清，换一张</a>
             </div>-->
             <div class="signup">
-                <a class="gv" href="javascript:" @click="login">登&nbsp;&nbsp;录</a>
-                <a class="gv" href="#">注&nbsp;&nbsp;册</a>
+                <a class="gv" href="javascript:" @click="login" v-if="isLogin">登&nbsp;&nbsp;录</a>
+                <a class="gv" href="javascript:" v-else @click="register">注&nbsp;&nbsp;册</a>
+            </div>
+            <div>
+                <a class="panel-register" v-if="!isLogin" @click="showLogin(true)">登&nbsp;录</a>
+                <a class="panel-register" v-else @click="showLogin( false)">注&nbsp;册</a>
             </div>
         </div>
         <div class="canvaszz"></div>
@@ -37,7 +56,7 @@
 
 <script>
     import '@/static/css/login.css';
-    import {login} from '@/api/user';
+    import {login, register} from '@/api/user';
 
     /*eslint no-unused-vars: ["error", { "args": "none" }]*/
     export default {
@@ -57,7 +76,9 @@
                 half: 0,
                 gradient2: "",
                 username: "",
-                passwd: ""
+                passwd: "",
+                repeat_passwd: "",
+                isLogin: true
             }
         },
         mounted() {
@@ -172,9 +193,34 @@
                     this.$message.error("服务器出小差！");
                 })
             },
+            register() {
+                register({
+                    username: this.username,
+                    passwd: this.passwd,
+                    repeat_passwd: this.repeat_passwd
+                }).then(res => {
+                    if (res.code !== 200) {
+                        this.$message.error(res.message);
+                    } else {
+                        localStorage.setItem('panel-token', res.data.token);
+                        localStorage.setItem('panel-userinfo', this.$base64.encode(JSON.stringify(res.data)));
+
+                        this.$router.push('/')
+                    }
+                }).catch(err => {
+                    this.$message.error("服务器出小差！");
+                })
+            },
+            showLogin(val) {
+                this.isLogin = val;
+            },
             enter(e) {
                 if (e.which === 13) {
-                    this.login();
+                    if (this.isLogin) {
+                        this.login();
+                    } else {
+                        this.register();
+                    }
                 }
             }
         }

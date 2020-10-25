@@ -9,5 +9,7 @@ const (
 	PLEASE_LOG_IN_FIRST_MSG           = "请先登陆!"
 	TOKEN_INVALID_MSG                 = "Token无效！"
 	TOKEN_BE_OVERDUE_MSG              = "Token过期！"
-	SSH_CONNECTION_FAILED_MSG         = "主机登录失败，主机用户名或密码或端口错误！！"
+	SSH_CONNECTION_FAILED_MSG         = "主机登录失败，主机用户名或密码或端口错误！"
+	TWO_PASSWORD_INCONSISTENCY_MEG    = "两次密码不同！"
+	PASSWORD_CANNOT_BE_EMPTY_MSG      = "密码不能为空！"
 )
