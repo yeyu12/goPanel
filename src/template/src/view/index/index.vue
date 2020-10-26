@@ -46,11 +46,12 @@
                         <i class="el-icon-setting"></i>
 
                         <el-dropdown-menu slot="dropdown">
-                            <el-dropdown-item icon="el-icon-plus">黄金糕</el-dropdown-item>
-                            <el-dropdown-item icon="el-icon-circle-plus">狮子头</el-dropdown-item>
-                            <el-dropdown-item icon="el-icon-circle-plus-outline">螺蛳粉</el-dropdown-item>
-                            <el-dropdown-item icon="el-icon-check">双皮奶</el-dropdown-item>
-                            <el-dropdown-item icon="el-icon-switch-button" command="loginout" divided>退出登录
+                            <!--                            <el-dropdown-item icon="el-icon-plus">黄金糕</el-dropdown-item>-->
+                            <!--                            <el-dropdown-item icon="el-icon-circle-plus">狮子头</el-dropdown-item>-->
+                            <!--                            <el-dropdown-item icon="el-icon-circle-plus-outline">螺蛳粉</el-dropdown-item>-->
+                            <!--                            <el-dropdown-item icon="el-icon-check">双皮奶</el-dropdown-item>-->
+                            <!--                            <el-dropdown-item icon="el-icon-switch-button" command="loginout" divided>退出登录-->
+                            <el-dropdown-item icon="el-icon-switch-button" command="loginout">退出登录
                             </el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
@@ -122,14 +123,14 @@
 </template>
 
 <script>
+    /*eslint no-unused-vars: ["error", { "args": "none" }]*/
     import '@/static/css/index.css';
-    import {save, list, del} from '../../api/machine';
+    import {del, list, save} from '../../api/machine';
     import shell from '../shell/index';
 
     const ADD_MACHINE_DIR = 1;
     const ADD_MACHINE_COMPUTER = 2;
 
-    /*eslint no-unused-vars: ["error", { "args": "none" }]*/
     export default {
         name: "Index",
         data() {
@@ -347,6 +348,10 @@
                             type: 'success'
                         });
 
+                        if (!this.dirData.is_dir) {
+                            // 删除已打开的tag标签
+                            this.$store.commit("TopMenu/openTagMenuDel", this.dirData);
+                        }
                         this.getMachineData()
                     } else {
                         this.$message.error(res.message);
