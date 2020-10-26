@@ -66,7 +66,7 @@
                 //连接成功
                 this.ws.onopen = (evt) => {
                     if (this.wsTimer) {
-                        clearInterval(this.wsTimer)
+                        clearInterval(this.wsTimer);
                         this.wsTimer = 0;
                     }
 
@@ -75,10 +75,10 @@
                         cols: this.term.cols,
                         rows: this.term.rows,
                         host: '127.0.0.1',
-                    }))
+                    }));
 
                     this.term.writeln("");
-                }
+                };
 
                 // 输入
                 this.termDispose = this.term.onData(data => {
@@ -90,7 +90,7 @@
                     let wsData = this.unFormatWs(evt.data);
                     switch (wsData.event) {
                         case "data":
-                            this.term.write(wsData.data)
+                            this.term.write(wsData.data);
                             break;
                         case "err":
                             this.isReconnection = false;
@@ -107,7 +107,7 @@
 
                 //关闭
                 this.ws.onclose = (evt) => {
-                    this.reconnect()
+                    this.reconnect();
                 };
                 //错误
                 this.ws.onerror = (evt) => {
@@ -117,7 +117,7 @@
             reconnect() {
                 if (!this.wsTimer && this.isReconnection) {
                     this.wsTimer = setInterval(() => {
-                        this.termDispose.dispose()
+                        this.termDispose.dispose();
                         this.connWebsocket();
                         this.term.reset();
                     }, 10000);
