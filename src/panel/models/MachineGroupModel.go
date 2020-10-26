@@ -22,7 +22,7 @@ func (m *MachineGroupModel) Get(db *xorm.Engine) *[]MachineGroupModel {
 	return &data
 }
 
-func (m *MachineGroupModel) Add(db *xorm.Engine, data MachineGroupModel) (int64, error) {
+func (m *MachineGroupModel) Add(db *xorm.Engine, data *MachineGroupModel) (int64, error) {
 	data.IsDir = 1
 	id, err := db.InsertOne(data)
 

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -105,8 +106,6 @@ func (c *MachineController) Del(g *gin.Context) {
 		return
 	}
 
-	log.Error(delVail)
-
 	switch delVail.Flag {
 	case CREATE_DIR:
 		_, err := c.machineGroupService.Del(core.Db, delVail.Id)
@@ -148,12 +147,10 @@ func (c *MachineController) saveDir(g *gin.Context, inputData []byte) (int32, st
 		addDirData.CreateTime = time.Now()
 		addDirData.CreateUid = userinfo.Id
 
-		id, err := c.machineGroupService.Add(core.Db, addDirData)
+		_, err := c.machineGroupService.Add(core.Db, &addDirData)
 		if err != nil {
 			return constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, ""
 		}
-
-		addDirData.Id = id
 	} else {
 		addDirData.UpdateTime = time.Now()
 		_, err := c.machineGroupService.Update(core.Db, addDirData)
@@ -180,17 +177,15 @@ func (c *MachineController) saveComputer(g *gin.Context, inputData []byte) (int3
 	var addComputerData models.MachineModel
 	c.JsonPost(&addComputerData, inputData)
 
-	if addComputerData.Id == 0 {
+	if addComputerData.Id == int64(0) {
 		addComputerData.CreateTime = time.Now()
 		addComputerData.CreateUid = userinfo.Id
 		addComputerData.LoginNum = 0
 
-		id, err := c.machineService.Add(core.Db, addComputerData)
+		_, err := c.machineService.Add(core.Db, &addComputerData)
 		if err != nil {
 			return constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, ""
 		}
-
-		addComputerData.Id = id
 	} else {
 		addComputerData.UpdateTime = time.Now()
 		_, err := c.machineService.Update(core.Db, addComputerData)
@@ -201,15 +196,12 @@ func (c *MachineController) saveComputer(g *gin.Context, inputData []byte) (int3
 
 	data := c.machineService.IdByDetails(core.Db, addComputerData.Id)
 	dataMap := common.StructToJson(data)
-	rsaPublicKey, err := ioutil.ReadFile(common.GetRsaFilePath() + "public.pem")
+	log.Error(addComputerVail.Passwd)
+	encodePasswd, err := common.RsaEncrypt([]byte(addComputerVail.Passwd), common.GetRsaFilePath()+"public.pem")
 	if err != nil {
 		log.Error(err)
 	}
-	encodePasswd, err := common.RsaEncrypt([]byte(addComputerVail.Passwd), rsaPublicKey)
-	if err != nil {
-		log.Error(err)
-	}
-	dataMap["passwd"] = encodePasswd
+	dataMap["passwd"] = base64.StdEncoding.EncodeToString(encodePasswd)
 
 	return constants.SUCCESS, constants.SUCCESS_MSG, dataMap
 }

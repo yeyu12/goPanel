@@ -13,7 +13,7 @@ func (s *MachineGroupService) Get(db *xorm.Engine) *[]models.MachineGroupModel {
 	return s.machineGroupModel.Get(db)
 }
 
-func (s *MachineGroupService) Add(db *xorm.Engine, data models.MachineGroupModel) (int64, error) {
+func (s *MachineGroupService) Add(db *xorm.Engine, data *models.MachineGroupModel) (int64, error) {
 	return s.machineGroupModel.Add(db, data)
 }
 

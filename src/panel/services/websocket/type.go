@@ -17,7 +17,8 @@ type BaseInit struct {
 
 type ShellInit struct {
 	BaseInit
-	Host string `json:"host"`
-	Cols uint32 `json:"cols"`
-	Rows uint32 `json:"rows"`
+	Id     int64  `json:"id"`
+	Passwd string `json:"passwd"`
+	Cols   uint32 `json:"cols"`
+	Rows   uint32 `json:"rows"`
 }

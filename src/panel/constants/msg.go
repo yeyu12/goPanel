@@ -12,4 +12,8 @@ const (
 	SSH_CONNECTION_FAILED_MSG         = "主机登录失败，主机用户名或密码或端口错误！"
 	TWO_PASSWORD_INCONSISTENCY_MEG    = "两次密码不同！"
 	PASSWORD_CANNOT_BE_EMPTY_MSG      = "密码不能为空！"
+	MACHINE_ID_MSG                    = "主机数据不存在！"
+	MACHINE_PASSWD_NOT_NILL_MSG       = "主机密码不能为空！"
+	SERVER_CONFIG_ERR_MSG             = "服务器配置错误！"
+	MACHINE_PASSWD_DECODE_FAIL_MSG    = "主机密码解密失败！"
 )

@@ -18,7 +18,7 @@ func main() {
 	core_log.LogSetOutput(config.Conf.App.LogPath)
 	createTable()
 	go websocket.WsManager.Start()
-	common.GenRsaKey(common.GetRsaFilePath())
+	common.GenRsaKey(common.GetRsaFilePath(), 2048)
 
 	g := gin.Default()
 	g = (new(router.Route)).Init(g)

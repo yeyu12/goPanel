@@ -20,7 +20,9 @@
                 fitAddon: {},
                 termDispose: {},
                 wsTimer: 0,
-                isReconnection: true
+                isReconnection: true,
+                passwd: '',
+                url: '',
             };
         },
         props: [
@@ -30,6 +32,8 @@
         created() {
             library.add(faBars, faClipboard, faDownload, faKey, faCog);
             dom.watch();
+
+            this.url = 'ws' + '://' + window.location.hostname + ':10010';
         },
         /*eslint no-unused-vars: ["error", { "args": "none" }]*/
         mounted() {
@@ -47,7 +51,13 @@
             this.term.focus();
             this.fitAddon.fit();
 
-            this.connWebsocket();
+            let computer = JSON.parse(window.localStorage.getItem('panel-computer'));
+            if (computer) {
+                this.passwd = computer[this.menu['host'] + ':' + this.menu['port']];
+                this.connWebsocket();
+            } else {
+                console.log('在这里验证客户端没有密码的情况。');
+            }
         },
         methods: {
             formatWs(event, data) {
@@ -61,7 +71,7 @@
                 return JSON.parse(new TextDecoder().decode(data))
             },
             connWebsocket() {
-                this.ws = new WebSocket("ws://127.0.0.1:10010/ws/ssh"); //地址
+                this.ws = new WebSocket(this.url + '/ws/ssh'); //地址
                 this.ws.binaryType = "arraybuffer";
                 //连接成功
                 this.ws.onopen = (evt) => {
@@ -74,7 +84,8 @@
                         token: window.localStorage.getItem('panel-token'),
                         cols: this.term.cols,
                         rows: this.term.rows,
-                        host: '127.0.0.1',
+                        id: this.menu.id,
+                        passwd: this.passwd
                     }));
 
                     this.term.writeln("");

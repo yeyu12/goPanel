@@ -1,11 +1,15 @@
 package websocket
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
+	"goPanel/src/panel/common"
 	"goPanel/src/panel/constants"
+	core "goPanel/src/panel/core/database"
 	"goPanel/src/panel/services"
+	"time"
 )
 
 type Client struct {
@@ -36,6 +40,7 @@ func NewWsShell(uid string, socket *websocket.Conn) *Client {
 func (c *Client) Read() {
 	defer func() {
 		recover()
+		time.Sleep(time.Microsecond * 100)
 		WsManager.UnRegister <- c
 	}()
 
@@ -59,14 +64,9 @@ func (c *Client) Read() {
 				_ = json.Unmarshal(baseInitJson, &baseInitData)
 
 				if state, msg, code := userService.IsUserLogin(baseInitData.Token); !state {
-					ret := &Message{
-						Event: constants.WS_EVENT_ERR,
-						Data:  msg,
-						Code:  code,
-					}
-					retJson, _ := json.Marshal(ret)
+					c.wsWriteErr(code, msg)
+					log.Info(msg)
 
-					c.Send <- retJson
 					return
 				}
 
@@ -75,18 +75,36 @@ func (c *Client) Read() {
 					sshInitData := new(ShellInit)
 					_ = json.Unmarshal(baseInitJson, &sshInitData)
 
-					sh, sshChannel, err := c.wsShell.sshConn(sshInitData.Host, "yeyu", "ZpB123", 22, sshInitData.Cols, sshInitData.Rows)
+					// 查询相关数据
+					service := new(services.MachineService)
+					machineData := service.IdByDetails(core.Db, sshInitData.Id)
+					if machineData.Id == 0 {
+						c.wsWriteErr(constants.MACHINE_ID, constants.MACHINE_ID_MSG)
+						log.Info(constants.MACHINE_ID_MSG)
+
+						return
+					}
+					if sshInitData.Passwd == "" {
+						c.wsWriteErr(constants.MACHINE_PASSWD_NOT_NILL, constants.MACHINE_PASSWD_NOT_NILL_MSG)
+						log.Info(constants.MACHINE_PASSWD_NOT_NILL_MSG)
+
+						return
+					}
+
+					sDec, _ := base64.StdEncoding.DecodeString(sshInitData.Passwd)
+					passwd, err := common.RsaDecrypt(sDec, common.GetRsaFilePath()+"private.pem")
 					if err != nil {
-						ret := &Message{
-							Event: constants.WS_EVENT_ERR,
-							Data:  constants.SSH_CONNECTION_FAILED_MSG,
-							Code:  constants.SSH_CONNECTION_FAILED,
-						}
+						c.wsWriteErr(constants.MACHINE_PASSWD_DECODE_FAIL, constants.MACHINE_PASSWD_DECODE_FAIL_MSG)
+						log.Info(err)
 
-						retJson, _ := json.Marshal(ret)
-						c.Send <- retJson
+						return
+					}
 
-						log.Error(err)
+					sh, sshChannel, err := c.wsShell.sshConn(machineData.Host, machineData.User, string(passwd), machineData.Port, sshInitData.Cols, sshInitData.Rows)
+					if err != nil {
+						c.wsWriteErr(constants.SSH_CONNECTION_FAILED, constants.SSH_CONNECTION_FAILED_MSG)
+						log.Info(err)
+
 						return
 					}
 					defer func() {
@@ -141,4 +159,16 @@ func (c *Client) Write() {
 			}
 		}
 	}
+}
+
+func (c *Client) wsWriteErr(code int32, msg string) {
+	ret := &Message{
+		Event: constants.WS_EVENT_ERR,
+		Data:  msg,
+		Code:  code,
+	}
+	retJson, _ := json.Marshal(ret)
+	c.Send <- retJson
+
+	return
 }

@@ -284,7 +284,7 @@
                                 computerCache = JSON.parse(computer);
                             }
 
-                            computerCache[res.data.host + ':' + res.data.port] = res.data.passwd;
+                            computerCache[res.data.host + ':' + res.data.port.toString()] = res.data.passwd;
                             window.localStorage.setItem('panel-computer', JSON.stringify(computerCache))
                         }
 
