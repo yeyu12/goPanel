@@ -13,6 +13,7 @@ const mutations = {
         window.localStorage.setItem('panel-tag-menu', JSON.stringify(state.openTagMenu));
     },
     openTagMenuDel(state, data) {
+        let defaultTagMenuInt = parseInt(state.defaultTagMenu);
         let del = data['host'] + ":" + data['port'];
         let delIndexObj = {};
         let delIndexArr = [];
@@ -27,14 +28,10 @@ const mutations = {
             }
         }
 
-        let defaultTagMenuInt = parseInt(state.defaultTagMenu);
-
-        // 开始执行删除
+        // 开始执行删除  没有要删除的tag标签，直接执行删除
         if (!delIndexArr.length) {
-            // 没有要删除的tag标签，直接执行删除
             return;
         }
-
         if (delIndexArr[0] === defaultTagMenuInt) {
             defaultTagMenuInt -= 1;
         } else if (delIndexArr[0] < defaultTagMenuInt) {
