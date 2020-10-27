@@ -1,7 +1,8 @@
 const state = {
     MENU_SHELL_TYPE: 'shell',
     openTagMenu: [],
-    defaultTagMenu: '0'
+    defaultTagMenu: '0',
+    currentSelectMenu: {}
 };
 
 const actions = {};
@@ -78,6 +79,9 @@ const mutations = {
     upDefaultTagMenu(state, index) {
         state.defaultTagMenu = index;
         window.localStorage.setItem('panel-default-tag-menu', index);
+    },
+    currentSelectMenuEdit(state, data) {
+        state.currentSelectMenu = data
     }
 };
 

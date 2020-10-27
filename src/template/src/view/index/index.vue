@@ -70,6 +70,7 @@
                 <a class="menu-button" @click="editTree">编辑</a>
                 <a class="menu-button" @click="delTree">删除</a>
                 <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
+                <a class="menu-button" @click="addCommand" v-if="!isDir">执行命令</a>
                 <!--                <a class="menu-button" v-if="!isDir">打开桌面</a>-->
             </el-popover>
         </transition>
@@ -187,6 +188,9 @@
             },
             "$store.state.TopMenu.defaultTagMenu"(val) {
                 this.defaultTopTagMenu = this.$store.state.TopMenu.defaultTagMenu;
+            },
+            "$store.state.TopMenu.currentSelectMenu"(val) {
+                this.dirData = val;
             }
         },
         mounted() {
@@ -198,7 +202,8 @@
                 return data.name.indexOf(value) !== -1;
             },
             treeRightMenu(MouseEvent, object, node, val) {
-                localStorage.setItem('currentSelectTree', JSON.stringify(object));
+                // window.localStorage.setItem('currentSelectTree', JSON.stringify(object));
+                this.$store.commit('TopMenu/currentSelectMenuEdit', object);
                 this.menuVisible = false;
                 this.menuVisible = true;
                 var menu = document.querySelector('.menu');
@@ -217,7 +222,7 @@
             },
             openShell() {
                 // 设置顶部菜单保存vuex中
-                let menuData = JSON.parse(window.localStorage.getItem('currentSelectTree'));
+                let menuData = this.dirData;
                 menuData['menu_type'] = this.$store.state.TopMenu.MENU_SHELL_TYPE;
                 this.$store.commit('TopMenu/openTagMenuPush', menuData);
             },
@@ -297,11 +302,9 @@
                 })
             },
             createComputer() {
-                this.dirData = JSON.parse(window.localStorage.getItem('currentSelectTree'));
                 this.isAddComputer = true;
             },
             editTree() {
-                this.dirData = JSON.parse(window.localStorage.getItem('currentSelectTree'));
                 if (this.dirData.is_dir) {
                     this.form.dir = {
                         id: this.dirData.id,
@@ -327,40 +330,46 @@
                 }
             },
             delTree() {
-                this.dirData = JSON.parse(window.localStorage.getItem('currentSelectTree'));
-                let req = {};
-                if (this.dirData.is_dir) {
-                    req = {
-                        id: this.dirData.id,
-                        flag: ADD_MACHINE_DIR
-                    }
-                } else {
-                    req = {
-                        id: this.dirData.id,
-                        flag: ADD_MACHINE_COMPUTER
-                    }
-                }
-
-                del(req).then(res => {
-                    if (res.code === 200) {
-                        this.$message({
-                            message: res.message,
-                            type: 'success'
-                        });
-
-                        if (!this.dirData.is_dir) {
-                            // 删除已打开的tag标签
-                            this.$store.commit("TopMenu/openTagMenuDel", this.dirData);
-                            this.$store.commit("LocalStorage/delComputer", this.dirData);
+                this.$confirm('此操作将永久删除, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let req = {};
+                    if (this.dirData.is_dir) {
+                        req = {
+                            id: this.dirData.id,
+                            flag: ADD_MACHINE_DIR
                         }
-                        this.getMachineData()
                     } else {
-                        this.$message.error(res.message);
+                        req = {
+                            id: this.dirData.id,
+                            flag: ADD_MACHINE_COMPUTER
+                        }
                     }
-                }).catch(err => {
-                    console.log(err);
-                    this.$message.error('服务器出小差！');
-                })
+
+                    del(req).then(res => {
+                        if (res.code === 200) {
+                            this.$message({
+                                message: res.message,
+                                type: 'success'
+                            });
+
+                            if (!this.dirData.is_dir) {
+                                // 删除已打开的tag标签
+                                this.$store.commit("TopMenu/openTagMenuDel", this.dirData);
+                                this.$store.commit("LocalStorage/delComputer", this.dirData);
+                            }
+                            this.getMachineData()
+                        } else {
+                            this.$message.error(res.message);
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                        this.$message.error('服务器出小差！');
+                    })
+                }).catch(() => {
+                });
             },
             clickTagMenu(tag, event) {
                 this.$store.commit("TopMenu/upDefaultTagMenu", tag.name);
@@ -376,6 +385,10 @@
                 localStorage.removeItem('panel-userinfo');
 
                 this.$router.push('/login')
+            },
+            addCommand() {
+                console.log(this.dirData);
+                // this.isAddComputer = true;
             }
         },
         computed: {

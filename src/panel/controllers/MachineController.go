@@ -108,6 +108,14 @@ func (c *MachineController) Del(g *gin.Context) {
 
 	switch delVail.Flag {
 	case CREATE_DIR:
+		data := c.machineService.Get(core.Db, map[string]interface{}{
+			"machine_group_id": delVail.Id,
+		})
+		if len(*data) > 0 {
+			common.RetJson(g, constants.MACHINE_DIR_NOT_NULL_FAIL, constants.MACHINE_DIR_NOT_NULL_MSG, "")
+			return
+		}
+
 		_, err := c.machineGroupService.Del(core.Db, delVail.Id)
 		if err != nil {
 			common.RetJson(g, constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, "")
