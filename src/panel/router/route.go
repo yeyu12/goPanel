@@ -47,4 +47,9 @@ func (r *Route) loadRoute() {
 		routeMachine.POST("/save", controllers.NewMachineController().Save)
 		routeMachine.POST("/del", controllers.NewMachineController().Del)
 	}
+
+	routeCommand := r.g.Group("/command")
+	{
+		routeCommand.POST("/addOne", controllers.NewCommandController().AddOne)
+	}
 }
