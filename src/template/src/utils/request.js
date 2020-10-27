@@ -7,7 +7,7 @@ let loginStatus = [3000, 4003, 4004];
 // 添加请求拦截器
 axiosObj.interceptors.request.use(
     config => {
-        config.url = "http://127.0.0.1:10010" + config.url;
+        config.url = "http://" + window.location.hostname + ":10010" + config.url;
         config.headers = {
             ...config.headers,
             'Account-Token': window.localStorage.getItem('panel-token') || '',

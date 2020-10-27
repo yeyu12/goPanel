@@ -196,7 +196,6 @@ func (c *MachineController) saveComputer(g *gin.Context, inputData []byte) (int3
 
 	data := c.machineService.IdByDetails(core.Db, addComputerData.Id)
 	dataMap := common.StructToJson(data)
-	log.Error(addComputerVail.Passwd)
 	encodePasswd, err := common.RsaEncrypt([]byte(addComputerVail.Passwd), common.GetRsaFilePath()+"public.pem")
 	if err != nil {
 		log.Error(err)

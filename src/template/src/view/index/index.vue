@@ -190,7 +190,7 @@
             }
         },
         mounted() {
-            this.getMachineData()
+            this.getMachineData();
         },
         methods: {
             filterNode(value, data) {
@@ -351,12 +351,14 @@
                         if (!this.dirData.is_dir) {
                             // 删除已打开的tag标签
                             this.$store.commit("TopMenu/openTagMenuDel", this.dirData);
+                            this.$store.commit("LocalStorage/delComputer", this.dirData);
                         }
                         this.getMachineData()
                     } else {
                         this.$message.error(res.message);
                     }
                 }).catch(err => {
+                    console.log(err);
                     this.$message.error('服务器出小差！');
                 })
             },
