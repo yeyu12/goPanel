@@ -185,6 +185,10 @@ func (c *MachineController) saveComputer(g *gin.Context, inputData []byte) (int3
 	var addComputerData models.MachineModel
 	c.JsonPost(&addComputerData, inputData)
 
+	if addComputerData.Name == "" {
+		addComputerData.Name = addComputerData.Host
+	}
+
 	if addComputerData.Id == int64(0) {
 		addComputerData.CreateTime = time.Now()
 		addComputerData.CreateUid = userinfo.Id

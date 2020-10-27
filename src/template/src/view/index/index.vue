@@ -48,10 +48,9 @@
                         <el-dropdown-menu slot="dropdown">
                             <!--                            <el-dropdown-item icon="el-icon-plus">黄金糕</el-dropdown-item>-->
                             <!--                            <el-dropdown-item icon="el-icon-circle-plus">狮子头</el-dropdown-item>-->
-                            <!--                            <el-dropdown-item icon="el-icon-circle-plus-outline">螺蛳粉</el-dropdown-item>-->
-                            <!--                            <el-dropdown-item icon="el-icon-check">双皮奶</el-dropdown-item>-->
-                            <!--                            <el-dropdown-item icon="el-icon-switch-button" command="loginout" divided>退出登录-->
-                            <el-dropdown-item icon="el-icon-switch-button" command="loginout">退出登录
+                            <el-dropdown-item icon="el-icon-check">批量执行命令</el-dropdown-item>
+                            <el-dropdown-item icon="el-icon-circle-plus-outline">执行日志</el-dropdown-item>
+                            <el-dropdown-item icon="el-icon-switch-button" command="loginout" divided>退出登录
                             </el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
@@ -59,6 +58,7 @@
             </el-container>
         </el-container>
 
+        <!-- 右键菜单-->
         <transition name="el-fade-in-linear">
             <el-popover
                     popper-class="menu"
@@ -70,44 +70,46 @@
                 <a class="menu-button" @click="editTree">编辑</a>
                 <a class="menu-button" @click="delTree">删除</a>
                 <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
-                <a class="menu-button" @click="addCommand" v-if="!isDir">执行命令</a>
+                <a class="menu-button" @click="showAddCommand" v-if="!isDir">执行命令</a>
                 <!--                <a class="menu-button" v-if="!isDir">打开桌面</a>-->
             </el-popover>
         </transition>
 
+        <!-- 添加目录-->
         <el-dialog
                 title="添加/修改目录"
                 :visible.sync="isAddDir"
                 width="500px"
                 center>
-            <el-form :model="form.dir" label-width="100px">
-                <el-form-item label="目录名称：">
+            <el-form :model="form.dir" label-width="100px" ref="dir" :rules="addDirVail">
+                <el-form-item label="目录名称：" prop="name">
                     <el-input v-model="form.dir.name" placeholder="请输入目录名"></el-input>
                 </el-form-item>
             </el-form>
 
             <span slot="footer" class="dialog-footer">
                 <el-button @click="isAddDir = false">取 消</el-button>
-                <el-button type="primary" @click="save(1)">确 定</el-button>
+                <el-button type="primary" @click="save(1, 'dir')">确 定</el-button>
             </span>
         </el-dialog>
 
+        <!-- 添加主机-->
         <el-dialog
                 title="添加/修改主机"
                 :visible.sync="isAddComputer"
                 width="500px"
                 center>
-            <el-form :model="form.computer" label-width="80px">
-                <el-form-item label="名称：">
+            <el-form :model="form.computer" label-width="80px" ref="computer" :rules="addComputerVail">
+                <el-form-item label="名称：" prop="name">
                     <el-input v-model="form.computer.name" placeholder="请输入主机名称"></el-input>
                 </el-form-item>
-                <el-form-item label="地址：">
+                <el-form-item label="地址：" prop="host">
                     <el-input v-model="form.computer.host" placeholder="请输入主机地址"></el-input>
                 </el-form-item>
                 <el-form-item label="用户名：">
                     <el-input v-model="form.computer.user" placeholder="请输入主机用户名，默认root"></el-input>
                 </el-form-item>
-                <el-form-item label="密码：">
+                <el-form-item label="密码：" prop="passwd">
                     <el-input v-model="form.computer.passwd" type="password" placeholder="请输入主机密码"></el-input>
                 </el-form-item>
                 <el-form-item label="端口：">
@@ -117,14 +119,40 @@
 
             <span slot="footer" class="dialog-footer">
                 <el-button @click="isAddComputer = false">取 消</el-button>
-                <el-button type="primary" @click="save(2)">确 定</el-button>
+                <el-button type="primary" @click="save(2, 'computer')">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 执行命令-->
+        <el-dialog title="执行命令" :visible.sync="isShowAddCommand" width="800px" center>
+            <el-form :model="form.command" :inline="true" label-width="auto" ref="computer" :show-message="false">
+                <el-form-item label="命令：" prop="command" required>
+                    <el-input type="textarea" :rows="20" style="width: 600px" v-model="form.command.command"
+                              placeholder="请输入要执行的命令" clearable></el-input>
+                </el-form-item>
+                <el-form-item label="执行方式：" required>
+                    <el-radio-group v-model="form.command.flag">
+                        <el-radio label="1">立即执行</el-radio>
+                        <el-radio label="2">定时执行</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item label="执行时间：" v-if="isShowAddCommandTime" required>
+                    <el-date-picker
+                            v-model="form.command.execTime"
+                            type="datetime"
+                            placeholder="选择执行日期时间">
+                    </el-date-picker>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="isShowAddCommand = false">取 消</el-button>
+                <el-button type="primary" @click="isShowAddCommand = false">确 定</el-button>
             </span>
         </el-dialog>
     </div>
 </template>
 
 <script>
-    /*eslint no-unused-vars: ["error", { "args": "none" }]*/
     import '@/static/css/index.css';
     import {del, list, save} from '../../api/machine';
     import shell from '../shell/index';
@@ -132,9 +160,19 @@
     const ADD_MACHINE_DIR = 1;
     const ADD_MACHINE_COMPUTER = 2;
 
+    /*eslint no-unused-vars: ["error", { "args": "none" }]*/
     export default {
         name: "Index",
         data() {
+            var validip = (rule, value, callback) => { // eslint-disable-line no-unused-vars
+                const reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;
+                if (reg.test(value)) {
+                    callback();
+                } else {
+                    return callback(new Error('输入格式不合法！'));
+                }
+            };
+
             return {
                 form: {
                     dir: {
@@ -150,6 +188,11 @@
                         port: '',
                         machine_group_id: 0,
                         flag: ADD_MACHINE_COMPUTER
+                    },
+                    command: {
+                        command: '',
+                        flag: '1',
+                        execTime: '',
                     }
                 },
                 isAddComputer: false,
@@ -161,10 +204,22 @@
                 isDir: false,
                 dirData: {},
                 defaultTopTagMenu: '0',
+                isShowAddCommand: false,
+                isShowAddCommandTime: false,
                 defaultProps: {
                     children: 'children',
                     label: 'name'
                 },
+                addDirVail: {
+                    name: [{required: true, message: '名称不能为空'}]
+                },
+                addComputerVail: {
+                    host: [
+                        {required: true, message: '地址不能为空', trigger: 'blur'},
+                        {validator: validip, trigger: 'blur'}
+                    ],
+                    passwd: [{required: true, message: '密码不能为空'}]
+                }
             }
         },
         created() {
@@ -191,6 +246,11 @@
             },
             "$store.state.TopMenu.currentSelectMenu"(val) {
                 this.dirData = val;
+            },
+            "form.command.flag"(val) {
+                if (val === '2') {
+                    this.isShowAddCommandTime = true
+                }
             }
         },
         mounted() {
@@ -260,46 +320,53 @@
                     this.$message.error('服务器出小差！');
                 })
             },
-            save(flag) {
+            save(flag, formName) {
                 let saveData = {};
-                if (flag === ADD_MACHINE_DIR) {
-                    saveData = this.form.dir;
-                    this.isAddDir = false;
-                } else if (flag === ADD_MACHINE_COMPUTER) {
-                    saveData = this.form.computer;
-                    saveData.machine_group_id = this.dirData.is_dir ? this.dirData.is_dir : 0;
-                    saveData.port = saveData.port ? parseInt(saveData.port) : 22;
-                    saveData.user = saveData.user ? saveData.user : 'root';
-                    this.isAddComputer = false;
-                }
 
-                this.dirData = {};
-
-                save(saveData).then(res => {
-                    if (res.code === 200) {
-                        this.$message({
-                            message: res.message,
-                            type: 'success'
-                        });
-
-                        if (res.data.is_dir === undefined) {
-                            let computerCache = {};
-                            let computer = window.localStorage.getItem('panel-computer');
-                            if (computer) {
-                                computerCache = JSON.parse(computer);
-                            }
-
-                            computerCache[res.data.host + ':' + res.data.port.toString()] = res.data.passwd;
-                            window.localStorage.setItem('panel-computer', JSON.stringify(computerCache))
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        if (flag === ADD_MACHINE_DIR) {
+                            saveData = this.form.dir;
+                            this.isAddDir = false;
+                        } else if (flag === ADD_MACHINE_COMPUTER) {
+                            saveData = this.form.computer;
+                            saveData.machine_group_id = this.dirData.is_dir ? this.dirData.is_dir : 0;
+                            saveData.port = saveData.port ? parseInt(saveData.port) : 22;
+                            saveData.user = saveData.user ? saveData.user : 'root';
+                            this.isAddComputer = false;
                         }
 
-                        this.getMachineData()
+                        this.dirData = {};
+
+                        save(saveData).then(res => {
+                            if (res.code === 200) {
+                                this.$message({
+                                    message: res.message,
+                                    type: 'success'
+                                });
+
+                                if (res.data.is_dir === undefined) {
+                                    let computerCache = {};
+                                    let computer = window.localStorage.getItem('panel-computer');
+                                    if (computer) {
+                                        computerCache = JSON.parse(computer);
+                                    }
+
+                                    computerCache[res.data.host + ':' + res.data.port.toString()] = res.data.passwd;
+                                    window.localStorage.setItem('panel-computer', JSON.stringify(computerCache))
+                                }
+
+                                this.getMachineData()
+                            } else {
+                                this.$message.error(res.message);
+                            }
+                        }).catch(err => {
+                            this.$message.error('服务器出小差！');
+                        })
                     } else {
-                        this.$message.error(res.message);
+                        return false;
                     }
-                }).catch(err => {
-                    this.$message.error('服务器出小差！');
-                })
+                });
             },
             createComputer() {
                 this.isAddComputer = true;
@@ -385,6 +452,9 @@
                 localStorage.removeItem('panel-userinfo');
 
                 this.$router.push('/login')
+            },
+            showAddCommand() {
+                this.isShowAddCommand = true;
             },
             addCommand() {
                 console.log(this.dirData);
