@@ -250,6 +250,8 @@
             "form.command.flag"(val) {
                 if (val === '2') {
                     this.isShowAddCommandTime = true
+                } else {
+                    this.isShowAddCommandTime = false;
                 }
             }
         },

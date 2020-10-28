@@ -31,5 +31,6 @@ func createTable() {
 		new(models.UserModel),
 		new(models.MachineModel),
 		new(models.MachineGroupModel),
+		new(models.CommandModel),
 	)
 }
