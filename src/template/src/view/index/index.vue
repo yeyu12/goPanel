@@ -46,10 +46,8 @@
                         <i class="el-icon-setting"></i>
 
                         <el-dropdown-menu slot="dropdown">
-                            <!--                            <el-dropdown-item icon="el-icon-plus">黄金糕</el-dropdown-item>-->
-                            <!--                            <el-dropdown-item icon="el-icon-circle-plus">狮子头</el-dropdown-item>-->
-                            <el-dropdown-item icon="el-icon-check">批量执行命令</el-dropdown-item>
-                            <el-dropdown-item icon="el-icon-circle-plus-outline">执行日志</el-dropdown-item>
+                            <el-dropdown-item icon="el-icon-c-scale-to-original" command="showAddCommands">批量执行命令</el-dropdown-item>
+                            <el-dropdown-item icon="el-icon-coin">执行日志</el-dropdown-item>
                             <el-dropdown-item icon="el-icon-switch-button" command="loginout" divided>退出登录
                             </el-dropdown-item>
                         </el-dropdown-menu>
@@ -149,12 +147,51 @@
                 <el-button type="primary" @click="isShowAddCommand = false">确 定</el-button>
             </span>
         </el-dialog>
+
+        <!--        批量执行命令-->
+        <!--        抽屉选择主机-->
+        <el-drawer
+                direction="rtl"
+                size="500px"
+                :visible.sync="isShowAddCommands"
+                :show-close="false"
+                id="panel-commands-drawer"
+        >
+            <span slot="title">批量执行命令，选择主机</span>
+            <el-divider></el-divider>
+
+            <el-table :data="computerData" stripe>
+                <el-table-column type="selection" :selectable="addCommandsIsCheckout"></el-table-column>
+                <el-table-column property="name" label="名称"></el-table-column>
+                <el-table-column property="host" label="host"></el-table-column>
+                <el-table-column
+                        prop="is_passwd"
+                        label="密码"
+                        width="100"
+                        :filters="[{ text: '有密码', value: true }, { text: '无密码', value: false }]"
+                        :filter-method="addCommandsFilterTag"
+                        filter-placement="bottom-end">
+                    <template slot-scope="scope">
+                        <el-tag
+                                :type="scope.row.is_passwd ? '' : 'danger'"
+                                disable-transitions>
+                            <template v-if="scope.row.is_passwd">
+                                有密码
+                            </template>
+                            <template v-else>
+                                无密码
+                            </template>
+                        </el-tag>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-drawer>
     </div>
 </template>
 
 <script>
     import '@/static/css/index.css';
-    import {del, list, save} from '../../api/machine';
+    import {del, list, save, getAll} from '../../api/machine';
     import shell from '../shell/index';
 
     const ADD_MACHINE_DIR = 1;
@@ -205,6 +242,7 @@
                 dirData: {},
                 defaultTopTagMenu: '0',
                 isShowAddCommand: false,
+                isShowAddCommands: false,
                 isShowAddCommandTime: false,
                 defaultProps: {
                     children: 'children',
@@ -219,7 +257,8 @@
                         {validator: validip, trigger: 'blur'}
                     ],
                     passwd: [{required: true, message: '密码不能为空'}]
-                }
+                },
+                computerData: []
             }
         },
         created() {
@@ -421,7 +460,6 @@
                             this.$message.error(res.message);
                         }
                     }).catch(err => {
-                        console.log(err);
                         this.$message.error('服务器出小差！');
                     })
                 }).catch(() => {
@@ -444,13 +482,35 @@
             },
             showAddCommand() {
                 if (!this.dirData['is_dir']) {
-                    if (!this.$store.state.LocalStorage.computerData[this.dirData['host'] + ':' + this.dirData['port']]) {
+                    if (!this.$store.state.LocalStorage.computerData[this.dirData.host + ':' + this.dirData.port]) {
                         this.$message('请编辑你选择的主机的密码！否则无法执行命令。');
                         return;
                     }
 
                     this.isShowAddCommand = true;
                 }
+            },
+            showAddCommands() {
+                this.isShowAddCommands = true;
+
+                getAll().then(res => {
+                    let data = res.data;
+                    for (let i in data) {
+                        data[i]['is_passwd'] = false;
+                        let passwd = this.$store.state.LocalStorage.computerData[data[i].host + ':' + data[i].port];
+                        passwd && (data[i]['is_passwd'] = true);
+                    }
+
+                    this.computerData = data
+                }).catch(err => {
+                    this.$message.error('服务器出小差！');
+                })
+            },
+            addCommandsFilterTag(value, row) {
+                return row.is_passwd === value;
+            },
+            addCommandsIsCheckout(row, index) {
+                return row.is_passwd;
             },
             addCommand() {
                 console.log(this.dirData);

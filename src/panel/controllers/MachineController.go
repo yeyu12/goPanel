@@ -58,6 +58,13 @@ func (c *MachineController) List(g *gin.Context) {
 	return
 }
 
+func (c *MachineController) GetMachineAll(g *gin.Context) {
+	machineData := c.machineService.GetAll(core.Db)
+	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, machineData)
+
+	return
+}
+
 func (c *MachineController) Save(g *gin.Context) {
 	inputData, _ := ioutil.ReadAll(g.Request.Body)
 	var addVail validations.MachineAdd

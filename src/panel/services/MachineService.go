@@ -13,6 +13,10 @@ func (s *MachineService) Get(db *xorm.Engine, where map[string]interface{}) *[]m
 	return s.machineModel.Get(db, where)
 }
 
+func (s *MachineService) GetAll(db *xorm.Engine) *[]models.MachineModel {
+	return s.machineModel.GetAll(db)
+}
+
 func (s *MachineService) Add(db *xorm.Engine, data *models.MachineModel) (int64, error) {
 	return s.machineModel.Add(db, data)
 }

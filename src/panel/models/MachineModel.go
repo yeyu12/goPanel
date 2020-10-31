@@ -32,6 +32,13 @@ func (m *MachineModel) Get(db *xorm.Engine, where map[string]interface{}) *[]Mac
 	return &data
 }
 
+func (m *MachineModel) GetAll(db *xorm.Engine) *[]MachineModel {
+	var data []MachineModel
+	db.Find(&data)
+
+	return &data
+}
+
 func (m *MachineModel) Add(db *xorm.Engine, data *MachineModel) (int64, error) {
 	id, err := db.InsertOne(data)
 

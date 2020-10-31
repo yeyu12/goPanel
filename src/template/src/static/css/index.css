@@ -115,3 +115,15 @@
     border: 0 !important;
     border-bottom: 1px #E4E7ED solid !important;
 }
+
+#panel-commands-drawer .el-drawer__header {
+    margin-bottom: 0 !important;
+}
+
+#panel-commands-drawer .el-drawer__header span {
+    font-size: 16px;
+}
+
+.el-drawer:focus {
+    outline: 0;
+}

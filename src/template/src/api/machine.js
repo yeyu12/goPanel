@@ -6,6 +6,12 @@ export function list() {
     })
 }
 
+export function getAll() {
+    return get("/machine/getAll").then((data) => {
+        return data.data;
+    })
+}
+
 export function save(params) {
     return post("/machine/save", params).then((data) => {
         return data.data;
