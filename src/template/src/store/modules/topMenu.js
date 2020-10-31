@@ -8,6 +8,13 @@ const state = {
 const actions = {};
 
 const mutations = {
+    init(state) {
+        let menuData = JSON.parse(window.localStorage.getItem('panel-tag-menu'));
+        menuData && mutations.openTagMenu(state, menuData)
+
+        let defaultMenuIndex = window.localStorage.getItem('panel-default-tag-menu');
+        defaultMenuIndex && mutations.upDefaultTagMenu(state, defaultMenuIndex)
+    },
     openTagMenuPush(state, data) {
         state.openTagMenu.push(data);
         mutations.upDefaultTagMenu(state, (state.openTagMenu.length - 1).toString());

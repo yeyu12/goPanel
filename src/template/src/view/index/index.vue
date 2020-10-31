@@ -227,15 +227,11 @@
                 this.$router.push('/login')
             }
 
-            let menuData = JSON.parse(window.localStorage.getItem('panel-tag-menu'));
-            menuData && this.$store.commit("TopMenu/openTagMenu", menuData);
+            // 初始化操作
+            this.$store.commit('LocalStorage/init')
+            this.$store.commit('TopMenu/init')
 
-            let defaultMenuIndex = window.localStorage.getItem('panel-default-tag-menu');
-
-            if (defaultMenuIndex !== undefined) {
-                this.$store.commit("TopMenu/upDefaultTagMenu", defaultMenuIndex);
-                this.defaultTopTagMenu = defaultMenuIndex;
-            }
+            this.defaultTopTagMenu = this.$store.state.TopMenu.defaultTagMenu;
         },
         watch: {
             search(val) {
@@ -347,22 +343,13 @@
                                     type: 'success'
                                 });
 
-                                if (res.data.is_dir === undefined) {
-                                    let computerCache = {};
-                                    let computer = window.localStorage.getItem('panel-computer');
-                                    if (computer) {
-                                        computerCache = JSON.parse(computer);
-                                    }
-
-                                    computerCache[res.data.host + ':' + res.data.port.toString()] = res.data.passwd;
-                                    window.localStorage.setItem('panel-computer', JSON.stringify(computerCache))
-                                }
-
+                                this.$store.commit("LocalStorage/pushComputerData", res.data);
                                 this.getMachineData()
                             } else {
                                 this.$message.error(res.message);
                             }
                         }).catch(err => {
+                            console.log(err)
                             this.$message.error('服务器出小差！');
                         })
                     } else {
@@ -456,11 +443,17 @@
                 this.$router.push('/login')
             },
             showAddCommand() {
-                this.isShowAddCommand = true;
+                if (!this.dirData['is_dir']) {
+                    if (!this.$store.state.LocalStorage.computerData[this.dirData['host'] + ':' + this.dirData['port']]) {
+                        this.$message('请编辑你选择的主机的密码！否则无法执行命令。');
+                        return;
+                    }
+
+                    this.isShowAddCommand = true;
+                }
             },
             addCommand() {
                 console.log(this.dirData);
-                // this.isAddComputer = true;
             }
         },
         computed: {
