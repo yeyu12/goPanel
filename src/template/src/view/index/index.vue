@@ -546,6 +546,10 @@
                 console.log(this.dirData);
             },
             treeDoubleClick(data, node) {
+                if (data.is_dir) {
+                    return;
+                }
+
                 this.treeClickCount++;
                 if (this.treeClickCount > 2) {
                     return;
