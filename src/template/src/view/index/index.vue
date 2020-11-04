@@ -70,7 +70,7 @@
                 <a class="menu-button" @click="editTree">编辑</a>
                 <a class="menu-button" @click="delTree">删除</a>
                 <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
-                <a class="menu-button" @click="showAddCommand" v-if="!isDir">执行命令</a>
+                <a class="menu-button" @click="showAddCommand(1)" v-if="!isDir">执行命令</a>
                 <!--                <a class="menu-button" v-if="!isDir">打开桌面</a>-->
             </el-popover>
         </transition>
@@ -146,7 +146,7 @@
             </el-form>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="isShowAddCommand = false">取 消</el-button>
-                <el-button type="primary" @click="isShowAddCommand = false">确 定</el-button>
+                <el-button type="primary" @click="saveCommand">确 定</el-button>
             </span>
         </el-dialog>
 
@@ -155,14 +155,14 @@
         <el-drawer
                 direction="rtl"
                 size="500px"
-                :visible.sync="isShowAddCommands"
+                :visible.sync="isShowAddCommandComputerList"
                 :show-close="false"
-                id="panel-commands-drawer"
-        >
+                id="panel-commands-drawer">
             <span slot="title">批量执行命令，选择主机</span>
             <el-divider></el-divider>
 
-            <el-table :data="computerData" stripe>
+            <el-table :data="computerData" stripe height="calc(100vh - 150px)" ref="multipleTable"
+                      @selection-change="handleSelectionTableChange">
                 <el-table-column type="selection" :selectable="addCommandsIsCheckout"></el-table-column>
                 <el-table-column property="name" label="名称"></el-table-column>
                 <el-table-column property="host" label="host"></el-table-column>
@@ -187,6 +187,11 @@
                     </template>
                 </el-table-column>
             </el-table>
+
+            <el-button-group style="position:relative; right: 10px;float: right;top: 10px">
+                <el-button @click="isShowAddCommands = false">取 消</el-button>
+                <el-button type="primary" @click="showAddCommand(2)">提 交</el-button>
+            </el-button-group>
         </el-drawer>
     </div>
 </template>
@@ -194,6 +199,7 @@
 <script>
     import '@/static/css/index.css';
     import {del, getAll, list, save} from '../../api/machine';
+    import {addCommand} from '../../api/command';
     import shell from '../shell/index';
 
     const ADD_MACHINE_DIR = 1;
@@ -230,8 +236,10 @@
                     },
                     command: {
                         command: '',
-                        flag: '1',
+                        flag: '1', // 是否定时执行（1立即执行，2定时执行
                         execTime: '',
+                        isType: 1, // 执行类型（1单个执行，2批量执行
+                        ids: []
                     }
                 },
                 isAddComputer: false,
@@ -244,7 +252,7 @@
                 dirData: {},
                 defaultTopTagMenu: '0',
                 isShowAddCommand: false,
-                isShowAddCommands: false,
+                isShowAddCommandComputerList: false,
                 isShowAddCommandTime: false,
                 defaultProps: {
                     children: 'children',
@@ -262,7 +270,8 @@
                 },
                 computerData: [],
                 treeClickCount: 0,
-                timer: {}
+                timer: {},
+                multipleTableSelection: []
             }
         },
         created() {
@@ -483,18 +492,36 @@
 
                 this.$router.push('/login')
             },
-            showAddCommand() {
+            showAddCommand(isType) {
                 if (!this.dirData['is_dir']) {
-                    if (!this.$store.state.LocalStorage.computerData[this.dirData.host + ':' + this.dirData.port]) {
-                        this.$message('请编辑你选择的主机的密码！否则无法执行命令。');
-                        return;
+                    this.form.command.isType = isType;
+                    if (isType === 1) {
+                        if (!this.$store.state.LocalStorage.computerData[this.dirData.host + ':' + this.dirData.port]) {
+                            this.$message('请编辑你选择的主机的密码！否则无法执行命令。');
+                            return;
+                        }
+                    } else if (isType === 2) {
+                        if (!this.multipleTableSelection.length) {
+                            this.$message('请勾选要执行命令的主机！否则无法执行命令。');
+                            return;
+                        }
+
+                        this.isShowAddCommandComputerList = false;
+                    }
+
+                    this.form.command = {
+                        command: '',
+                        flag: this.form.command.flag,
+                        execTime: '',
+                        isType: isType,
+                        ids: []
                     }
 
                     this.isShowAddCommand = true;
                 }
             },
             showAddCommands() {
-                this.isShowAddCommands = true;
+                this.isShowAddCommandComputerList = true;
 
                 getAll().then(res => {
                     let data = res.data;
@@ -540,6 +567,33 @@
                         //双击事件
                     }
                 }, 300);
+            },
+            handleSelectionTableChange(val) {
+                this.multipleTableSelection = val;
+            },
+            saveCommand() {
+                if ((this.form.command.isType === 2) && this.multipleTableSelection.length) {
+                    for (let i in this.multipleTableSelection) {
+                        this.form.command.ids.push(this.multipleTableSelection[i]['id'])
+                    }
+                } else {
+                    this.form.command.ids = [];
+                }
+
+                addCommand(this.form.command).then(res => {
+                    if (res.code === 200) {
+                        this.$message({
+                            message: res.message,
+                            type: 'success'
+                        });
+                    } else {
+                        this.$message.error(res.message);
+                    }
+
+                    this.isShowAddCommand = false;
+                }).catch(err => {
+                    this.$message.error('服务器出小差！');
+                })
             }
         },
         computed: {

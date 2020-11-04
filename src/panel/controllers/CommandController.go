@@ -14,6 +14,6 @@ func NewCommandController() *CommandController {
 	return &CommandController{}
 }
 
-func (c *CommandController) AddOne(g *gin.Context) {
+func (c *CommandController) Add(g *gin.Context) {
 	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, "")
 }

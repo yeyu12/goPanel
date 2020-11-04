@@ -51,6 +51,6 @@ func (r *Route) loadRoute() {
 
 	routeCommand := r.g.Group("/command")
 	{
-		routeCommand.POST("/addOne", controllers.NewCommandController().AddOne)
+		routeCommand.POST("/add", controllers.NewCommandController().Add)
 	}
 }
