@@ -26,6 +26,7 @@
                             draggable
                             @node-contextmenu="treeRightMenu"
                             default-expand-all
+                            @node-click="treeDoubleClick"
                     >
                     </el-tree>
                 </div>
@@ -46,7 +47,8 @@
                         <i class="el-icon-setting"></i>
 
                         <el-dropdown-menu slot="dropdown">
-                            <el-dropdown-item icon="el-icon-c-scale-to-original" command="showAddCommands">批量执行命令</el-dropdown-item>
+                            <el-dropdown-item icon="el-icon-c-scale-to-original" command="showAddCommands">批量执行命令
+                            </el-dropdown-item>
                             <el-dropdown-item icon="el-icon-coin">执行日志</el-dropdown-item>
                             <el-dropdown-item icon="el-icon-switch-button" command="loginout" divided>退出登录
                             </el-dropdown-item>
@@ -191,7 +193,7 @@
 
 <script>
     import '@/static/css/index.css';
-    import {del, list, save, getAll} from '../../api/machine';
+    import {del, getAll, list, save} from '../../api/machine';
     import shell from '../shell/index';
 
     const ADD_MACHINE_DIR = 1;
@@ -258,7 +260,9 @@
                     ],
                     passwd: [{required: true, message: '密码不能为空'}]
                 },
-                computerData: []
+                computerData: [],
+                treeClickCount: 0,
+                timer: {}
             }
         },
         created() {
@@ -298,9 +302,8 @@
                 if (!value) return true;
                 return data.name.indexOf(value) !== -1;
             },
-            treeRightMenu(MouseEvent, object, node, val) {
-                // window.localStorage.setItem('currentSelectTree', JSON.stringify(object));
-                this.$store.commit('TopMenu/currentSelectMenuEdit', object);
+            treeRightMenu(MouseEvent, data, node, val) {
+                this.$store.commit('TopMenu/currentSelectMenuEdit', data);
                 this.menuVisible = false;
                 this.menuVisible = true;
                 var menu = document.querySelector('.menu');
@@ -308,7 +311,7 @@
                 document.addEventListener('click', this.clearEventRightMenu);
                 menu.style.top = MouseEvent.clientY - 10 + 'px';
 
-                if (object.is_dir) {
+                if (data.is_dir) {
                     this.isDir = true;
                 } else {
                     this.isDir = false;
@@ -514,6 +517,29 @@
             },
             addCommand() {
                 console.log(this.dirData);
+            },
+            treeDoubleClick(data, node) {
+                this.treeClickCount++;
+                if (this.treeClickCount > 2) {
+                    return;
+                }
+
+                this.$store.commit('TopMenu/currentSelectMenuEdit', data);
+
+                //计时器,计算300毫秒为单位,可自行修改
+                this.timer = window.setTimeout(() => {
+                    if (this.treeClickCount === 2) {
+                        //把次数归零
+                        this.treeClickCount = 0;
+
+                        //单击事件处理
+                        this.openShell()
+                    } else if (this.treeClickCount > 2) {
+                        //把次数归零
+                        this.treeClickCount = 0;
+                        //双击事件
+                    }
+                }, 300);
             }
         },
         computed: {
@@ -523,6 +549,9 @@
         },
         components: {
             shell
+        },
+        destroyed() {
+            clearTimeout(this.timer);
         }
     }
 </script>
