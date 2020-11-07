@@ -277,7 +277,7 @@
             }
         },
         created() {
-            if (!localStorage.getItem('panel-token')) {
+            if (!localStorage.getItem('gps-token')) {
                 this.$router.push('/login')
             }
 
@@ -489,8 +489,8 @@
                 eval("this." + command + "()")
             },
             loginout() {
-                sessionStorage.removeItem('panel-token');
-                sessionStorage.removeItem('panel-userinfo');
+                sessionStorage.removeItem('gps-token');
+                sessionStorage.removeItem('gps-userinfo');
 
                 this.$router.push('/login')
             },

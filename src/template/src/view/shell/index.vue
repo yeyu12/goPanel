@@ -51,7 +51,7 @@
             this.term.focus();
             this.fitAddon.fit();
 
-            let computer = JSON.parse(window.localStorage.getItem('panel-computer'));
+            let computer = JSON.parse(window.localStorage.getItem('gps-computer'));
             if (computer) {
                 this.passwd = computer[this.menu['host'] + ':' + this.menu['port']];
                 this.connWebsocket();
@@ -81,7 +81,7 @@
                     }
 
                     this.ws.send(this.formatWs('init', {
-                        token: window.sessionStorage.getItem('panel-token'),
+                        token: window.sessionStorage.getItem('gps-token'),
                         cols: this.term.cols,
                         rows: this.term.rows,
                         id: this.menu.id,

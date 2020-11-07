@@ -9,16 +9,16 @@ const actions = {};
 
 const mutations = {
     init(state) {
-        let menuData = JSON.parse(window.localStorage.getItem('panel-tag-menu'));
+        let menuData = JSON.parse(window.localStorage.getItem('gps-tag-menu'));
         menuData && mutations.openTagMenu(state, menuData)
 
-        let defaultMenuIndex = window.localStorage.getItem('panel-default-tag-menu');
+        let defaultMenuIndex = window.localStorage.getItem('gps-default-tag-menu');
         defaultMenuIndex && mutations.upDefaultTagMenu(state, defaultMenuIndex)
     },
     openTagMenuPush(state, data) {
         state.openTagMenu.push(data);
         mutations.upDefaultTagMenu(state, (state.openTagMenu.length - 1).toString());
-        window.localStorage.setItem('panel-tag-menu', JSON.stringify(state.openTagMenu));
+        window.localStorage.setItem('gps-tag-menu', JSON.stringify(state.openTagMenu));
     },
     openTagMenuDel(state, data) {
         let defaultTagMenuInt = parseInt(state.defaultTagMenu);
@@ -63,11 +63,11 @@ const mutations = {
         });
 
         mutations.upDefaultTagMenu(state, defaultTagMenuInt.toString());
-        window.localStorage.setItem('panel-tag-menu', JSON.stringify(state.openTagMenu));
+        window.localStorage.setItem('gps-tag-menu', JSON.stringify(state.openTagMenu));
     },
     openTagMenuClear(state) {
         state.openTagMenu = [];
-        window.localStorage.removeItem('panel-tag-menu');
+        window.localStorage.removeItem('gps-tag-menu');
     },
     openTagMenu(state, data) {
         state.openTagMenu = data;
@@ -81,11 +81,11 @@ const mutations = {
         }
 
         mutations.upDefaultTagMenu(state, intDefaultTagMenu.toString());
-        window.localStorage.setItem('panel-tag-menu', JSON.stringify(state.openTagMenu));
+        window.localStorage.setItem('gps-tag-menu', JSON.stringify(state.openTagMenu));
     },
     upDefaultTagMenu(state, index) {
         state.defaultTagMenu = index;
-        window.localStorage.setItem('panel-default-tag-menu', index);
+        window.localStorage.setItem('gps-default-tag-menu', index);
     },
     currentSelectMenuEdit(state, data) {
         state.currentSelectMenu = data
