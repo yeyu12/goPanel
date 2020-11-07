@@ -138,8 +138,9 @@
                 </el-form-item>
                 <el-form-item label="执行时间：" v-if="isShowAddCommandTime" required>
                     <el-date-picker
-                            v-model="form.command.execTime"
+                            v-model="form.command.plan_exec_time"
                             type="datetime"
+                            value-format="yyyy-MM-dd HH:mm:ss"
                             placeholder="选择执行日期时间">
                     </el-date-picker>
                 </el-form-item>
@@ -237,9 +238,10 @@
                     command: {
                         command: '',
                         flag: '1', // 是否定时执行（1立即执行，2定时执行
-                        execTime: '',
-                        isType: 1, // 执行类型（1单个执行，2批量执行
-                        ids: []
+                        plan_exec_time: '',
+                        is_type: 1, // 执行类型（1单个执行，2批量执行
+                        ids: [],
+                        passwd: {}
                     }
                 },
                 isAddComputer: false,
@@ -305,6 +307,7 @@
         },
         mounted() {
             this.getMachineData();
+            this.getComputerAll();
         },
         methods: {
             filterNode(value, data) {
@@ -394,13 +397,12 @@
                                     type: 'success'
                                 });
 
-                                this.$store.commit("LocalStorage/pushComputerData", res.data);
+                                this.$store.commit("LocalStorage/pushComputerPasswdData", res.data);
                                 this.getMachineData()
                             } else {
                                 this.$message.error(res.message);
                             }
                         }).catch(err => {
-                            console.log(err)
                             this.$message.error('服务器出小差！');
                         })
                     } else {
@@ -465,7 +467,7 @@
                             if (!this.dirData.is_dir) {
                                 // 删除已打开的tag标签
                                 this.$store.commit("TopMenu/openTagMenuDel", this.dirData);
-                                this.$store.commit("LocalStorage/delComputer", this.dirData);
+                                this.$store.commit("LocalStorage/delComputerPasswd", this.dirData);
                             }
                             this.getMachineData()
                         } else {
@@ -487,16 +489,16 @@
                 eval("this." + command + "()")
             },
             loginout() {
-                localStorage.removeItem('panel-token');
-                localStorage.removeItem('panel-userinfo');
+                sessionStorage.removeItem('panel-token');
+                sessionStorage.removeItem('panel-userinfo');
 
                 this.$router.push('/login')
             },
             showAddCommand(isType) {
                 if (!this.dirData['is_dir']) {
-                    this.form.command.isType = isType;
+                    this.form.command.is_type = isType;
                     if (isType === 1) {
-                        if (!this.$store.state.LocalStorage.computerData[this.dirData.host + ':' + this.dirData.port]) {
+                        if (!this.$store.state.LocalStorage.computerPasswdData[this.dirData.host + ':' + this.dirData.port]) {
                             this.$message('请编辑你选择的主机的密码！否则无法执行命令。');
                             return;
                         }
@@ -511,10 +513,11 @@
 
                     this.form.command = {
                         command: '',
-                        flag: this.form.command.flag,
-                        execTime: '',
-                        isType: isType,
-                        ids: []
+                        flag: '1',
+                        plan_exec_time: '',
+                        is_type: isType,
+                        ids: [],
+                        passwd: {}
                     }
 
                     this.isShowAddCommand = true;
@@ -522,19 +525,7 @@
             },
             showAddCommands() {
                 this.isShowAddCommandComputerList = true;
-
-                getAll().then(res => {
-                    let data = res.data;
-                    for (let i in data) {
-                        data[i]['is_passwd'] = false;
-                        let passwd = this.$store.state.LocalStorage.computerData[data[i].host + ':' + data[i].port];
-                        passwd && (data[i]['is_passwd'] = true);
-                    }
-
-                    this.computerData = data
-                }).catch(err => {
-                    this.$message.error('服务器出小差！');
-                })
+                this.getComputerAll();
             },
             addCommandsFilterTag(value, row) {
                 return row.is_passwd === value;
@@ -542,8 +533,19 @@
             addCommandsIsCheckout(row, index) {
                 return row.is_passwd;
             },
-            addCommand() {
-                console.log(this.dirData);
+            getComputerAll() {
+                getAll().then(res => {
+                    let data = res.data;
+                    for (let i in data) {
+                        data[i]['is_passwd'] = false;
+                        let passwd = this.$store.state.LocalStorage.computerPasswdData[data[i].host + ':' + data[i].port];
+                        passwd && (data[i]['is_passwd'] = true);
+                    }
+
+                    this.computerData = data
+                }).catch(err => {
+                    this.$message.error('服务器出小差！');
+                })
             },
             treeDoubleClick(data, node) {
                 if (data.is_dir) {
@@ -576,12 +578,27 @@
                 this.multipleTableSelection = val;
             },
             saveCommand() {
-                if ((this.form.command.isType === 2) && this.multipleTableSelection.length) {
+                if ((this.form.command.is_type === 2) && this.multipleTableSelection.length) {
                     for (let i in this.multipleTableSelection) {
                         this.form.command.ids.push(this.multipleTableSelection[i]['id'])
                     }
                 } else {
-                    this.form.command.ids = [];
+                    this.form.command.ids = [this.dirData.id];
+                }
+
+                if (this.form.command.ids.length > 0) {
+                    let idsMap = {};
+                    for (let i in this.form.command.ids) {
+                        let idStr = this.form.command.ids[i];
+                        idsMap[idStr] = true;
+                    }
+
+                    for (let i in this.computerData) {
+                        let computerId = this.computerData[i]['id'];
+                        if (idsMap[computerId]) {
+                            this.form.command.passwd[computerId] = this.$store.state.LocalStorage.computerPasswdData[this.computerData[i].host + ':' + this.computerData[i].port]
+                        }
+                    }
                 }
 
                 addCommand(this.form.command).then(res => {

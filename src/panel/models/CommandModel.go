@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"github.com/go-xorm/xorm"
+	"time"
+)
 
 // 要执行的命令
 type CommandModel struct {
@@ -16,4 +19,8 @@ type CommandModel struct {
 	CreateTime   time.Time `json:"create_time"`
 	CreateUid    int64     `json:"create_uid"`
 	UpdateTime   time.Time `json:"update_time"`
+}
+
+func (m *CommandModel) Add(db *xorm.Engine, data *CommandModel) (int64, error) {
+	return db.InsertOne(data)
 }

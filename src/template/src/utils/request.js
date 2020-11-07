@@ -10,7 +10,7 @@ axiosObj.interceptors.request.use(
         config.url = "http://" + window.location.hostname + ":10010" + config.url;
         config.headers = {
             ...config.headers,
-            'Account-Token': window.localStorage.getItem('panel-token') || '',
+            'Account-Token': window.sessionStorage.getItem('panel-token') || '',
         };
 
         return config;

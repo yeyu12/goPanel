@@ -17,4 +17,5 @@ const (
 	SERVER_CONFIG_ERR_MSG             = "服务器配置错误！"
 	MACHINE_DIR_NOT_NULL_MSG          = "目录不为空，请先删除该目录下的主机，然后在删除！"
 	MACHINE_PASSWD_DECODE_FAIL_MSG    = "主机密码解密失败！"
+	COMMAND_EXEC_FLAG_FAIL_MSG        = "命令执行方式错误！"
 )

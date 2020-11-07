@@ -81,7 +81,7 @@
                     }
 
                     this.ws.send(this.formatWs('init', {
-                        token: window.localStorage.getItem('panel-token'),
+                        token: window.sessionStorage.getItem('panel-token'),
                         cols: this.term.cols,
                         rows: this.term.rows,
                         id: this.menu.id,

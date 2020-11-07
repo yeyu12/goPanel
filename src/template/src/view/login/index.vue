@@ -184,8 +184,8 @@
                     if (data.code !== 200) {
                         this.$message.error(data.message);
                     } else {
-                        localStorage.setItem('panel-token', data.data.token);
-                        localStorage.setItem('panel-userinfo', this.$base64.encode(JSON.stringify(data.data)));
+                        sessionStorage.setItem('panel-token', data.data.token);
+                        sessionStorage.setItem('panel-userinfo', this.$base64.encode(JSON.stringify(data.data)));
 
                         this.$router.push('/')
                     }
@@ -222,6 +222,11 @@
                         this.register();
                     }
                 }
+            }
+        },
+        created() {
+            if (sessionStorage.getItem('panel-token')) {
+                this.$router.push('/')
             }
         }
     }
