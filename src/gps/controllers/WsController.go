@@ -7,6 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/gps/services"
 	panel_ws "goPanel/src/gps/services/websocket"
+	"goPanel/src/gps/services/ws"
 	"net/http"
 	"time"
 )
@@ -51,7 +52,7 @@ func NewWsController() *WsController {
 }
 
 func (c *WsController) Ssh(g *gin.Context) {
-	ws, err := (&websocket.Upgrader{
+	wsConn, err := (&websocket.Upgrader{
 		HandshakeTimeout: time.Duration(time.Second * 30),
 		CheckOrigin: func(r *http.Request) bool {
 			return true
@@ -62,8 +63,27 @@ func (c *WsController) Ssh(g *gin.Context) {
 		return
 	}
 
-	client := panel_ws.NewWsShell(uuid.NewV4().String(), ws)
+	client := panel_ws.NewWsShell(uuid.NewV4().String(), wsConn)
 	panel_ws.WsManager.Register <- client
+
+	go client.Read()
+	go client.Write()
+}
+
+func (c *WsController) Conn(g *gin.Context) {
+	wsConn, err := (&websocket.Upgrader{
+		HandshakeTimeout: time.Duration(time.Second * 30),
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}).Upgrade(g.Writer, g.Request, nil)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	client := ws.NewWs(uuid.NewV4().String(), wsConn)
+	ws.WsManager.Register <- client
 
 	go client.Read()
 	go client.Write()
