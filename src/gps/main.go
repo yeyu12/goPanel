@@ -2,13 +2,12 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"goPanel/src/gps/common"
 	"goPanel/src/gps/config"
 	core "goPanel/src/gps/core/database"
 	core_log "goPanel/src/gps/core/log"
 	"goPanel/src/gps/models"
 	"goPanel/src/gps/router"
-	"goPanel/src/gps/services/websocket"
+	"goPanel/src/gps/services/socket"
 	"time"
 )
 
@@ -17,12 +16,13 @@ func main() {
 	_, _ = time.LoadLocation("Asia/Shanghai")
 	core_log.LogSetOutput(config.Conf.App.LogPath)
 	createTable()
-	go websocket.WsManager.Start()
-	common.GenRsaKey(common.GetRsaFilePath(), 2048)
+	go socket.ServerWsManager.Start()
+	go socket.ControlManager.Start()
+	//common.GenRsaKey(common.GetRsaFilePath(), 2048)
 
 	g := gin.Default()
 	g = (new(router.Route)).Init(g)
-	_ = g.Run(":10010")
+	_ = g.Run(":8090")
 }
 
 // 创建表

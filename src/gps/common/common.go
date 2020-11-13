@@ -6,11 +6,13 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/gps/library/snowFlake"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -229,4 +231,29 @@ func StructToJson(data interface{}) (dataMap map[string]interface{}) {
 	_ = json.Unmarshal(dataJson, &dataMap)
 
 	return
+}
+
+func portInUse(port int) bool {
+	checkStatement := fmt.Sprintf("netstat -anp | grep -q %d ", port)
+	output, err := exec.Command("sh", "-c", checkStatement).CombinedOutput()
+	if err != nil {
+		return true // err != nil 说明端口没被占用
+	}
+
+	if len(output) > 0 {
+		return false
+	}
+
+	return true
+}
+
+// 返回可用的中继端口
+func RetRelayPort(port int) int {
+	for i := port; i < 65535; i++ {
+		if portInUse(i) {
+			return i
+		}
+	}
+
+	return -1
 }
