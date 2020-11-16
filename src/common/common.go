@@ -9,7 +9,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"goPanel/src/gps/library/snowFlake"
+	"goPanel/src/library/snowFlake"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -256,4 +257,18 @@ func RetRelayPort(port int) int {
 	}
 
 	return -1
+}
+
+// 创建tcp连接
+func ConnTcp(addr string) (*net.TCPConn, error) {
+	var tcpAddr *net.TCPAddr
+	tcpAddr, _ = net.ResolveTCPAddr("tcp", addr)
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+
+	if err != nil {
+		log.Error("Client connect error ! " + err.Error())
+		return nil, err
+	}
+
+	return conn, nil
 }

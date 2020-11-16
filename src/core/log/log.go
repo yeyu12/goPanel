@@ -3,7 +3,7 @@ package core
 import (
 	"errors"
 	log "github.com/sirupsen/logrus"
-	"goPanel/src/gps/common"
+	"goPanel/src/common"
 	"goPanel/src/gps/config"
 	"os"
 	"time"

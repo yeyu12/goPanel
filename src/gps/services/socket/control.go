@@ -2,8 +2,8 @@ package socket
 
 import (
 	"encoding/json"
-	"fmt"
 	log "github.com/sirupsen/logrus"
+	"io"
 	"net"
 )
 
@@ -30,43 +30,53 @@ var ControlManager = &ControlTcpManager{
 	relayStartPort: 10086,
 }
 
-func init() {
+func (cm *ControlTcpManager) Start() {
 	controlListen, err := net.Listen("tcp", controlAddr)
 	if err != nil {
 		log.Error(err)
 	}
 
-	go func() {
-		for {
-			controlConn, err := controlListen.Accept()
-			if err != nil {
-				log.Error(err)
-			}
+	log.Info("控制端启动")
 
-			log.Info("控制启动，有连接进来：", controlConn.RemoteAddr().String())
+	go cm.Conn(controlListen)
 
-			client := Control{
-				Conn:  &controlConn,
-				write: make(chan []byte, 1024),
-			}
-			ControlManager.Register <- &client
-		}
-	}()
-}
-
-func (cm *ControlTcpManager) Start() {
 	for {
 		select {
 		case cli := <-cm.Register:
 			cm.Client[cli] = true
 			go cli.Read()
 			go cli.Send()
+			msgJson, _ := json.Marshal(Message{
+				Type:  0,
+				Event: "connRelayByLocalSsh",
+				Data:  "lallal",
+				Code:  0,
+			})
+
+			cli.write <- msgJson
 		case unRegister := <-cm.UnRegister:
 			_ = (*unRegister.Conn).Close()
 			delete(cm.Client, unRegister)
 		case mess := <-cm.Broadcast:
 			cm.SendAll(mess)
 		}
+	}
+}
+
+func (cm *ControlTcpManager) Conn(controlListen net.Listener) {
+	for {
+		controlConn, err := controlListen.Accept()
+		if err != nil {
+			log.Error(err)
+		}
+
+		log.Info("控制端有连接进来（新客户端）：", controlConn.RemoteAddr().String())
+
+		client := Control{
+			Conn:  &controlConn,
+			write: make(chan []byte, 1024),
+		}
+		ControlManager.Register <- &client
 	}
 }
 
@@ -79,7 +89,7 @@ func (cm *ControlTcpManager) SendAll(message []byte) {
 		_, err := (*index.Conn).Write(message)
 
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 		}
 	}
 }
@@ -92,24 +102,24 @@ func (c *Control) Read() {
 	}()
 
 	for {
-		data := make([]byte, 10240)
+		var data = make([]byte, 10240)
 		size, err := (*c.Conn).Read(data)
-		if err != nil {
-			fmt.Println(err)
+		if err != nil || err == io.EOF {
+			log.Info(err)
+			ControlManager.UnRegister <- c
+			break
 		}
 		data = data[:size]
 
 		var dataMap map[string]interface{}
 		err = json.Unmarshal(data, &dataMap)
 		if err != nil {
-			fmt.Println("json解析失败", err)
+			log.Info(err)
+			continue
 		}
 
 		switch dataMap["event"] {
 		case "init":
-			fmt.Println(dataMap["data"])
-			// 那到数据后，解析出来，判断是否要创建隧道连接
-
 			serMess := map[string]string{
 				"event": "createRelay",
 				//"port":  strconv.Itoa(RelayPort()),
@@ -134,7 +144,7 @@ func (c *Control) Send() {
 		case wr := <-c.write:
 			_, err := (*c.Conn).Write(wr)
 			if err != nil {
-				fmt.Println("控制端发送消息失败！", err)
+				log.Error("控制端发送消息失败！", err)
 			}
 		}
 

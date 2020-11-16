@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/gps/constants"
-	"goPanel/src/gps/library/ssh"
+	"goPanel/src/library/ssh"
 	gossh "golang.org/x/crypto/ssh"
 )
 

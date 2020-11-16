@@ -8,3 +8,7 @@ app:
   log_output_flag: 0
   # 日志目录
   log_path: ./runtime/log/
+  # 服务端地址
+  server_host: 192.168.30.124
+  # 服务端端口
+  server_port: 10010

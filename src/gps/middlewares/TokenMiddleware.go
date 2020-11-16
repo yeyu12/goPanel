@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
-	"goPanel/src/gps/common"
-	core "goPanel/src/gps/core/database"
+	"goPanel/src/common"
+	core "goPanel/src/core/database"
 	"goPanel/src/gps/services"
 )
 

@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"goPanel/src/gps/common"
+	"goPanel/src/common"
+	core "goPanel/src/core/database"
 	"goPanel/src/gps/constants"
-	core "goPanel/src/gps/core/database"
 	"goPanel/src/gps/models"
 	"goPanel/src/gps/services"
 	"goPanel/src/gps/validations"

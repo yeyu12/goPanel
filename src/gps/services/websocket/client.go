@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
-	"goPanel/src/gps/common"
+	"goPanel/src/common"
+	core "goPanel/src/core/database"
 	"goPanel/src/gps/constants"
-	core "goPanel/src/gps/core/database"
 	"goPanel/src/gps/services"
 	"time"
 )

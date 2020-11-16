@@ -10,12 +10,11 @@ import (
 
 var (
 	Conf           *Config
-	ConfigFilePath = common.GetCurrentDir() + "/src/gps/config/conf.yaml"
+	ConfigFilePath = common.GetCurrentDir() + "/src/gpc/config/conf.yaml"
 )
 
 type Config struct {
-	App      *AppConfig
-	Database *Database
+	App *AppConfig
 }
 
 type AppConfig struct {
@@ -24,6 +23,8 @@ type AppConfig struct {
 	LogOutputType uint32 `yaml:"log_output_type"`
 	LogOutputFlag uint32 `yaml:"log_output_flag"`
 	LogPath       string `yaml:"log_path"`
+	ServerHost    string `yaml:"server_host"`
+	ServerPort    string `yaml:"server_port"`
 }
 
 func init() {
@@ -32,7 +33,6 @@ func init() {
 	loadYamlConfig()
 	loadEnvConfig()
 
-	new(Database).initialization()
 }
 
 func loadYamlConfig() {

@@ -2,7 +2,7 @@ package socket
 
 import (
 	"fmt"
-	"goPanel/src/gps/common"
+	"goPanel/src/common"
 	"net"
 	"strconv"
 )
