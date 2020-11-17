@@ -12,3 +12,9 @@ app:
   server_host: 192.168.30.124
   # 服务端端口
   server_port: 10010
+  # 本机昵称
+  local_name: 公司电脑
+  # 控制端心跳时间,s为单位
+  control_heartbeat_time: 30
+  # 控制端重连时间，s为单位
+  control_reconn_tcp_time: 5

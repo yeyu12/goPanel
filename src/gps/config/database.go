@@ -7,7 +7,7 @@ type Database struct {
 
 func (c *Database) initialization() {
 	c.SqlPath = "./script/sqlite.sql"
-	c.DbPath = "./go-gps.db"
+	c.DbPath = "./go-panel.db"
 
 	Conf.Database = c
 }

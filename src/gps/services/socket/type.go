@@ -1,14 +1,28 @@
 package socket
 
-const (
-	CLIENT_SHELL_TYPE = iota
+import (
+	"goPanel/src/gps/config"
+	"strconv"
 )
 
 var (
-	serverAddr  = "0.0.0.0:10000" // 服务端口
-	controlAddr = "0.0.0.0:10010" // 控制端口
-	relayAddr   = "0.0.0.0:10086" // 中继端口
+	controlAddr = ":" + strconv.Itoa(config.Conf.App.ControlPort) // 控制端口
 )
+
+var ServerWsManager = ServerWebsocketManager{
+	Broadcast:  make(chan []byte),
+	Register:   make(chan *Client),
+	UnRegister: make(chan *Client),
+	Clients:    make(map[*Client]bool),
+}
+
+var ControlManager = &ControlTcpManager{
+	Client:         make(map[*Control]bool),
+	Broadcast:      make(chan []byte, 1024),
+	Register:       make(chan *Control),
+	UnRegister:     make(chan *Control),
+	relayStartPort: config.Conf.App.RelayStartPort,
+}
 
 type Message struct {
 	Type  int         `json:"type"`

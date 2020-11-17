@@ -8,6 +8,7 @@ import (
 	"goPanel/src/gps/models"
 	"goPanel/src/gps/router"
 	"goPanel/src/gps/services/socket"
+	"strconv"
 	"time"
 )
 
@@ -22,7 +23,7 @@ func main() {
 
 	g := gin.Default()
 	g = (new(router.Route)).Init(g)
-	_ = g.Run(":8090")
+	_ = g.Run(":" + strconv.Itoa(config.Conf.App.HttpPort))
 }
 
 // 创建表

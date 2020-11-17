@@ -8,3 +8,9 @@ app:
   log_output_flag: 0
   # 日志目录
   log_path: ./runtime/log/
+  # http服务端口
+  http_port: 10000
+  # control tcp服务控制端口
+  control_port: 10010
+  # 中继开始端口
+  relay_start_port: 10086

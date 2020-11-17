@@ -277,13 +277,13 @@
             }
         },
         created() {
-            if (!localStorage.getItem('gps-token')) {
-                this.$router.push('/login')
+            if (!window.sessionStorage.getItem('panel-token')) {
+                this.$router.push('/login');
             }
 
             // 初始化操作
-            this.$store.commit('LocalStorage/init')
-            this.$store.commit('TopMenu/init')
+            this.$store.commit('LocalStorage/init');
+            this.$store.commit('TopMenu/init');
 
             this.defaultTopTagMenu = this.$store.state.TopMenu.defaultTagMenu;
         },
@@ -489,8 +489,8 @@
                 eval("this." + command + "()")
             },
             loginout() {
-                sessionStorage.removeItem('gps-token');
-                sessionStorage.removeItem('gps-userinfo');
+                sessionStorage.removeItem('panel-token');
+                sessionStorage.removeItem('panel-userinfo');
 
                 this.$router.push('/login')
             },

@@ -7,13 +7,6 @@ type ServerWebsocketManager struct {
 	UnRegister chan *Client
 }
 
-var ServerWsManager = ServerWebsocketManager{
-	Broadcast:  make(chan []byte),
-	Register:   make(chan *Client),
-	UnRegister: make(chan *Client),
-	Clients:    make(map[*Client]bool),
-}
-
 func (manager *ServerWebsocketManager) Start() {
 	defer func() {
 		recover()

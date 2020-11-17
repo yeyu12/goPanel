@@ -3,6 +3,7 @@ package socket
 import (
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
+	"goPanel/src/gps/router"
 	"io"
 	"net"
 )
@@ -18,42 +19,33 @@ type ControlTcpManager struct {
 }
 
 type Control struct {
-	Conn  *net.Conn
-	write chan []byte
-}
-
-var ControlManager = &ControlTcpManager{
-	Client:         make(map[*Control]bool),
-	Broadcast:      make(chan []byte, 1024),
-	Register:       make(chan *Control),
-	UnRegister:     make(chan *Control),
-	relayStartPort: 10086,
+	Conn  *net.TCPConn
+	Write chan []byte
 }
 
 func (cm *ControlTcpManager) Start() {
-	controlListen, err := net.Listen("tcp", controlAddr)
+	tcpAddr, err := net.ResolveTCPAddr("tcp", controlAddr)
 	if err != nil {
-		log.Error(err)
+		log.Panic(err)
+		return
+	}
+	controlListen, err := net.ListenTCP("tcp", tcpAddr)
+	if err != nil {
+		log.Panic(err)
+		return
 	}
 
-	log.Info("控制端启动")
+	defer controlListen.Close()
 
-	go cm.Conn(controlListen)
+	go cm.conn(controlListen)
+	log.Info("控制端启动")
 
 	for {
 		select {
 		case cli := <-cm.Register:
 			cm.Client[cli] = true
-			go cli.Read()
-			go cli.Send()
-			msgJson, _ := json.Marshal(Message{
-				Type:  0,
-				Event: "connRelayByLocalSsh",
-				Data:  "lallal",
-				Code:  0,
-			})
-
-			cli.write <- msgJson
+			go cli.read()
+			go cli.send()
 		case unRegister := <-cm.UnRegister:
 			_ = (*unRegister.Conn).Close()
 			delete(cm.Client, unRegister)
@@ -63,7 +55,7 @@ func (cm *ControlTcpManager) Start() {
 	}
 }
 
-func (cm *ControlTcpManager) Conn(controlListen net.Listener) {
+func (cm *ControlTcpManager) conn(controlListen *net.TCPListener) {
 	for {
 		controlConn, err := controlListen.Accept()
 		if err != nil {
@@ -73,8 +65,8 @@ func (cm *ControlTcpManager) Conn(controlListen net.Listener) {
 		log.Info("控制端有连接进来（新客户端）：", controlConn.RemoteAddr().String())
 
 		client := Control{
-			Conn:  &controlConn,
-			write: make(chan []byte, 1024),
+			Conn:  controlConn.(*net.TCPConn),
+			Write: make(chan []byte, 1024),
 		}
 		ControlManager.Register <- &client
 	}
@@ -90,13 +82,15 @@ func (cm *ControlTcpManager) SendAll(message []byte) {
 
 		if err != nil {
 			log.Error(err)
+			continue
 		}
 	}
 }
 
-func (c *Control) Read() {
+func (c *Control) read() {
 	defer func() {
 		if err := recover(); err != nil {
+			log.Error(err)
 			ControlManager.UnRegister <- c
 		}
 	}()
@@ -105,46 +99,40 @@ func (c *Control) Read() {
 		var data = make([]byte, 10240)
 		size, err := (*c.Conn).Read(data)
 		if err != nil || err == io.EOF {
-			log.Info(err)
+			log.Error(err)
 			ControlManager.UnRegister <- c
 			break
 		}
 		data = data[:size]
 
-		var dataMap map[string]interface{}
-		err = json.Unmarshal(data, &dataMap)
+		var ret Message
+		err = json.Unmarshal(data, &ret)
 		if err != nil {
-			log.Info(err)
+			log.Error(err)
 			continue
 		}
 
-		switch dataMap["event"] {
-		case "init":
-			serMess := map[string]string{
-				"event": "createRelay",
-				//"port":  strconv.Itoa(RelayPort()),
-			}
-			serMessJson, _ := json.Marshal(serMess)
-			c.write <- serMessJson
-
-			break
+		if router.ControlTcpRoute[ret.Event] != nil {
+			router.ControlTcpRoute[ret.Event](c.Conn, ret)
 		}
 	}
 }
 
-func (c *Control) Send() {
+func (c *Control) send() {
 	defer func() {
 		if err := recover(); err != nil {
+			log.Error(err)
 			ControlManager.UnRegister <- c
 		}
 	}()
 
 	for {
 		select {
-		case wr := <-c.write:
+		case wr := <-c.Write:
 			_, err := (*c.Conn).Write(wr)
 			if err != nil {
 				log.Error("控制端发送消息失败！", err)
+				return
 			}
 		}
 

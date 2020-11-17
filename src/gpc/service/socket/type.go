@@ -1,6 +1,7 @@
 package socket
 
-var isReconnControlTcp = false
+var isReconnControlTcp = true
+var ControlAddr string
 
 type RequestWsMessage struct {
 	Event string      `json:"event"`

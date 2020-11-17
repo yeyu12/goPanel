@@ -19,11 +19,14 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Debug         bool   `yaml:"debug"`
-	LogLevel      uint32 `yaml:"log_level"`
-	LogOutputType uint32 `yaml:"log_output_type"`
-	LogOutputFlag uint32 `yaml:"log_output_flag"`
-	LogPath       string `yaml:"log_path"`
+	Debug          bool   `yaml:"debug"`
+	LogLevel       uint32 `yaml:"log_level"`
+	LogOutputType  uint32 `yaml:"log_output_type"`
+	LogOutputFlag  uint32 `yaml:"log_output_flag"`
+	LogPath        string `yaml:"log_path"`
+	HttpPort       int    `yaml:"http_port"`
+	ControlPort    int    `yaml:"control_port"`
+	RelayStartPort int    `yaml:"relay_start_port"`
 }
 
 func init() {

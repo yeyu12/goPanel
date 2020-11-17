@@ -11,5 +11,6 @@ func main() {
 	_, _ = time.LoadLocation("Asia/Shanghai")
 	core_log.LogSetOutput(config.Conf.App.LogPath)
 
-	socket.StartClientTcp(config.Conf.App.ServerHost + ":" + config.Conf.App.ServerPort)
+	socket.ControlAddr = config.Conf.App.ServerHost + ":" + config.Conf.App.ServerPort
+	socket.StartClientTcp()
 }

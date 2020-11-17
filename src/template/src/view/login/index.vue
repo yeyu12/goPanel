@@ -184,8 +184,8 @@
                     if (data.code !== 200) {
                         this.$message.error(data.message);
                     } else {
-                        sessionStorage.setItem('gps-token', data.data.token);
-                        sessionStorage.setItem('gps-userinfo', this.$base64.encode(JSON.stringify(data.data)));
+                        window.sessionStorage.setItem('panel-token', data.data.token);
+                        window.sessionStorage.setItem('panel-userinfo', this.$base64.encode(JSON.stringify(data.data)));
 
                         this.$router.push('/')
                     }
@@ -202,8 +202,8 @@
                     if (res.code !== 200) {
                         this.$message.error(res.message);
                     } else {
-                        localStorage.setItem('gps-token', res.data.token);
-                        localStorage.setItem('gps-userinfo', this.$base64.encode(JSON.stringify(res.data)));
+                        localStorage.setItem('panel-token', res.data.token);
+                        localStorage.setItem('panel-userinfo', this.$base64.encode(JSON.stringify(res.data)));
 
                         this.$router.push('/')
                     }
@@ -225,7 +225,7 @@
             }
         },
         created() {
-            if (sessionStorage.getItem('gps-token')) {
+            if (sessionStorage.getItem('panel-token')) {
                 this.$router.push('/')
             }
         }
