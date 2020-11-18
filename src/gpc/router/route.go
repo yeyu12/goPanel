@@ -11,4 +11,5 @@ var Route = make(map[string]handle)
 
 func init() {
 	Route["connRelayByLocalSsh"] = controller.ConnRelayAndLocalSsh
+	Route["heartbeat"] = controller.Heartbeat
 }

@@ -29,7 +29,7 @@ func heartbeat(conn *net.TCPConn) {
 
 		write := RequestWsMessage{
 			Event: "heartbeat",
-			Data:  "",
+			Data:  nil,
 		}
 		writeJson, err := json.Marshal(write)
 		if err != nil {

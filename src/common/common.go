@@ -272,3 +272,18 @@ func ConnTcp(addr string) (*net.TCPConn, error) {
 
 	return conn, nil
 }
+
+// interface转map
+func InterfaceByMapStr(data interface{}) (map[string]interface{}, error) {
+	dataJson, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret map[string]interface{}
+	if err = json.Unmarshal(dataJson, &ret); err != nil {
+		return nil, err
+	}
+
+	return ret, nil
+}

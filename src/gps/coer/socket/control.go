@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
-	"goPanel/src/gps/router"
+	"goPanel/src/gps/coer/router"
 	"io"
 	"net"
+	"unsafe"
 )
 
 // 控制端
@@ -21,7 +22,7 @@ type ControlTcpManager struct {
 
 type Control struct {
 	Conn  *net.TCPConn
-	write chan []byte
+	Write chan []byte
 	Uuid  string
 	Name  string
 }
@@ -41,7 +42,7 @@ func (cm *ControlTcpManager) Start() {
 	defer controlListen.Close()
 
 	go cm.conn(controlListen)
-	log.Info("控制端启动")
+	log.Info("控制端TCP启动：" + controlListen.Addr().String())
 
 	for {
 		select {
@@ -69,7 +70,7 @@ func (cm *ControlTcpManager) conn(controlListen *net.TCPListener) {
 
 		client := Control{
 			Conn:  controlConn.(*net.TCPConn),
-			write: make(chan []byte, 1024),
+			Write: make(chan []byte, 1024),
 			Uuid:  uuid.NewV4().String(),
 		}
 
@@ -117,8 +118,8 @@ func (c *Control) read() {
 			continue
 		}
 
-		if router.ControlTcpRoute[ret.Event] != nil {
-			router.ControlTcpRoute[ret.Event](c.Conn, ret)
+		if err = router.HandleRoute(ret.Event, unsafe.Pointer(c), &ret); err != nil {
+			log.Error(err)
 		}
 	}
 }
@@ -133,7 +134,7 @@ func (c *Control) send() {
 
 	for {
 		select {
-		case wr := <-c.write:
+		case wr := <-c.Write:
 			_, err := (*c.Conn).Write(wr)
 			if err != nil {
 				log.Error("控制端发送消息失败！", err)

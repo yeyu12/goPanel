@@ -4,10 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	core "goPanel/src/core/database"
 	core_log "goPanel/src/core/log"
+	"goPanel/src/gps/coer/socket"
 	"goPanel/src/gps/config"
 	"goPanel/src/gps/models"
 	"goPanel/src/gps/router"
-	"goPanel/src/gps/services/socket"
 	"strconv"
 	"time"
 )

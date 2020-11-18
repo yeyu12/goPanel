@@ -1,15 +1,12 @@
 package router
 
 import (
+	"goPanel/src/gps/coer/router"
 	"goPanel/src/gps/controllers/controltcp"
-	"net"
 )
 
-type handle func(conn *net.TCPConn, message interface{})
-
-var ControlTcpRoute = make(map[string]handle)
-
 func init() {
-	ControlTcpRoute["local_setting"] = controltcp.SettingInit
-	ControlTcpRoute["local_register"] = controltcp.RegisterNode
+	router.AddRoute("local_setting", controltcp.SettingInit)
+	router.AddRoute("local_register", controltcp.RegisterNode)
+	router.AddRoute("heartbeat", controltcp.Heartbeat)
 }
