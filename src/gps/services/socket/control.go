@@ -2,6 +2,7 @@ package socket
 
 import (
 	"encoding/json"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/gps/router"
 	"io"
@@ -10,7 +11,7 @@ import (
 
 // 控制端
 type ControlTcpManager struct {
-	Client         map[*Control]bool // 连接控制端的客户端
+	Clients        map[*Control]bool // 连接控制端的客户端
 	Broadcast      chan []byte       // 广播
 	Register       chan *Control     // 注册
 	UnRegister     chan *Control     // 卸载
@@ -20,7 +21,9 @@ type ControlTcpManager struct {
 
 type Control struct {
 	Conn  *net.TCPConn
-	Write chan []byte
+	write chan []byte
+	Uuid  string
+	Name  string
 }
 
 func (cm *ControlTcpManager) Start() {
@@ -43,12 +46,12 @@ func (cm *ControlTcpManager) Start() {
 	for {
 		select {
 		case cli := <-cm.Register:
-			cm.Client[cli] = true
+			cm.Clients[cli] = true
 			go cli.read()
 			go cli.send()
 		case unRegister := <-cm.UnRegister:
 			_ = (*unRegister.Conn).Close()
-			delete(cm.Client, unRegister)
+			delete(cm.Clients, unRegister)
 		case mess := <-cm.Broadcast:
 			cm.SendAll(mess)
 		}
@@ -66,18 +69,20 @@ func (cm *ControlTcpManager) conn(controlListen *net.TCPListener) {
 
 		client := Control{
 			Conn:  controlConn.(*net.TCPConn),
-			Write: make(chan []byte, 1024),
+			write: make(chan []byte, 1024),
+			Uuid:  uuid.NewV4().String(),
 		}
+
 		ControlManager.Register <- &client
 	}
 }
 
 func (cm *ControlTcpManager) SendAll(message []byte) {
-	if len(cm.Client) == 0 {
+	if len(cm.Clients) == 0 {
 		return
 	}
 
-	for index, _ := range cm.Client {
+	for index, _ := range cm.Clients {
 		_, err := (*index.Conn).Write(message)
 
 		if err != nil {
@@ -128,7 +133,7 @@ func (c *Control) send() {
 
 	for {
 		select {
-		case wr := <-c.Write:
+		case wr := <-c.write:
 			_, err := (*c.Conn).Write(wr)
 			if err != nil {
 				log.Error("控制端发送消息失败！", err)

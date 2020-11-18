@@ -17,7 +17,7 @@ var ServerWsManager = ServerWebsocketManager{
 }
 
 var ControlManager = &ControlTcpManager{
-	Client:         make(map[*Control]bool),
+	Clients:        make(map[*Control]bool),
 	Broadcast:      make(chan []byte, 1024),
 	Register:       make(chan *Control),
 	UnRegister:     make(chan *Control),
