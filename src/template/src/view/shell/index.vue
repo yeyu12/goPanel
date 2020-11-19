@@ -136,7 +136,8 @@
             }
         },
         destroyed() {
-            clearInterval(this.wsTimer);
+            window.clearInterval(this.wsTimer);
+            this.isReconnection = false;
             this.ws.close();
         }
     };

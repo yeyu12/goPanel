@@ -1,228 +1,29 @@
 package controllers
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"goPanel/src/common"
-	core "goPanel/src/core/database"
 	"goPanel/src/gps/coer/socket"
 	"goPanel/src/gps/constants"
-	"goPanel/src/gps/models"
-	"goPanel/src/gps/services"
-	"goPanel/src/gps/validations"
-	"io/ioutil"
-	"time"
 )
 
 type MachineController struct {
 	BaseController
-	machineService      *services.MachineService
-	machineGroupService *services.MachineGroupService
 }
 
-const (
-	CREATE_DIR      = 1
-	CREATE_COMPUTER = 2
-)
-
 func NewMachineController() *MachineController {
-	return &MachineController{
-		machineService:      new(services.MachineService),
-		machineGroupService: new(services.MachineGroupService),
-	}
+	return &MachineController{}
 }
 
 func (c *MachineController) List(g *gin.Context) {
-	groupData := c.machineGroupService.Get(core.Db)
-	var retData []map[string]interface{}
-	groupJson, _ := json.Marshal(groupData)
-	_ = json.Unmarshal(groupJson, &retData)
-
-	for index, item := range retData {
-		where := map[string]interface{}{
-			"machine_group_id": item["id"],
-		}
-
-		retData[index]["children"] = c.machineService.Get(core.Db, where)
-	}
-
-	machineData := c.machineService.Get(core.Db, map[string]interface{}{})
-	var machineMap []map[string]interface{}
-	machineJson, _ := json.Marshal(machineData)
-	_ = json.Unmarshal(machineJson, &machineMap)
-
-	retData = append(retData, machineMap...)
-
-	log.Error(socket.ControlManager.Clients)
-
-	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, retData)
-	return
-}
-
-func (c *MachineController) GetMachineAll(g *gin.Context) {
-	machineData := c.machineService.GetAll(core.Db)
-	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, machineData)
-
-	return
-}
-
-func (c *MachineController) Save(g *gin.Context) {
-	inputData, _ := ioutil.ReadAll(g.Request.Body)
-	var addVail validations.MachineAdd
-	c.JsonPost(&addVail, inputData)
-
-	if err := c.Validations(addVail); err != nil {
-		common.RetJson(g, constants.MISSING_PARAMETER_FAIL, err.Error(), "")
-		return
-	}
-
-	var (
-		code int32
-		msg  string
-		data interface{}
-	)
-	switch addVail.Flag {
-	case CREATE_DIR:
-		code, msg, data = c.saveDir(g, inputData)
-		if code != constants.SUCCESS {
-			common.RetJson(g, code, msg, data)
-			return
-		}
-
-		break
-	case CREATE_COMPUTER:
-		code, msg, data = c.saveComputer(g, inputData)
-		if code != constants.SUCCESS {
-			common.RetJson(g, code, msg, data)
-			return
-		}
-
-		break
-	}
-
-	common.RetJson(g, code, msg, data)
-	return
-}
-
-func (c *MachineController) Del(g *gin.Context) {
-	inputData, _ := ioutil.ReadAll(g.Request.Body)
-	var delVail validations.MachineDel
-	c.JsonPost(&delVail, inputData)
-
-	if err := c.Validations(delVail); err != nil {
-		common.RetJson(g, constants.MISSING_PARAMETER_FAIL, err.Error(), "")
-		return
-	}
-
-	switch delVail.Flag {
-	case CREATE_DIR:
-		data := c.machineService.Get(core.Db, map[string]interface{}{
-			"machine_group_id": delVail.Id,
+	var ret []map[string]interface{}
+	for index, _ := range socket.ControlManager.Clients {
+		ret = append(ret, map[string]interface{}{
+			"id":   index.Uuid,
+			"name": index.Name,
 		})
-		if len(*data) > 0 {
-			common.RetJson(g, constants.MACHINE_DIR_NOT_NULL_FAIL, constants.MACHINE_DIR_NOT_NULL_MSG, "")
-			return
-		}
-
-		_, err := c.machineGroupService.Del(core.Db, delVail.Id)
-		if err != nil {
-			common.RetJson(g, constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, "")
-			return
-		}
-
-		break
-	case CREATE_COMPUTER:
-		_, err := c.machineService.Del(core.Db, delVail.Id)
-		if err != nil {
-			common.RetJson(g, constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, "")
-			return
-		}
-
-		break
 	}
 
-	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, "")
+	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, ret)
 	return
-}
-
-// 添加目录
-func (c *MachineController) saveDir(g *gin.Context, inputData []byte) (int32, string, interface{}) {
-	var addDirVail validations.MachineAddDir
-	c.JsonPost(&addDirVail, inputData)
-
-	if err := c.Validations(addDirVail); err != nil {
-		return constants.MISSING_PARAMETER_FAIL, err.Error(), ""
-	}
-
-	userinfo := c.GetUserInfo(g)
-	var addDirData models.MachineGroupModel
-	c.JsonPost(&addDirData, inputData)
-	var retData interface{}
-
-	if addDirData.Id == 0 {
-		addDirData.CreateTime = time.Now()
-		addDirData.CreateUid = userinfo.Id
-
-		_, err := c.machineGroupService.Add(core.Db, &addDirData)
-		if err != nil {
-			return constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, ""
-		}
-	} else {
-		addDirData.UpdateTime = time.Now()
-		_, err := c.machineGroupService.Update(core.Db, addDirData)
-		if err != nil {
-			return constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, ""
-		}
-	}
-
-	retData = c.machineGroupService.IdByDetails(core.Db, addDirData.Id)
-
-	return constants.SUCCESS, constants.SUCCESS_MSG, retData
-}
-
-// 添加主机
-func (c *MachineController) saveComputer(g *gin.Context, inputData []byte) (int32, string, interface{}) {
-	var addComputerVail validations.MachineAddComputer
-	c.JsonPost(&addComputerVail, inputData)
-
-	if err := c.Validations(addComputerVail); err != nil {
-		return constants.MISSING_PARAMETER_FAIL, err.Error(), ""
-	}
-
-	userinfo := c.GetUserInfo(g)
-	var addComputerData models.MachineModel
-	c.JsonPost(&addComputerData, inputData)
-
-	if addComputerData.Name == "" {
-		addComputerData.Name = addComputerData.Host
-	}
-
-	if addComputerData.Id == int64(0) {
-		addComputerData.CreateTime = time.Now()
-		addComputerData.CreateUid = userinfo.Id
-		addComputerData.LoginNum = 0
-
-		_, err := c.machineService.Add(core.Db, &addComputerData)
-		if err != nil {
-			return constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, ""
-		}
-	} else {
-		addComputerData.UpdateTime = time.Now()
-		_, err := c.machineService.Update(core.Db, addComputerData)
-		if err != nil {
-			return constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, ""
-		}
-	}
-
-	data := c.machineService.IdByDetails(core.Db, addComputerData.Id)
-	dataMap := common.StructToJson(data)
-	encodePasswd, err := common.RsaEncrypt([]byte(addComputerVail.Passwd), common.GetRsaFilePath()+"public.pem")
-	if err != nil {
-		log.Error(err)
-	}
-	dataMap["passwd"] = base64.StdEncoding.EncodeToString(encodePasswd)
-
-	return constants.SUCCESS, constants.SUCCESS_MSG, dataMap
 }

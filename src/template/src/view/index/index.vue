@@ -3,19 +3,7 @@
         <el-container>
             <el-aside id="panel-left" width="200px">
                 <div>
-                    <el-input placeholder="过滤" v-model="search">
-                        <el-button slot="prepend" icon="el-icon-plus" @click="showAddMenu"></el-button>
-                    </el-input>
-
-                    <transition name="el-fade-in-linear">
-                        <div id="panel-add-menu" v-if="isAddMenu">
-                            <el-button-group class="box-card">
-                                <el-button @click="showAddDir">添加目录</el-button>
-                                <el-button @click="showAddComputer">添加主机</el-button>
-                            </el-button-group>
-                        </div>
-                    </transition>
-
+                    <el-input placeholder="搜索主机" v-model="search"></el-input>
                     <el-tree
                             class="filter-tree"
                             :data="machineData"
@@ -66,62 +54,14 @@
                     width="150"
                     trigger="manual"
                     v-model="menuVisible">
-<!--                <a class="menu-button" @click="createComputer" v-if="isDir">添加</a>-->
-<!--                <a class="menu-button" @click="editTree">编辑</a>-->
-<!--                <a class="menu-button" @click="delTree">删除</a>-->
+                <!--                <a class="menu-button" @click="createComputer" v-if="isDir">添加</a>-->
+                <!--                <a class="menu-button" @click="editTree">编辑</a>-->
+                <!--                <a class="menu-button" @click="delTree">删除</a>-->
                 <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
                 <a class="menu-button" @click="showAddCommand(1)" v-if="!isDir">执行命令</a>
                 <!--                <a class="menu-button" v-if="!isDir">打开桌面</a>-->
             </el-popover>
         </transition>
-
-        <!-- 添加目录-->
-        <!--<el-dialog
-                title="添加/修改目录"
-                :visible.sync="isAddDir"
-                width="500px"
-                center>
-            <el-form :model="form.dir" label-width="100px" ref="dir" :rules="addDirVail">
-                <el-form-item label="目录名称：" prop="name">
-                    <el-input v-model="form.dir.name" placeholder="请输入目录名"></el-input>
-                </el-form-item>
-            </el-form>
-
-            <span slot="footer" class="dialog-footer">
-                <el-button @click="isAddDir = false">取 消</el-button>
-                <el-button type="primary" @click="save(1, 'dir')">确 定</el-button>
-            </span>
-        </el-dialog>-->
-
-        <!-- 添加主机-->
-        <!--<el-dialog
-                title="添加/修改主机"
-                :visible.sync="isAddComputer"
-                width="500px"
-                center>
-            <el-form :model="form.computer" label-width="80px" ref="computer" :rules="addComputerVail">
-                <el-form-item label="名称：" prop="name">
-                    <el-input v-model="form.computer.name" placeholder="请输入主机名称"></el-input>
-                </el-form-item>
-                <el-form-item label="地址：" prop="host">
-                    <el-input v-model="form.computer.host" placeholder="请输入主机地址"></el-input>
-                </el-form-item>
-                <el-form-item label="用户名：">
-                    <el-input v-model="form.computer.user" placeholder="请输入主机用户名，默认root"></el-input>
-                </el-form-item>
-                <el-form-item label="密码：" prop="passwd">
-                    <el-input v-model="form.computer.passwd" type="password" placeholder="请输入主机密码"></el-input>
-                </el-form-item>
-                <el-form-item label="端口：">
-                    <el-input v-model="form.computer.port" placeholder="请输入主机端口，默认22"></el-input>
-                </el-form-item>
-            </el-form>
-
-            <span slot="footer" class="dialog-footer">
-                <el-button @click="isAddComputer = false">取 消</el-button>
-                <el-button type="primary" @click="save(2, 'computer')">确 定</el-button>
-            </span>
-        </el-dialog>-->
 
         <!-- 执行命令-->
         <el-dialog title="执行命令" :visible.sync="isShowAddCommand" width="800px" center>
@@ -162,31 +102,11 @@
             <span slot="title">批量执行命令，选择主机</span>
             <el-divider></el-divider>
 
-            <el-table :data="computerData" stripe height="calc(100vh - 150px)" ref="multipleTable"
+            <el-table :data="machineData" stripe height="calc(100vh - 150px)" ref="multipleTable"
                       @selection-change="handleSelectionTableChange">
-                <el-table-column type="selection" :selectable="addCommandsIsCheckout"></el-table-column>
+                <el-table-column type="selection"></el-table-column>
+                <el-table-column property="id" label="ID"></el-table-column>
                 <el-table-column property="name" label="名称"></el-table-column>
-                <el-table-column property="host" label="host"></el-table-column>
-                <el-table-column
-                        prop="is_passwd"
-                        label="密码"
-                        width="100"
-                        :filters="[{ text: '有密码', value: true }, { text: '无密码', value: false }]"
-                        :filter-method="addCommandsFilterTag"
-                        filter-placement="bottom-end">
-                    <template slot-scope="scope">
-                        <el-tag
-                                :type="scope.row.is_passwd ? '' : 'danger'"
-                                disable-transitions>
-                            <template v-if="scope.row.is_passwd">
-                                有密码
-                            </template>
-                            <template v-else>
-                                无密码
-                            </template>
-                        </el-tag>
-                    </template>
-                </el-table-column>
             </el-table>
 
             <el-button-group style="position:relative; right: 10px;float: right;top: 10px">
@@ -199,54 +119,24 @@
 
 <script>
     import '@/static/css/index.css';
-    import {del, getAll, list, save} from '../../api/machine';
+    import {list} from '../../api/machine';
     import {addCommand} from '../../api/command';
     import shell from '../shell/index';
-
-    const ADD_MACHINE_DIR = 1;
-    const ADD_MACHINE_COMPUTER = 2;
 
     /*eslint no-unused-vars: ["error", { "args": "none" }]*/
     export default {
         name: "Index",
         data() {
-            var validip = (rule, value, callback) => { // eslint-disable-line no-unused-vars
-                const reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;
-                if (reg.test(value)) {
-                    callback();
-                } else {
-                    return callback(new Error('输入格式不合法！'));
-                }
-            };
-
             return {
                 form: {
-                    dir: {
-                        id: 0,
-                        name: '',
-                        flag: ADD_MACHINE_DIR
-                    },
-                    computer: {
-                        id: 0,
-                        name: '',
-                        host: '',
-                        user: '',
-                        port: '',
-                        machine_group_id: 0,
-                        flag: ADD_MACHINE_COMPUTER
-                    },
                     command: {
                         command: '',
                         flag: '1', // 是否定时执行（1立即执行，2定时执行
                         plan_exec_time: '',
                         is_type: 1, // 执行类型（1单个执行，2批量执行
                         ids: [],
-                        passwd: {}
                     }
                 },
-                isAddComputer: false,
-                isAddMenu: false,
-                isAddDir: false,
                 menuVisible: false,
                 search: '',
                 machineData: [],
@@ -260,17 +150,6 @@
                     children: 'children',
                     label: 'name'
                 },
-                addDirVail: {
-                    name: [{required: true, message: '名称不能为空'}]
-                },
-                addComputerVail: {
-                    host: [
-                        {required: true, message: '地址不能为空', trigger: 'blur'},
-                        {validator: validip, trigger: 'blur'}
-                    ],
-                    passwd: [{required: true, message: '密码不能为空'}]
-                },
-                computerData: [],
                 treeClickCount: 0,
                 timer: {},
                 multipleTableSelection: []
@@ -307,7 +186,6 @@
         },
         mounted() {
             this.getMachineData();
-            this.getComputerAll();
         },
         methods: {
             filterNode(value, data) {
@@ -338,31 +216,6 @@
                 menuData['menu_type'] = this.$store.state.TopMenu.MENU_SHELL_TYPE;
                 this.$store.commit('TopMenu/openTagMenuPush', menuData);
             },
-            showAddMenu() {
-                this.isAddMenu = !this.isAddMenu;
-            },
-            showAddDir() {
-                this.form.dir = {
-                    id: 0,
-                    name: '',
-                    flag: ADD_MACHINE_DIR
-                };
-                this.isAddDir = true;
-                this.isAddMenu = false;
-            },
-            showAddComputer() {
-                this.form.computer = {
-                    id: 0,
-                    name: '',
-                    host: '',
-                    user: '',
-                    port: '',
-                    machine_group_id: 0,
-                    flag: ADD_MACHINE_COMPUTER
-                };
-                this.isAddComputer = true;
-                this.isAddMenu = false;
-            },
             getMachineData() {
                 list().then(ret => {
                     if (ret.code === 200) {
@@ -371,113 +224,6 @@
                 }).catch(err => {
                     this.$message.error('服务器出小差！');
                 })
-            },
-            save(flag, formName) {
-                let saveData = {};
-
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                        if (flag === ADD_MACHINE_DIR) {
-                            saveData = this.form.dir;
-                            this.isAddDir = false;
-                        } else if (flag === ADD_MACHINE_COMPUTER) {
-                            saveData = this.form.computer;
-                            saveData.machine_group_id = this.dirData.is_dir ? this.dirData.is_dir : 0;
-                            saveData.port = saveData.port ? parseInt(saveData.port) : 22;
-                            saveData.user = saveData.user ? saveData.user : 'root';
-                            this.isAddComputer = false;
-                        }
-
-                        this.dirData = {};
-
-                        save(saveData).then(res => {
-                            if (res.code === 200) {
-                                this.$message({
-                                    message: res.message,
-                                    type: 'success'
-                                });
-
-                                this.$store.commit("LocalStorage/pushComputerPasswdData", res.data);
-                                this.getMachineData()
-                            } else {
-                                this.$message.error(res.message);
-                            }
-                        }).catch(err => {
-                            this.$message.error('服务器出小差！');
-                        })
-                    } else {
-                        return false;
-                    }
-                });
-            },
-            createComputer() {
-                this.isAddComputer = true;
-            },
-            editTree() {
-                if (this.dirData.is_dir) {
-                    this.form.dir = {
-                        id: this.dirData.id,
-                        name: this.dirData.name,
-                        flag: ADD_MACHINE_DIR
-                    };
-
-                    this.isAddDir = true;
-                    this.isAddMenu = false;
-                } else {
-                    this.form.computer = {
-                        id: this.dirData.id,
-                        name: this.dirData.name,
-                        host: this.dirData.host,
-                        user: this.dirData.user,
-                        port: this.dirData.port,
-                        machine_group_id: this.dirData.machine_group_id,
-                        flag: ADD_MACHINE_COMPUTER
-                    };
-
-                    this.isAddComputer = true;
-                    this.isAddMenu = false;
-                }
-            },
-            delTree() {
-                this.$confirm('此操作将永久删除, 是否继续?', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                    let req = {};
-                    if (this.dirData.is_dir) {
-                        req = {
-                            id: this.dirData.id,
-                            flag: ADD_MACHINE_DIR
-                        }
-                    } else {
-                        req = {
-                            id: this.dirData.id,
-                            flag: ADD_MACHINE_COMPUTER
-                        }
-                    }
-
-                    del(req).then(res => {
-                        if (res.code === 200) {
-                            this.$message({
-                                message: res.message,
-                                type: 'success'
-                            });
-
-                            if (!this.dirData.is_dir) {
-                                // 删除已打开的tag标签
-                                this.$store.commit("TopMenu/openTagMenuDel", this.dirData);
-                                this.$store.commit("LocalStorage/delComputerPasswd", this.dirData);
-                            }
-                            this.getMachineData()
-                        } else {
-                            this.$message.error(res.message);
-                        }
-                    }).catch(err => {
-                        this.$message.error('服务器出小差！');
-                    })
-                }).catch(() => {
-                });
             },
             clickTagMenu(tag, event) {
                 this.$store.commit("TopMenu/upDefaultTagMenu", tag.name);
@@ -495,57 +241,20 @@
                 this.$router.push('/login')
             },
             showAddCommand(isType) {
-                if (!this.dirData['is_dir']) {
-                    this.form.command.is_type = isType;
-                    if (isType === 1) {
-                        if (!this.$store.state.LocalStorage.computerPasswdData[this.dirData.host + ':' + this.dirData.port]) {
-                            this.$message('请编辑你选择的主机的密码！否则无法执行命令。');
-                            return;
-                        }
-                    } else if (isType === 2) {
-                        if (!this.multipleTableSelection.length) {
-                            this.$message('请勾选要执行命令的主机！否则无法执行命令。');
-                            return;
-                        }
-
-                        this.isShowAddCommandComputerList = false;
-                    }
-
-                    this.form.command = {
-                        command: '',
-                        flag: '1',
-                        plan_exec_time: '',
-                        is_type: isType,
-                        ids: [],
-                        passwd: {}
-                    }
-
-                    this.isShowAddCommand = true;
+                this.form.command.is_type = isType;
+                this.form.command = {
+                    command: '',
+                    flag: '1',
+                    plan_exec_time: '',
+                    is_type: isType,
+                    ids: [],
+                    passwd: {}
                 }
+
+                this.isShowAddCommand = true;
             },
             showAddCommands() {
                 this.isShowAddCommandComputerList = true;
-                this.getComputerAll();
-            },
-            addCommandsFilterTag(value, row) {
-                return row.is_passwd === value;
-            },
-            addCommandsIsCheckout(row, index) {
-                return row.is_passwd;
-            },
-            getComputerAll() {
-                getAll().then(res => {
-                    let data = res.data;
-                    for (let i in data) {
-                        data[i]['is_passwd'] = false;
-                        let passwd = this.$store.state.LocalStorage.computerPasswdData[data[i].host + ':' + data[i].port];
-                        passwd && (data[i]['is_passwd'] = true);
-                    }
-
-                    this.computerData = data
-                }).catch(err => {
-                    this.$message.error('服务器出小差！');
-                })
             },
             treeDoubleClick(data, node) {
                 if (data.is_dir) {
@@ -561,16 +270,14 @@
 
                 //计时器,计算300毫秒为单位,可自行修改
                 this.timer = window.setTimeout(() => {
-                    if (this.treeClickCount === 2) {
+                    if (this.treeClickCount === 1) {
                         //把次数归零
                         this.treeClickCount = 0;
-
-                        //单击事件处理
-                        this.openShell()
-                    } else if (this.treeClickCount > 2) {
+                    } else if (this.treeClickCount > 1) {
                         //把次数归零
                         this.treeClickCount = 0;
                         //双击事件
+                        this.openShell()
                     }
                 }, 300);
             },
