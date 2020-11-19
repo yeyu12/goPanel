@@ -66,9 +66,9 @@
                     width="150"
                     trigger="manual"
                     v-model="menuVisible">
-                <a class="menu-button" @click="createComputer" v-if="isDir">添加</a>
-                <a class="menu-button" @click="editTree">编辑</a>
-                <a class="menu-button" @click="delTree">删除</a>
+<!--                <a class="menu-button" @click="createComputer" v-if="isDir">添加</a>-->
+<!--                <a class="menu-button" @click="editTree">编辑</a>-->
+<!--                <a class="menu-button" @click="delTree">删除</a>-->
                 <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
                 <a class="menu-button" @click="showAddCommand(1)" v-if="!isDir">执行命令</a>
                 <!--                <a class="menu-button" v-if="!isDir">打开桌面</a>-->
@@ -76,7 +76,7 @@
         </transition>
 
         <!-- 添加目录-->
-        <el-dialog
+        <!--<el-dialog
                 title="添加/修改目录"
                 :visible.sync="isAddDir"
                 width="500px"
@@ -91,10 +91,10 @@
                 <el-button @click="isAddDir = false">取 消</el-button>
                 <el-button type="primary" @click="save(1, 'dir')">确 定</el-button>
             </span>
-        </el-dialog>
+        </el-dialog>-->
 
         <!-- 添加主机-->
-        <el-dialog
+        <!--<el-dialog
                 title="添加/修改主机"
                 :visible.sync="isAddComputer"
                 width="500px"
@@ -121,7 +121,7 @@
                 <el-button @click="isAddComputer = false">取 消</el-button>
                 <el-button type="primary" @click="save(2, 'computer')">确 定</el-button>
             </span>
-        </el-dialog>
+        </el-dialog>-->
 
         <!-- 执行命令-->
         <el-dialog title="执行命令" :visible.sync="isShowAddCommand" width="800px" center>

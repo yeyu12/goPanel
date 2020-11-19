@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	Conf           *Config
-	ConfigFilePath = common.GetCurrentDir() + "/src/gpc/config/conf.yaml"
+	Conf              *Config
+	GpcConfigFilePath = common.GetCurrentDir() + "/config/gpc.yaml"
 )
 
 type Config struct {
@@ -35,13 +35,12 @@ func init() {
 
 	loadYamlConfig()
 	loadEnvConfig()
-
 }
 
 func loadYamlConfig() {
-	yamlFile, err := ioutil.ReadFile(ConfigFilePath)
+	yamlFile, err := ioutil.ReadFile(GpcConfigFilePath)
 	if err != nil {
-		log.Panic("yamlFile.Get err #%v ", err)
+		log.Panic("yamlFile.Get err #", err)
 	}
 
 	if err = yaml.Unmarshal(yamlFile, Conf); err != nil {

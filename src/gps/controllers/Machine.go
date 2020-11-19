@@ -7,6 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/common"
 	core "goPanel/src/core/database"
+	"goPanel/src/gps/coer/socket"
 	"goPanel/src/gps/constants"
 	"goPanel/src/gps/models"
 	"goPanel/src/gps/services"
@@ -53,6 +54,8 @@ func (c *MachineController) List(g *gin.Context) {
 	_ = json.Unmarshal(machineJson, &machineMap)
 
 	retData = append(retData, machineMap...)
+
+	log.Error(socket.ControlManager.Clients)
 
 	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, retData)
 	return

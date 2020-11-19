@@ -96,7 +96,12 @@ func CreatePath(path string) bool {
 
 // 获取当前工作目录
 func GetCurrentDir() string {
-	fpt, err := filepath.Abs("")
+	path := filepath.Dir(os.Args[0])
+	if path == "/tmp" {
+		path = ""
+	}
+
+	fpt, err := filepath.Abs(path)
 	if err != nil {
 		log.Error(err)
 	}

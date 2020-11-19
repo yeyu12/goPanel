@@ -15,7 +15,12 @@ import (
 func main() {
 	// 服务启动前，初始化操作
 	_, _ = time.LoadLocation("Asia/Shanghai")
-	core_log.LogSetOutput(config.Conf.App.LogPath)
+	core_log.Initialization(
+		config.Conf.App.LogOutputType,
+		config.Conf.App.Debug,
+		config.Conf.App.LogLevel,
+	)
+	core_log.LogSetOutput(config.Conf.App.LogPath, config.Conf.App.LogOutputFlag)
 	createTable()
 	go socket.ServerWsManager.Start()
 	go socket.ControlManager.Start()

@@ -4,13 +4,12 @@ import (
 	"errors"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/common"
-	"goPanel/src/gps/config"
 	"os"
 	"time"
 )
 
-func init() {
-	if config.Conf.App.LogOutputType == 0 {
+func Initialization(outPutType uint32, isDebug bool, level uint32) {
+	if outPutType == 0 {
 		log.SetFormatter(&log.TextFormatter{
 			FullTimestamp:   true,
 			TimestampFormat: "2006-01-02 15:04:05",
@@ -22,14 +21,14 @@ func init() {
 	}
 
 	// 显示调用位置，方法
-	log.SetReportCaller(config.Conf.App.Debug)
+	log.SetReportCaller(isDebug)
 	log.SetOutput(os.Stdout)
-	log.SetLevel(log.Level(config.Conf.App.LogLevel))
+	log.SetLevel(log.Level(level))
 }
 
 // 设置日志输出方式
-func LogSetOutput(path string) {
-	if config.Conf.App.LogOutputFlag == 1 && path != "" {
+func LogSetOutput(path string, outputFlag uint32) {
+	if outputFlag == 1 && path != "" {
 		if !common.DirOrFileByIsExists(path) && !common.CreatePath(path) {
 			return
 		}

@@ -105,7 +105,10 @@ func (c *Control) read() {
 		var data = make([]byte, 10240)
 		size, err := (*c.Conn).Read(data)
 		if err != nil || err == io.EOF {
-			log.Error(err)
+			if err != io.EOF {
+				log.Error(err)
+			}
+
 			ControlManager.UnRegister <- c
 			break
 		}

@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	Conf           *Config
-	ConfigFilePath = common.GetCurrentDir() + "/src/gps/config/conf.yaml"
+	Conf              *Config
+	GpsConfigFilePath = common.GetCurrentDir() + "/config/gps.yaml"
 )
 
 type Config struct {
@@ -39,7 +39,7 @@ func init() {
 }
 
 func loadYamlConfig() {
-	yamlFile, err := ioutil.ReadFile(ConfigFilePath)
+	yamlFile, err := ioutil.ReadFile(GpsConfigFilePath)
 	if err != nil {
 		log.Panic("yamlFile.Get err #%v ", err)
 	}
