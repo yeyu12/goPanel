@@ -21,10 +21,11 @@ type ControlTcpManager struct {
 }
 
 type Control struct {
-	Conn  *net.TCPConn
-	Write chan []byte
-	Uuid  string
-	Name  string
+	Conn     *net.TCPConn
+	Write    chan []byte
+	Uuid     string
+	Name     string
+	ClientId int
 }
 
 func (cm *ControlTcpManager) Start() {

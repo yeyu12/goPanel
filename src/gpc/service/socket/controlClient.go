@@ -7,6 +7,7 @@ import (
 	"goPanel/src/gpc/config"
 	"goPanel/src/gpc/router"
 	"io"
+	"io/ioutil"
 	"net"
 	"time"
 )
@@ -46,8 +47,37 @@ func heartbeat(conn *net.TCPConn) {
 
 // 注册本机数据
 func registerLocalData(conn *net.TCPConn) {
+	// 获取本机id数据
+	uidFilePath := config.Conf.App.UidPath + "uid"
+	var uid []byte
+	var err error
+
+	if common.DirOrFileByIsExists(uidFilePath) {
+		uid, err = ioutil.ReadFile(uidFilePath)
+		if err != nil {
+			log.Error("客户机，uid文件读取错误：", err)
+		}
+	}
+
+	if len(uid) == 0 {
+		if !common.DirOrFileByIsExists(config.Conf.App.UidPath) {
+			if !common.CreatePath(config.Conf.App.UidPath) {
+				log.Error("uid目录创建失败!")
+			}
+		}
+
+		id, _ := common.GenToken()
+		uid = []byte(id)
+
+		err = ioutil.WriteFile(uidFilePath, uid, 0755)
+		if err != nil {
+			log.Error("uid写文件出错！", err)
+		}
+	}
+
 	localComputerData := map[string]string{
 		"name": config.Conf.App.LocalName,
+		"uid":  string(uid),
 	}
 	write := RequestWsMessage{
 		Event: "local_register",

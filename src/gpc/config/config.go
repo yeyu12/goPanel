@@ -28,6 +28,7 @@ type AppConfig struct {
 	LocalName            string `yaml:"local_name"`
 	ControlHeartbeatTime int64  `yaml:"control_heartbeat_time"`
 	ControlReconnTcpTime int64  `yaml:"control_reconn_tcp_time"`
+	UidPath              string `yaml:"uid_path"`
 }
 
 func init() {

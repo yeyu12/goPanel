@@ -15,12 +15,13 @@ import (
 func main() {
 	// 服务启动前，初始化操作
 	_, _ = time.LoadLocation("Asia/Shanghai")
+	conf := config.Conf.App
 	core_log.Initialization(
-		config.Conf.App.LogOutputType,
-		config.Conf.App.Debug,
-		config.Conf.App.LogLevel,
+		conf.LogOutputType,
+		conf.Debug,
+		conf.LogLevel,
 	)
-	core_log.LogSetOutput(config.Conf.App.LogPath, config.Conf.App.LogOutputFlag)
+	core_log.LogSetOutput(conf.LogPath, conf.LogOutputFlag)
 	createTable()
 	go socket.ServerWsManager.Start()
 	go socket.ControlManager.Start()
@@ -28,7 +29,7 @@ func main() {
 
 	g := gin.Default()
 	g = (new(router.Route)).Init(g)
-	_ = g.Run(":" + strconv.Itoa(config.Conf.App.HttpPort))
+	_ = g.Run(":" + strconv.Itoa(conf.HttpPort))
 }
 
 // 创建表

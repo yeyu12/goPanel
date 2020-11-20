@@ -18,3 +18,5 @@ app:
   control_heartbeat_time: 30
   # 控制端重连时间，s为单位
   control_reconn_tcp_time: 5
+  # 客户端唯一id所在目录
+  uid_path: ./runtime/uid/
