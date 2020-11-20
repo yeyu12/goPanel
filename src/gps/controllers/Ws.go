@@ -51,6 +51,19 @@ func NewWsController() *WsController {
 	}
 }
 
+func (c *WsController) SshNew(g *gin.Context) {
+	/*wsConn, err := (&websocket.Upgrader{
+		HandshakeTimeout: time.Duration(time.Second * 30),
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}).Upgrade(g.Writer, g.Request, nil)
+	if err != nil {
+		log.Error(err)
+		return
+	}*/
+}
+
 func (c *WsController) Ssh(g *gin.Context) {
 	wsConn, err := (&websocket.Upgrader{
 		HandshakeTimeout: time.Duration(time.Second * 30),
