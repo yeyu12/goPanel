@@ -79,6 +79,7 @@ func registerLocalData(conn *net.TCPConn) {
 		"name": config.Conf.App.LocalName,
 		"uid":  string(uid),
 	}
+	log.Info(localComputerData)
 	write := RequestWsMessage{
 		Event: "local_register",
 		Data:  localComputerData,

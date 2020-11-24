@@ -35,3 +35,14 @@ type RequestWsMessage struct {
 	Event string      `json:"event"`
 	Data  interface{} `json:"data"`
 }
+
+type BaseInit struct {
+	Token string `json:"token"`
+}
+
+type ShellInit struct {
+	BaseInit
+	Id   string `json:"id"`
+	Cols uint32 `json:"cols"`
+	Rows uint32 `json:"rows"`
+}

@@ -9,8 +9,8 @@ app:
   # 日志目录
   log_path: ./runtime/log/
   # 服务端地址
-  server_host: 192.168.30.124
-  # 服务端端口
+  server_host: 192.168.28.124
+  # 服务端控制端口
   server_port: 10010
   # 本机昵称
   local_name: 公司电脑

@@ -4,7 +4,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/common"
 	"goPanel/src/gps/coer/socket"
-	"strconv"
 	"unsafe"
 )
 
@@ -21,5 +20,5 @@ func RegisterNode(cli unsafe.Pointer, message interface{}) {
 	}
 
 	controlTcpCli.Name = messBody["name"].(string)
-	controlTcpCli.ClientId, _ = strconv.Atoi(messBody["uid"].(string))
+	controlTcpCli.ClientId = messBody["uid"].(string)
 }

@@ -19,7 +19,7 @@ func (c *MachineController) List(g *gin.Context) {
 	var ret []map[string]interface{}
 	for index, _ := range socket.ControlManager.Clients {
 		ret = append(ret, map[string]interface{}{
-			"id":   index.Uuid,
+			"id":   index.ClientId,
 			"name": index.Name,
 		})
 	}

@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/websocket"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
+	"goPanel/src/gps/coer/socket"
 	"goPanel/src/gps/services"
 	panel_ws "goPanel/src/gps/services/websocket"
 	"goPanel/src/gps/services/ws"
@@ -52,7 +53,7 @@ func NewWsController() *WsController {
 }
 
 func (c *WsController) SshNew(g *gin.Context) {
-	/*wsConn, err := (&websocket.Upgrader{
+	wsConn, err := (&websocket.Upgrader{
 		HandshakeTimeout: time.Duration(time.Second * 30),
 		CheckOrigin: func(r *http.Request) bool {
 			return true
@@ -61,7 +62,13 @@ func (c *WsController) SshNew(g *gin.Context) {
 	if err != nil {
 		log.Error(err)
 		return
-	}*/
+	}
+
+	client := socket.NewClientWs(uuid.NewV4().String(), wsConn)
+	socket.ServerWsManager.Register <- client
+
+	go client.Read()
+	go client.Write()
 }
 
 func (c *WsController) Ssh(g *gin.Context) {

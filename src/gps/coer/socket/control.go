@@ -25,7 +25,7 @@ type Control struct {
 	Write    chan []byte
 	Uuid     string
 	Name     string
-	ClientId int
+	ClientId string
 }
 
 func (cm *ControlTcpManager) Start() {

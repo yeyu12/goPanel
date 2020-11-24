@@ -33,7 +33,7 @@
             library.add(faBars, faClipboard, faDownload, faKey, faCog);
             dom.watch();
 
-            this.url = 'ws' + '://' + window.location.hostname + ':10010';
+            this.url = 'ws' + '://' + window.location.hostname + ':10000';
         },
         /*eslint no-unused-vars: ["error", { "args": "none" }]*/
         mounted() {
@@ -85,7 +85,6 @@
                         cols: this.term.cols,
                         rows: this.term.rows,
                         id: this.menu.id,
-                        passwd: this.passwd
                     }));
 
                     this.term.writeln("");
@@ -105,6 +104,7 @@
                             break;
                         case "err":
                             this.isReconnection = false;
+                            this.ws.close()
 
                             this.$notify.error({
                                 title: '错误',

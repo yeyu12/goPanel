@@ -19,7 +19,8 @@ func (manager *ServerWebsocketManager) Start() {
 		case conn := <-manager.UnRegister:
 			if _, ok := manager.Clients[conn]; ok {
 				_ = conn.Socket.Close()
-				close(conn.WsRead)
+				_ = conn.RelayListener.Close()
+				close(conn.wsRead)
 				close(conn.Send)
 				delete(manager.Clients, conn)
 			}
