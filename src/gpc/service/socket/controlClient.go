@@ -6,13 +6,22 @@ import (
 	"goPanel/src/common"
 	"goPanel/src/gpc/config"
 	"goPanel/src/gpc/router"
+	"goPanel/src/gpc/service"
 	"io"
 	"io/ioutil"
 	"net"
 	"time"
 )
 
+var isReconnControlTcp = true
+
 func StartClientTcp() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error(err)
+		}
+	}()
+
 	for {
 		if isReconnControlTcp {
 			handelConnControlTcp()
@@ -25,10 +34,17 @@ func StartClientTcp() {
 
 // 心跳
 func heartbeat(conn *net.TCPConn) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error(err)
+			conn.Close()
+		}
+	}()
+
 	for {
 		time.Sleep(time.Second * time.Duration(config.Conf.App.ControlHeartbeatTime))
 
-		write := RequestWsMessage{
+		write := service.RequestWsMessage{
 			Event: "heartbeat",
 			Data:  nil,
 		}
@@ -47,6 +63,13 @@ func heartbeat(conn *net.TCPConn) {
 
 // 注册本机数据
 func registerLocalData(conn *net.TCPConn) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error(err)
+			conn.Close()
+		}
+	}()
+
 	// 获取本机id数据
 	uidFilePath := config.Conf.App.UidPath + "uid"
 	var uid []byte
@@ -79,8 +102,7 @@ func registerLocalData(conn *net.TCPConn) {
 		"name": config.Conf.App.LocalName,
 		"uid":  string(uid),
 	}
-	log.Info(localComputerData)
-	write := RequestWsMessage{
+	write := service.RequestWsMessage{
 		Event: "local_register",
 		Data:  localComputerData,
 	}
@@ -104,7 +126,7 @@ func handelConnControlTcp() {
 	}()
 
 	isReconnControlTcp = false
-	conn, err := common.ConnTcp(ControlAddr)
+	conn, err := common.ConnTcp(service.ControlAddr)
 	if err != nil {
 		log.Error(err)
 		return
@@ -116,7 +138,10 @@ func handelConnControlTcp() {
 
 	registerLocalData(conn)
 	go heartbeat(conn)
+	readControlTcpMess(conn)
+}
 
+func readControlTcpMess(conn *net.TCPConn) {
 	for {
 		var data = make([]byte, 10240)
 		size, err := conn.Read(data)
@@ -126,13 +151,18 @@ func handelConnControlTcp() {
 		}
 		data = data[:size]
 
-		var message Message
+		var message service.Message
 		err = json.Unmarshal(data, &message)
 		if err != nil {
 			log.Info(err)
 			continue
 		}
 
-		router.Route[message.Event](conn, message)
+		if _, ok := router.Route[message.Event]; ok {
+			router.Route[message.Event](conn, message)
+			continue
+		}
+
+		log.Error("请求路由不存在！")
 	}
 }

@@ -3,6 +3,7 @@ package main
 import (
 	core_log "goPanel/src/core/log"
 	"goPanel/src/gpc/config"
+	"goPanel/src/gpc/service"
 	"goPanel/src/gpc/service/socket"
 	"time"
 )
@@ -17,6 +18,6 @@ func main() {
 	)
 	core_log.LogSetOutput(conf.LogPath, conf.LogOutputFlag)
 
-	socket.ControlAddr = conf.ServerHost + ":" + conf.ServerPort
+	service.ControlAddr = conf.ServerHost + ":" + conf.ServerPort
 	socket.StartClientTcp()
 }

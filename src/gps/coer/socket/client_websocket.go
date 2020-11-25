@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
-	"goPanel/src/gps/constants"
+	"goPanel/src/constants"
 	"goPanel/src/gps/services"
 	"net"
 )
@@ -32,7 +32,10 @@ func NewClientWs(uid string, socket *websocket.Conn) *Client {
 
 func (c *Client) Read() {
 	defer func() {
-		recover()
+		if err := recover(); err != nil {
+			log.Error(err)
+		}
+
 		//time.Sleep(time.Microsecond * 100)
 		ServerWsManager.UnRegister <- c
 	}()
@@ -60,7 +63,10 @@ func (c *Client) Read() {
 
 func (c *Client) Write() {
 	defer func() {
-		recover()
+		if err := recover(); err != nil {
+			log.Error(err)
+		}
+
 		ServerWsManager.UnRegister <- c
 	}()
 
@@ -72,7 +78,14 @@ func (c *Client) Write() {
 				return
 			}
 
-			if err := c.Socket.WriteMessage(websocket.BinaryMessage, message); err != nil {
+			msgJson, _ := json.Marshal(Message{
+				Type:  0,
+				Event: constants.WS_EVENT_DATA,
+				Data:  string(message),
+				Code:  constants.SUCCESS,
+			})
+
+			if err := c.Socket.WriteMessage(websocket.BinaryMessage, msgJson); err != nil {
 				log.Error(err)
 				return
 			}
@@ -93,9 +106,15 @@ func (c *Client) wsWriteErr(code int32, msg string) {
 }
 
 func (c *Client) handleWsMess(req *Message) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error(err)
+		}
+	}()
+
 	switch req.Event {
 	case constants.WS_EVENT_INIT:
-		// 验证相关东西，用户token，终端是否存在
+		// 验证相关数据，用户token，终端是否存在
 		baseInitData := new(BaseInit)
 		baseInitJson, _ := json.Marshal(req.Data)
 		_ = json.Unmarshal(baseInitJson, &baseInitData)
@@ -115,22 +134,15 @@ func (c *Client) handleWsMess(req *Message) {
 			// 查询是否有该连接存在
 			// 存在：创建中继端，通知客户端创建一个连接，连接中继端，客户端返回终端密码，ws客户端直连中继端
 			// 不存在：跳出
-
-			var control *Control
-			for index, _ := range ControlManager.Clients {
-				if index.ClientId == sshInitData.Id {
-					control = index
-					goto JAMP
-				}
+			control := ControlManager.FindClientIdByClientConn(sshInitData.Id)
+			if control == nil {
+				c.wsWriteErr(constants.CLIENT_NOT_FOND_FAIL, constants.CLIENT_NOT_FOND_MSG)
+				return
 			}
 
-			c.wsWriteErr(constants.CLIENT_NOT_FOND_FAIL, constants.CLIENT_NOT_FOND_MSG)
-			return
-
-		JAMP:
 			// 创建中继端
 			port := RelayPort()
-			relayListener, err := CreateRelayConn(port)
+			relayListener, err := CreateRelayConn(port, c.Send)
 			if err != nil {
 				log.Error(err)
 				c.wsWriteErr(constants.CREATE_NOT_RELAY_FAIL, constants.CREATE_NOT_RELAY_MSG)
@@ -143,6 +155,8 @@ func (c *Client) handleWsMess(req *Message) {
 				Event: "sshConnectRelay",
 				Data: map[string]interface{}{
 					"port": port,
+					"cols": sshInitData.Cols,
+					"rows": sshInitData.Rows,
 				},
 			}
 			reqMessJson, _ := json.Marshal(reqMess)
@@ -155,6 +169,7 @@ func (c *Client) handleWsMess(req *Message) {
 	case constants.WS_EVENT_DATA:
 		switch req.Type {
 		case constants.CLIENT_SHELL_TYPE:
+			log.Error(req.Data.(string))
 			c.wsRead <- []byte(req.Data.(string))
 			break
 		}

@@ -3,6 +3,7 @@ package socket
 import (
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/common"
+	"io"
 	"net"
 	"strconv"
 )
@@ -25,8 +26,9 @@ func RelayPort() int {
 	return ControlManager.relayStartPort
 }
 
-func CreateRelayConn(port int) (*net.TCPListener, error) {
-	tcpAddr, err := net.ResolveTCPAddr("tcp", "0.0.0.0:"+strconv.Itoa(port))
+func CreateRelayConn(port int, wsWrite chan []byte) (*net.TCPListener, error) {
+	relayAddr := "0.0.0.0:" + strconv.Itoa(port)
+	tcpAddr, err := net.ResolveTCPAddr("tcp", relayAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -36,23 +38,41 @@ func CreateRelayConn(port int) (*net.TCPListener, error) {
 		return nil, err
 	}
 
+	log.Info("中继端启动：", relayAddr)
+
 	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				log.Error(err)
+			}
+		}()
+
 		for {
 			relayConn, err := relayListen.Accept()
 			if err != nil {
-				log.Info("连接中继端失败!", err)
+				log.Info(err)
+				return
 			}
 
-			for {
-				data := make([]byte, 10240)
-				size, err := relayConn.Read(data)
-				if err != nil {
-					log.Error("消息读失败！", err)
+			go func() {
+				for {
+					data := make([]byte, 10240)
+					size, err := relayConn.Read(data)
+					if err == io.EOF {
+						return
+					}
+					if err != nil {
+						log.Error("消息读失败！", err)
+					}
+					data = data[:size]
+
+					log.Info("来自用户端的消息：", relayConn.RemoteAddr())
+					//log.Info("消息内容：", string(data))
+
+					// 中继端的输出发送到ws中
+					wsWrite <- data
 				}
-				data = data[:size]
-				log.Info("来自用户端：", relayConn.RemoteAddr())
-				log.Info("中继端的输出：", string(data))
-			}
+			}()
 		}
 	}()
 

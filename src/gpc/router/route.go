@@ -10,6 +10,6 @@ type handle func(conn *net.TCPConn, message interface{})
 var Route = make(map[string]handle)
 
 func init() {
-	Route["connRelayByLocalSsh"] = controller.ConnRelayAndLocalSsh
+	Route["sshConnectRelay"] = controller.SshConnectRelay
 	Route["heartbeat"] = controller.Heartbeat
 }

@@ -149,7 +149,9 @@ func (s *Ssh) Pty(channel gossh.Channel, term TermConfig) error {
 
 func (s *Ssh) Read(channel gossh.Channel, sshRead chan []byte) {
 	defer func() {
-		log.Error(recover())
+		if err := recover(); err != nil {
+			log.Error(err)
+		}
 	}()
 
 	br := bufio.NewReader(channel)
@@ -161,8 +163,9 @@ func (s *Ssh) Read(channel gossh.Channel, sshRead chan []byte) {
 
 	go func() {
 		defer func() {
-			err := recover()
-			log.Info(err)
+			if err := recover(); err != nil {
+				log.Info(err)
+			}
 		}()
 
 		for {
@@ -199,7 +202,9 @@ func (s *Ssh) Read(channel gossh.Channel, sshRead chan []byte) {
 
 func (s *Ssh) Write(channel gossh.Channel, sshWrite chan []byte) {
 	defer func() {
-		log.Error(recover())
+		if err := recover(); err != nil {
+			log.Error(err)
+		}
 	}()
 
 	for {

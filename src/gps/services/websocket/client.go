@@ -6,8 +6,8 @@ import (
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/common"
+	"goPanel/src/constants"
 	core "goPanel/src/core/database"
-	"goPanel/src/gps/constants"
 	"goPanel/src/gps/services"
 	"time"
 )

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
-	"goPanel/src/gps/constants"
+	"goPanel/src/constants"
 	"goPanel/src/gps/services"
 	"time"
 )

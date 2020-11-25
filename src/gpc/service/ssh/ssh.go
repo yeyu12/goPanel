@@ -1,20 +1,28 @@
-package websocket
+package ssh
 
 import (
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/constants"
+	"goPanel/src/gpc/service"
 	"goPanel/src/library/ssh"
 	gossh "golang.org/x/crypto/ssh"
 )
 
-type wsSsh struct {
+type TcpSsh struct {
 	SshRead  chan []byte
 	SshWrite chan []byte
 }
 
+func NewTcpSsh() *TcpSsh {
+	return &TcpSsh{
+		SshRead:  make(chan []byte, 1024),
+		SshWrite: make(chan []byte, 1024),
+	}
+}
+
 // 连接ssh
-func (c *wsSsh) sshConn(host, username, passwd string, port int, cols, rows uint32) (*ssh.Ssh, gossh.Channel, error) {
+func (c *TcpSsh) SshConn(host, username, passwd string, port int, cols, rows uint32) (*ssh.Ssh, gossh.Channel, error) {
 	sh := ssh.NewSsh(host, username, passwd, port)
 	sshChannel, err := sh.RunShell(ssh.TermConfig{
 		Cols: cols,
@@ -27,8 +35,8 @@ func (c *wsSsh) sshConn(host, username, passwd string, port int, cols, rows uint
 	return sh, sshChannel, nil
 }
 
-// 读ssh数据写入到ws中
-func (c *wsSsh) sshReadByWsWrite(wsWrite chan []byte) {
+// 读ssh数据写入到tcp中
+func (c *TcpSsh) SshReadBySocketWrite(tcpWrite chan []byte) {
 	defer func() {
 		log.Error(recover())
 	}()
@@ -39,30 +47,28 @@ func (c *wsSsh) sshReadByWsWrite(wsWrite chan []byte) {
 			if !ok {
 				log.Error(ok)
 			}
-			wsMess := &Message{
+			wsMess := &service.Message{
 				Event: constants.WS_EVENT_DATA,
 				Data:  string(msg),
 				Code:  constants.SUCCESS,
 			}
 
 			wsMessJson, _ := json.Marshal(wsMess)
-			wsWrite <- wsMessJson
+			tcpWrite <- wsMessJson
 		}
 	}
-
-	//CLOSE:
 }
 
-// 读ws数据写ssh数据
-func (c *wsSsh) readWsBySshWrite(wsRead chan []byte) {
+// 读tcp数据写ssh数据
+func (c *TcpSsh) ReadSocketBySshWrite(tcpRead chan []byte) {
 	defer func() {
 		log.Error(recover())
 	}()
 
 	for {
 		select {
-		case msg := <-wsRead:
-			c.SshWrite <- msg
+		case sw := <-tcpRead:
+			c.SshWrite <- sw
 		}
 	}
 }

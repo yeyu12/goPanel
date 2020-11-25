@@ -3,8 +3,8 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"goPanel/src/common"
+	"goPanel/src/constants"
 	"goPanel/src/gps/coer/socket"
-	"goPanel/src/gps/constants"
 )
 
 type MachineController struct {

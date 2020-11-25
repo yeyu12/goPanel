@@ -1,6 +1,5 @@
-package socket
+package service
 
-var isReconnControlTcp = true
 var ControlAddr string
 
 type RequestWsMessage struct {
