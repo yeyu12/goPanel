@@ -17,6 +17,7 @@ type Client struct {
 	ClientType    int
 	RelayListener *net.TCPListener
 	RelayConn     *net.TCPConn
+	RelayPort     int
 }
 
 var userService = new(services.UserService)
@@ -142,22 +143,23 @@ func (c *Client) handleWsMess(req *Message) {
 
 			// 创建中继端
 			relay := new(Relay)
-			port := relay.RelayPort()
+			relayPort := relay.RelayPort()
 			relayConnCh := make(chan *net.TCPConn)
-			relayListener, err := relay.CreateRelayConn(port, c.Send, relayConnCh)
+			relayListener, err := relay.CreateRelayConn(relayPort, c.Send, relayConnCh)
 			if err != nil {
 				log.Error(err)
 				c.wsWriteErr(constants.CREATE_NOT_RELAY_FAIL, constants.CREATE_NOT_RELAY_MSG)
 				return
 			}
 			c.RelayListener = relayListener
+			c.RelayPort = relayPort
 			go c.bindRelayConn(relayConnCh)
 
 			// 通知客户端创建本地ssh，连接中间端
 			reqMess := RequestWsMessage{
 				Event: "sshConnectRelay",
 				Data: map[string]interface{}{
-					"port": port,
+					"port": relayPort,
 					"cols": sshInitData.Cols,
 					"rows": sshInitData.Rows,
 				},

@@ -92,3 +92,7 @@ func (cm *ControlTcpManager) FindClientIdByClientConn(clientId string) *Control 
 
 	return nil
 }
+
+func (cm *ControlTcpManager) PushRecoveryPort(port int) {
+	ControlManager.recoveryPort = append(ControlManager.recoveryPort, port)
+}

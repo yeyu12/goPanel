@@ -32,6 +32,8 @@ func (manager *ServerWebsocketManager) Start() {
 					log.Error(err)
 				}
 
+				ControlManager.PushRecoveryPort(conn.RelayPort)
+
 				close(conn.wsRead)
 				close(conn.Send)
 				delete(manager.Clients, conn)
