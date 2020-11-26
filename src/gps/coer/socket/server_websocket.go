@@ -1,5 +1,7 @@
 package socket
 
+import log "github.com/sirupsen/logrus"
+
 type ServerWebsocketManager struct {
 	Clients    map[*Client]bool
 	Broadcast  chan []byte
@@ -18,8 +20,18 @@ func (manager *ServerWebsocketManager) Start() {
 			manager.Clients[conn] = true
 		case conn := <-manager.UnRegister:
 			if _, ok := manager.Clients[conn]; ok {
-				_ = conn.Socket.Close()
-				_ = conn.RelayListener.Close()
+				if err := conn.Socket.Close(); err != nil {
+					log.Error(err)
+				}
+				if conn.RelayConn != nil {
+					if err := conn.RelayConn.Close(); err != nil {
+						log.Error(err)
+					}
+				}
+				if err := conn.RelayListener.Close(); err != nil {
+					log.Error(err)
+				}
+
 				close(conn.wsRead)
 				close(conn.Send)
 				delete(manager.Clients, conn)

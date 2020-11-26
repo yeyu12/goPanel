@@ -8,7 +8,11 @@ import (
 	"strconv"
 )
 
-func RelayPort() int {
+type Relay struct {
+	Conn *net.TCPConn
+}
+
+func (r *Relay) RelayPort() int {
 	if len(ControlManager.recoveryPort) > 0 {
 		retPort := ControlManager.recoveryPort[0]
 		ControlManager.recoveryPort = ControlManager.recoveryPort[1:]
@@ -26,7 +30,7 @@ func RelayPort() int {
 	return ControlManager.relayStartPort
 }
 
-func CreateRelayConn(port int, wsWrite chan []byte) (*net.TCPListener, error) {
+func (r *Relay) CreateRelayConn(port int, wsWrite chan []byte, relayConnCh chan *net.TCPConn) (*net.TCPListener, error) {
 	relayAddr := "0.0.0.0:" + strconv.Itoa(port)
 	tcpAddr, err := net.ResolveTCPAddr("tcp", relayAddr)
 	if err != nil {
@@ -44,6 +48,7 @@ func CreateRelayConn(port int, wsWrite chan []byte) (*net.TCPListener, error) {
 		defer func() {
 			if err := recover(); err != nil {
 				log.Error(err)
+				relayListen.Close()
 			}
 		}()
 
@@ -51,30 +56,43 @@ func CreateRelayConn(port int, wsWrite chan []byte) (*net.TCPListener, error) {
 			relayConn, err := relayListen.Accept()
 			if err != nil {
 				log.Info(err)
-				return
+				break
 			}
 
-			go func() {
-				for {
-					data := make([]byte, 10240)
-					size, err := relayConn.Read(data)
-					if err == io.EOF {
-						return
-					}
-					if err != nil {
-						log.Error("消息读失败！", err)
-					}
-					data = data[:size]
+			r.Conn = relayConn.(*net.TCPConn)
+			relayConnCh <- r.Conn
 
-					log.Info("来自用户端的消息：", relayConn.RemoteAddr())
-					//log.Info("消息内容：", string(data))
-
-					// 中继端的输出发送到ws中
-					wsWrite <- data
-				}
-			}()
+			go r.read(wsWrite)
 		}
 	}()
 
 	return relayListen, nil
+}
+
+func (r *Relay) read(wsWrite chan []byte) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error(err)
+			r.Conn.Close()
+		}
+	}()
+
+	for {
+		data := make([]byte, 10240)
+		size, err := r.Conn.Read(data)
+		if err == io.EOF {
+			return
+		}
+		if err != nil {
+			log.Info("消息读失败！", err)
+			break
+		}
+		data = data[:size]
+
+		log.Info("来自用户端的消息：", r.Conn.RemoteAddr())
+		//log.Info("消息内容：", string(data))
+
+		// 中继端的输出发送到ws中
+		wsWrite <- data
+	}
 }

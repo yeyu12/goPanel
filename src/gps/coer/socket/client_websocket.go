@@ -16,6 +16,7 @@ type Client struct {
 	wsRead        chan []byte
 	ClientType    int
 	RelayListener *net.TCPListener
+	RelayConn     *net.TCPConn
 }
 
 var userService = new(services.UserService)
@@ -36,20 +37,19 @@ func (c *Client) Read() {
 			log.Error(err)
 		}
 
-		//time.Sleep(time.Microsecond * 100)
 		ServerWsManager.UnRegister <- c
 	}()
 
 	for {
 		mt, message, err := c.Socket.ReadMessage()
-		// 其他错误，如果是 1001 和 1000 就不打印日志
+		// 其他错误，如果是 1001、1000、1005 就不打印日志
 		if websocket.IsUnexpectedCloseError(err,
 			websocket.CloseGoingAway,
 			websocket.CloseNormalClosure,
 			websocket.CloseNoStatusReceived,
 		) {
-			log.Infof("ReadMessage other remote:%v error: %v \n", c.Socket.RemoteAddr(), err)
-			return
+			log.Infof("ws连接错误：", c.Socket.RemoteAddr(), err)
+			break
 		}
 
 		if mt == websocket.BinaryMessage {
@@ -141,14 +141,17 @@ func (c *Client) handleWsMess(req *Message) {
 			}
 
 			// 创建中继端
-			port := RelayPort()
-			relayListener, err := CreateRelayConn(port, c.Send)
+			relay := new(Relay)
+			port := relay.RelayPort()
+			relayConnCh := make(chan *net.TCPConn)
+			relayListener, err := relay.CreateRelayConn(port, c.Send, relayConnCh)
 			if err != nil {
 				log.Error(err)
 				c.wsWriteErr(constants.CREATE_NOT_RELAY_FAIL, constants.CREATE_NOT_RELAY_MSG)
 				return
 			}
 			c.RelayListener = relayListener
+			go c.bindRelayConn(relayConnCh)
 
 			// 通知客户端创建本地ssh，连接中间端
 			reqMess := RequestWsMessage{
@@ -175,5 +178,14 @@ func (c *Client) handleWsMess(req *Message) {
 		}
 
 		break
+	}
+}
+
+func (c *Client) bindRelayConn(relayConnCh chan *net.TCPConn) {
+	for {
+		select {
+		case rc := <-relayConnCh:
+			c.RelayConn = rc
+		}
 	}
 }
