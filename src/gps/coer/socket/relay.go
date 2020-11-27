@@ -111,7 +111,7 @@ func (r *Relay) write(wsRead chan []byte) {
 		case read := <-wsRead:
 			_, err := r.Conn.Write(read)
 			if err != nil {
-				log.Error(err)
+				log.Info(err)
 				return
 			}
 		}
