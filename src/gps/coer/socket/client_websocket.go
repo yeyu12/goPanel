@@ -79,13 +79,25 @@ func (c *Client) Write() {
 				return
 			}
 
-			msgJson, _ := json.Marshal(Message{
+			var msg Message
+			var msgJson []byte
+			err := json.Unmarshal(message, &msg)
+			if err == nil {
+				msgJson = message
+				goto JUMP
+			}
+			if msg.Event != "" {
+				goto JUMP
+			}
+
+			msgJson, _ = json.Marshal(Message{
 				Type:  0,
 				Event: constants.WS_EVENT_DATA,
 				Data:  string(message),
 				Code:  constants.SUCCESS,
 			})
 
+		JUMP:
 			if err := c.Socket.WriteMessage(websocket.BinaryMessage, msgJson); err != nil {
 				log.Error(err)
 				return
@@ -145,7 +157,7 @@ func (c *Client) handleWsMess(req *Message) {
 			relay := new(Relay)
 			relayPort := relay.RelayPort()
 			relayConnCh := make(chan *net.TCPConn)
-			relayListener, err := relay.CreateRelayConn(relayPort, c.Send, relayConnCh)
+			relayListener, err := relay.CreateRelayConn(relayPort, c.Send, c.wsRead, relayConnCh)
 			if err != nil {
 				log.Error(err)
 				c.wsWriteErr(constants.CREATE_NOT_RELAY_FAIL, constants.CREATE_NOT_RELAY_MSG)
@@ -174,7 +186,6 @@ func (c *Client) handleWsMess(req *Message) {
 	case constants.WS_EVENT_DATA:
 		switch req.Type {
 		case constants.CLIENT_SHELL_TYPE:
-			log.Error(req.Data.(string))
 			c.wsRead <- []byte(req.Data.(string))
 			break
 		}

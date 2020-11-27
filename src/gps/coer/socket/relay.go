@@ -30,7 +30,7 @@ func (r *Relay) RelayPort() int {
 	return ControlManager.relayStartPort
 }
 
-func (r *Relay) CreateRelayConn(port int, wsWrite chan []byte, relayConnCh chan *net.TCPConn) (*net.TCPListener, error) {
+func (r *Relay) CreateRelayConn(port int, wsWrite, wsRead chan []byte, relayConnCh chan *net.TCPConn) (*net.TCPListener, error) {
 	relayAddr := "0.0.0.0:" + strconv.Itoa(port)
 	tcpAddr, err := net.ResolveTCPAddr("tcp", relayAddr)
 	if err != nil {
@@ -63,6 +63,7 @@ func (r *Relay) CreateRelayConn(port int, wsWrite chan []byte, relayConnCh chan 
 			relayConnCh <- r.Conn
 
 			go r.read(wsWrite)
+			go r.write(wsRead)
 		}
 	}()
 
@@ -90,9 +91,29 @@ func (r *Relay) read(wsWrite chan []byte) {
 		data = data[:size]
 
 		log.Info("来自用户端的消息：", r.Conn.RemoteAddr())
-		//log.Info("消息内容：", string(data))
+		log.Info("消息内容：", string(data))
 
 		// 中继端的输出发送到ws中
 		wsWrite <- data
+	}
+}
+
+func (r *Relay) write(wsRead chan []byte) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error(err)
+			r.Conn.Close()
+		}
+	}()
+
+	for {
+		select {
+		case read := <-wsRead:
+			_, err := r.Conn.Write(read)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+		}
 	}
 }
