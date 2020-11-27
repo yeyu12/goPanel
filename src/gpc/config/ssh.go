@@ -23,7 +23,7 @@ type SshConfig struct {
 func (c *SshConfig) initialization() {
 	sshConfigPath = Conf.App.UserDir + "/.config/"
 	sshConfigFileName = "gpc.yaml"
-	exampleSshConfigPath = common.GetCurrentDir() + "/config/.config.gpc.yaml.example"
+	exampleSshConfigPath = common.GetCurrentDir() + "/script/client.gpc.yaml.example"
 
 	if !common.DirOrFileByIsExists(sshConfigPath) {
 		if !common.CreatePath(sshConfigPath) {

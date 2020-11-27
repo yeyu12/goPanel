@@ -44,6 +44,7 @@ func (r *RelayClient) RelayConn(addr string, flag uint, cols, rows uint32) error
 	case constants.CLIENT_SHELL_TYPE:
 		tcpSsh, err := r.connSsh(cols, rows)
 		if err != nil {
+			log.Error(err)
 			return err
 		}
 
@@ -61,24 +62,34 @@ func (r *RelayClient) RelayConn(addr string, flag uint, cols, rows uint32) error
 }
 
 func (r *RelayClient) relayClientReadTcpWriteSsh(sshWrite chan []byte) {
+	if sshWrite == nil {
+		return
+	}
+
 	for {
 		select {
-		case sw := <-r.Read:
+		case sw, ok := <-r.Read:
+			if !ok {
+				return
+			}
+
 			sshWrite <- sw
 		}
 	}
 }
 
 func (r *RelayClient) relayClientReadSshWriteTcp(sshRead chan []byte) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Error(err)
-		}
-	}()
+	if sshRead == nil {
+		return
+	}
 
 	for {
 		select {
-		case w := <-sshRead:
+		case w, ok := <-sshRead:
+			if !ok {
+				return
+			}
+
 			r.Write <- w
 		}
 	}
@@ -99,11 +110,10 @@ func (r *RelayClient) connSsh(cols, rows uint32) (*TcpSsh, error) {
 		resJson, _ := json.Marshal(m)
 		_, err = r.Conn.Write(resJson)
 		if err != nil {
-			log.Error(err)
 			r.closeRelay()
 		}
 
-		return nil, err
+		return tcpSsh, err
 	}
 
 	return tcpSsh, nil

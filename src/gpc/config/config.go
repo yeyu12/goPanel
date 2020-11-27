@@ -60,8 +60,5 @@ func loadYamlConfig() {
 }
 
 func loadEnvConfig() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Error("Error loading .env file")
-	}
+	_ = godotenv.Load()
 }

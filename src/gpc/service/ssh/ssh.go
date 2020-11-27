@@ -38,7 +38,9 @@ func (c *TcpSsh) SshConn(host, username, passwd string, port int, cols, rows uin
 // 读ssh数据写入到tcp中
 func (c *TcpSsh) SshReadBySocketWrite(tcpWrite chan []byte) {
 	defer func() {
-		log.Error(recover())
+		if err := recover(); err != nil {
+			log.Error(err)
+		}
 	}()
 
 	for {
@@ -46,6 +48,7 @@ func (c *TcpSsh) SshReadBySocketWrite(tcpWrite chan []byte) {
 		case msg, ok := <-c.SshRead:
 			if !ok {
 				log.Error(ok)
+				return
 			}
 			wsMess := &service.Message{
 				Event: constants.WS_EVENT_DATA,
@@ -62,7 +65,9 @@ func (c *TcpSsh) SshReadBySocketWrite(tcpWrite chan []byte) {
 // 读tcp数据写ssh数据
 func (c *TcpSsh) ReadSocketBySshWrite(tcpRead chan []byte) {
 	defer func() {
-		log.Error(recover())
+		if err := recover(); err != nil {
+			log.Error(err)
+		}
 	}()
 
 	for {

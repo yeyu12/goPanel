@@ -55,7 +55,7 @@ func heartbeat(conn *net.TCPConn) {
 
 		log.Info("正在执行控制端心跳包")
 		if _, err = conn.Write(writeJson); err != nil {
-			log.Error(err)
+			log.Info(err)
 			return
 		}
 	}
