@@ -15,6 +15,7 @@ var (
 
 type Config struct {
 	App *AppConfig
+	Ssh *SshConfig
 }
 
 type AppConfig struct {
@@ -29,6 +30,7 @@ type AppConfig struct {
 	ControlHeartbeatTime int64  `yaml:"control_heartbeat_time"`
 	ControlReconnTcpTime int64  `yaml:"control_reconn_tcp_time"`
 	UidPath              string `yaml:"uid_path"`
+	UserDir              string
 }
 
 func init() {
@@ -36,6 +38,14 @@ func init() {
 
 	loadYamlConfig()
 	loadEnvConfig()
+
+	userDir, err := common.UserDir()
+	if err != nil {
+		log.Panic("获取用户目录失败！", err)
+	}
+	Conf.App.UserDir = userDir
+
+	new(SshConfig).initialization()
 }
 
 func loadYamlConfig() {

@@ -1,0 +1,4 @@
+ssh:
+    username: root
+    password: root
+    port: 22

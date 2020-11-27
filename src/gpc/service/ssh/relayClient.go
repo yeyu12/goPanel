@@ -5,6 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/common"
 	"goPanel/src/constants"
+	"goPanel/src/gpc/config"
 	"goPanel/src/gpc/service"
 	"goPanel/src/library/ssh"
 	gossh "golang.org/x/crypto/ssh"
@@ -84,9 +85,10 @@ func (r *RelayClient) relayClientReadSshWriteTcp(sshRead chan []byte) {
 }
 
 func (r *RelayClient) connSsh(cols, rows uint32) (*TcpSsh, error) {
-	tcpSsh := NewTcpSsh()
 	var err error
-	r.sh, r.sshChan, err = tcpSsh.SshConn("127.0.0.1", "fengxiao", "ZpB123", 22, cols, rows)
+	host := "127.0.0.1"
+	tcpSsh := NewTcpSsh()
+	r.sh, r.sshChan, err = tcpSsh.SshConn(host, config.Conf.Ssh.Username, config.Conf.Ssh.Password, config.Conf.Ssh.Port, cols, rows)
 	if err != nil {
 		m := service.Message{
 			Event: constants.WS_EVENT_ERR,
