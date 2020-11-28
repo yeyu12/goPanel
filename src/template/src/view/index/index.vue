@@ -46,6 +46,29 @@
             </el-container>
         </el-container>
 
+        <el-dialog
+                title="修改主机"
+                :visible.sync="isAddComputer"
+                width="500px"
+                center>
+            <el-form :model="form.computer" label-width="80px" ref="computer">
+                <el-form-item label="用户名：">
+                    <el-input v-model="form.computer.user" placeholder="请输入主机用户名，默认root"></el-input>
+                </el-form-item>
+                <el-form-item label="密码：" prop="passwd">
+                    <el-input v-model="form.computer.passwd" type="password" placeholder="请输入主机密码，默认root"></el-input>
+                </el-form-item>
+                <el-form-item label="ssh端口：">
+                    <el-input v-model="form.computer.port" placeholder="请输入主机ssh端口，默认22"></el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="isAddComputer = false">取 消</el-button>
+                <el-button type="primary" @click="save">确 定</el-button>
+            </span>
+        </el-dialog>
+
         <!-- 右键菜单-->
         <transition name="el-fade-in-linear">
             <el-popover
@@ -55,7 +78,7 @@
                     trigger="manual"
                     v-model="menuVisible">
                 <!--                <a class="menu-button" @click="createComputer" v-if="isDir">添加</a>-->
-                <!--                <a class="menu-button" @click="editTree">编辑</a>-->
+                <a class="menu-button" @click="editTree">编辑</a>
                 <!--                <a class="menu-button" @click="delTree">删除</a>-->
                 <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
                 <a class="menu-button" @click="showAddCommand(1)" v-if="!isDir">执行命令</a>
@@ -135,6 +158,11 @@
                         plan_exec_time: '',
                         is_type: 1, // 执行类型（1单个执行，2批量执行
                         ids: [],
+                    },
+                    computer: {
+                        username: '',
+                        passwd: '',
+                        port: ''
                     }
                 },
                 menuVisible: false,
@@ -152,7 +180,8 @@
                 },
                 treeClickCount: 0,
                 timer: {},
-                multipleTableSelection: []
+                multipleTableSelection: [],
+                isAddComputer: false,
             }
         },
         created() {
@@ -322,16 +351,28 @@
                 }).catch(err => {
                     this.$message.error('服务器出小差！');
                 })
+            },
+            editTree() {
+                this.form.computer = {
+                    id: this.dirData.id,
+                };
+
+                this.isAddComputer = true;
+            },
+            save() {
+
             }
         },
         computed: {
             topTagMenu() {
                 return this.$store.state.TopMenu.openTagMenu;
             }
-        },
+        }
+        ,
         components: {
             shell
-        },
+        }
+        ,
         destroyed() {
             clearTimeout(this.timer);
         }

@@ -254,7 +254,18 @@ func StructToJson(data interface{}) (dataMap map[string]interface{}) {
 }
 
 func portInUse(port int) bool {
-	checkStatement := fmt.Sprintf("netstat -anp | grep -q %d ", port)
+	var checkStatement string
+	switch runtime.GOOS {
+	case "darwin":
+		checkStatement = fmt.Sprintf("netstat -anp tcp | grep %d ", port)
+		break
+	case "linux":
+		checkStatement = fmt.Sprintf("netstat -anp | grep -q %d ", port)
+		break
+	case "windows":
+		break
+	}
+
 	output, err := exec.Command("sh", "-c", checkStatement).CombinedOutput()
 	if err != nil {
 		return true // err != nil 说明端口没被占用
