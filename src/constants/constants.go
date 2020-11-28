@@ -10,3 +10,9 @@ const (
 const (
 	CLIENT_SHELL_TYPE = iota
 )
+
+const (
+	SYSTEM_MAC     = "darwin"
+	SYSTEM_LINUX   = "linux"
+	SYSTEM_WINDOWS = "windows"
+)

@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"goPanel/src/constants"
 	"goPanel/src/library/snowFlake"
 	"net"
 	"net/http"
@@ -67,7 +68,7 @@ func GetCurrentDate() string {
 }
 
 func IsWindows() bool {
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == constants.SYSTEM_WINDOWS {
 		return true
 	}
 
@@ -103,10 +104,10 @@ func GetCurrentDir() string {
 	var fpt string
 	var err error
 	switch runtime.GOOS {
-	case "darwin":
+	case constants.SYSTEM_MAC:
 		fpt, _ = os.Getwd()
 		return fpt
-	case "windows":
+	case constants.SYSTEM_LINUX:
 		path := filepath.Dir(os.Args[0])
 		if path == "/tmp" {
 			path = ""
@@ -116,7 +117,7 @@ func GetCurrentDir() string {
 		if err != nil {
 			log.Error(err)
 		}
-	case "linux":
+	case constants.SYSTEM_WINDOWS:
 		break
 	}
 
@@ -256,13 +257,13 @@ func StructToJson(data interface{}) (dataMap map[string]interface{}) {
 func portInUse(port int) bool {
 	var checkStatement string
 	switch runtime.GOOS {
-	case "darwin":
+	case constants.SYSTEM_MAC:
 		checkStatement = fmt.Sprintf("netstat -anp tcp | grep %d ", port)
 		break
-	case "linux":
+	case constants.SYSTEM_LINUX:
 		checkStatement = fmt.Sprintf("netstat -anp | grep -q %d ", port)
 		break
-	case "windows":
+	case constants.SYSTEM_WINDOWS:
 		break
 	}
 
@@ -326,7 +327,7 @@ func UserDir() (string, error) {
 
 	// cross compile support
 
-	if "windows" == runtime.GOOS {
+	if constants.SYSTEM_WINDOWS == runtime.GOOS {
 		return homeWindows()
 	}
 
