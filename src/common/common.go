@@ -100,14 +100,24 @@ func CreatePath(path string) bool {
 
 // 获取当前工作目录
 func GetCurrentDir() string {
-	path := filepath.Dir(os.Args[0])
-	if path == "/tmp" {
-		path = ""
-	}
+	var fpt string
+	var err error
+	switch runtime.GOOS {
+	case "darwin":
+		fpt, _ = os.Getwd()
+		return fpt
+	case "windows":
+		path := filepath.Dir(os.Args[0])
+		if path == "/tmp" {
+			path = ""
+		}
 
-	fpt, err := filepath.Abs(path)
-	if err != nil {
-		log.Error(err)
+		fpt, err = filepath.Abs(path)
+		if err != nil {
+			log.Error(err)
+		}
+	case "linux":
+		break
 	}
 
 	return fpt
@@ -275,7 +285,6 @@ func ConnTcp(addr string) (*net.TCPConn, error) {
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
 
 	if err != nil {
-		log.Error("Client connect error ! " + err.Error())
 		return nil, err
 	}
 
