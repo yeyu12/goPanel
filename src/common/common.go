@@ -255,6 +255,7 @@ func StructToJson(data interface{}) (dataMap map[string]interface{}) {
 }
 
 func portInUse(port int) bool {
+	//log.Error(port)
 	var checkStatement string
 	switch runtime.GOOS {
 	case constants.SYSTEM_MAC:
@@ -281,6 +282,10 @@ func portInUse(port int) bool {
 
 // 返回可用的中继端口
 func RetRelayPort(port int) int {
+	if port == 0 {
+		return -1
+	}
+
 	for i := port; i < 65535; i++ {
 		if portInUse(i) {
 			return i
