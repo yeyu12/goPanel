@@ -29,6 +29,18 @@ type AppConfig struct {
 	RelayStartPort int    `yaml:"relay_start_port"`
 }
 
+// 默认配置
+var DefaultConfigApp = map[string]interface{}{
+	"debug":            false,
+	"log_level":        2,
+	"log_output_type":  0,
+	"log_output_flag":  0,
+	"log_path":         "./runtime/log/",
+	"http_port":        10000,
+	"control_port":     10010,
+	"relay_start_port": 10086,
+}
+
 func init() {
 	Conf = new(Config)
 
@@ -39,6 +51,22 @@ func init() {
 }
 
 func loadYamlConfig() {
+	if !common.DirOrFileByIsExists(GpsConfigFilePath) {
+		c, err := yaml.Marshal(map[string]interface{}{
+			"app": DefaultConfigApp,
+		})
+		if err != nil {
+			log.Panic(err)
+			return
+		}
+
+		// 写配置文件
+		err = ioutil.WriteFile(GpsConfigFilePath, c, 0755)
+		if err != nil {
+			log.Panic("配置文件写入错误！", err)
+		}
+	}
+
 	yamlFile, err := ioutil.ReadFile(GpsConfigFilePath)
 	if err != nil {
 		log.Panic("yamlFile.Get err #%v ", err)

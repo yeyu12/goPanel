@@ -98,6 +98,7 @@ func registerLocalData(conn *net.TCPConn) {
 		}
 	}
 
+	config.Conf.App.Uid = string(uid)
 	localComputerData := map[string]string{
 		"name": config.Conf.App.LocalName,
 		"uid":  string(uid),

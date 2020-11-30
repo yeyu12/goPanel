@@ -12,6 +12,7 @@ var (
 	sshConfigPath        string
 	sshConfigFileName    string
 	exampleSshConfigPath string
+	GpcSshConfigPath     string
 )
 
 type SshConfig struct {
@@ -20,10 +21,17 @@ type SshConfig struct {
 	Port     int    `yaml:"port"`
 }
 
+var DefaultSshConfig = map[string]interface{}{
+	"username": "root",
+	"password": "root",
+	"port":     22,
+}
+
 func (c *SshConfig) initialization() {
 	sshConfigPath = Conf.App.UserDir + "/.config/"
 	sshConfigFileName = "gpc.yaml"
 	exampleSshConfigPath = common.GetCurrentDir() + "/script/client.gpc.yaml.example"
+	GpcSshConfigPath = sshConfigPath + sshConfigFileName
 
 	if !common.DirOrFileByIsExists(sshConfigPath) {
 		if !common.CreatePath(sshConfigPath) {
@@ -35,7 +43,15 @@ func (c *SshConfig) initialization() {
 	if !common.DirOrFileByIsExists(sshConfigPathFileName) {
 		fileData, err := ioutil.ReadFile(exampleSshConfigPath)
 		if err != nil {
-			log.Panic("默认配置文件不存在！#", err)
+			log.Info("默认配置文件不存在！#", err)
+
+			fileData, err = yaml.Marshal(map[string]interface{}{
+				"ssh": DefaultSshConfig,
+			})
+			if err != nil {
+				log.Panic(err)
+				return
+			}
 		}
 
 		fp, err := os.Create(sshConfigPathFileName)

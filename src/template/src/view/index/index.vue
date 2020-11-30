@@ -52,8 +52,11 @@
                 width="500px"
                 center>
             <el-form :model="form.computer" label-width="80px" ref="computer">
+                <el-form-item label="主机名：">
+                    <el-input v-model="form.computer.name" placeholder="请输入主机名"></el-input>
+                </el-form-item>
                 <el-form-item label="用户名：">
-                    <el-input v-model="form.computer.user" placeholder="请输入主机用户名，默认root"></el-input>
+                    <el-input v-model="form.computer.username" placeholder="请输入主机用户名，默认root"></el-input>
                 </el-form-item>
                 <el-form-item label="密码：" prop="passwd">
                     <el-input v-model="form.computer.passwd" type="password" placeholder="请输入主机密码，默认root"></el-input>
@@ -77,12 +80,13 @@
                     width="150"
                     trigger="manual"
                     v-model="menuVisible">
-                <!--                <a class="menu-button" @click="createComputer" v-if="isDir">添加</a>-->
-                <a class="menu-button" @click="editTree">编辑</a>
-                <!--                <a class="menu-button" @click="delTree">删除</a>-->
+                <a class="menu-button" @click="editTree">编辑信息</a>
                 <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
+                <a class="menu-button" v-if="!isDir">文件管理</a>
+                <a class="menu-button" v-if="!isDir">桌面管理</a>
                 <a class="menu-button" @click="showAddCommand(1)" v-if="!isDir">执行命令</a>
-                <!--                <a class="menu-button" v-if="!isDir">打开桌面</a>-->
+                <a class="menu-button" @click="restartService" v-if="!isDir">重启服务</a>
+                <a class="menu-button" @click="reboot" v-if="!isDir">重启主机</a>
             </el-popover>
         </transition>
 
@@ -142,7 +146,7 @@
 
 <script>
     import '@/static/css/index.css';
-    import {list} from '../../api/machine';
+    import {list, save, reboot} from '../../api/machine';
     import {addCommand} from '../../api/command';
     import shell from '../shell/index';
 
@@ -160,9 +164,11 @@
                         ids: [],
                     },
                     computer: {
+                        id: 0,
+                        name: '',
                         username: '',
                         passwd: '',
-                        port: ''
+                        port: null
                     }
                 },
                 menuVisible: false,
@@ -355,12 +361,46 @@
             editTree() {
                 this.form.computer = {
                     id: this.dirData.id,
+                    name: this.dirData.name,
                 };
 
                 this.isAddComputer = true;
             },
             save() {
+                let computer = this.form.computer;
+                computer.id = computer.id.toString();
+                computer.username = computer.username ? computer.username : 'root';
+                computer.name = computer.name ? computer.name : computer.id.toString();
+                computer.passwd = computer.passwd ? computer.passwd : 'root';
+                computer.port = computer.port ? parseInt(computer.port) : 22;
 
+                save(this.form.computer).then(res => {
+                    if (res.code === 200) {
+                        this.$message({
+                            message: res.message,
+                            type: 'success'
+                        });
+                    } else {
+                        this.$message.error(res.message);
+                    }
+
+                    this.isAddComputer = false;
+                }).catch(err => {
+                    console.log(err)
+                    this.$message.error('服务器出小差！');
+                })
+            },
+            restartService() {
+                console.log("重启服务中...")
+            },
+            reboot() {
+                console.log("重启主机中...")
+                reboot(this.dirData.id).then(res=>{
+                    console.log(res)
+                }).catch(err=>{
+                    console.log(err)
+                    this.$message.error('服务器出小差！');
+                })
             }
         },
         computed: {

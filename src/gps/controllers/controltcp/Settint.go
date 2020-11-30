@@ -11,6 +11,7 @@ func SettingInit(cli unsafe.Pointer, message interface{}) {
 
 }
 
+// 注册客户端信息
 func RegisterNode(cli unsafe.Pointer, message interface{}) {
 	controlTcpCli := (*socket.Control)(unsafe.Pointer(cli))
 	messBody, err := common.InterfaceByMapStr(message.(*socket.Message).Data)

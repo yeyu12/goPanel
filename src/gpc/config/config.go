@@ -31,6 +31,21 @@ type AppConfig struct {
 	ControlReconnTcpTime int64  `yaml:"control_reconn_tcp_time"`
 	UidPath              string `yaml:"uid_path"`
 	UserDir              string
+	Uid                  string
+}
+
+var DefaultAppConfig = map[string]interface{}{
+	"debug":                   false,
+	"log_level":               2,
+	"log_output_type":         0,
+	"log_output_flag":         1,
+	"log_path":                "./runtime/log/",
+	"server_host":             "192.168.28.124",
+	"server_port":             10010,
+	"local_name":              "主机",
+	"control_heartbeat_time":  60,
+	"control_reconn_tcp_time": 5,
+	"uid_path":                "./runtime/uid/",
 }
 
 func init() {
@@ -49,6 +64,22 @@ func init() {
 }
 
 func loadYamlConfig() {
+	if !common.DirOrFileByIsExists(GpcConfigFilePath) {
+		c, err := yaml.Marshal(map[string]interface{}{
+			"app": DefaultAppConfig,
+		})
+		if err != nil {
+			log.Panic(err)
+			return
+		}
+
+		// 写配置文件
+		err = ioutil.WriteFile(GpcConfigFilePath, c, 0755)
+		if err != nil {
+			log.Panic("配置文件写入错误！", err)
+		}
+	}
+
 	yamlFile, err := ioutil.ReadFile(GpcConfigFilePath)
 	if err != nil {
 		log.Panic("yamlFile.Get err #", err)

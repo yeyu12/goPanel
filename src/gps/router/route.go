@@ -44,6 +44,9 @@ func (r *Route) loadRoute() {
 	routeMachine := r.g.Group("/machine")
 	{
 		routeMachine.GET("/list", controllers.NewMachineController().List)
+		routeMachine.POST("/save", controllers.NewMachineController().Save)
+		routeMachine.GET("/reboot", controllers.NewMachineController().Reboot)
+		routeMachine.GET("/restartService", controllers.NewMachineController().RestartService)
 	}
 
 	routeCommand := r.g.Group("/command")
