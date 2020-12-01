@@ -4,13 +4,17 @@ import (
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/common"
+	"goPanel/src/constants"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
+	"strconv"
 )
 
 var (
 	Conf              *Config
-	GpsConfigFilePath = common.GetCurrentDir() + "/config/gps.yaml"
+	GpsConfigFilePath = common.GetCurrentDir() + constants.CONFIG_PATH + constants.GPS_CONFIG_FILENAME
+	GpsPidFileName    = common.GetCurrentDir() + constants.GPS_PID_PATH + constants.PID_FILENAME
 )
 
 type Config struct {
@@ -42,6 +46,18 @@ var DefaultConfigApp = map[string]interface{}{
 }
 
 func init() {
+	if err := common.InitDir(
+		common.GetCurrentDir()+constants.RUNTIME_PATH,
+		common.GetCurrentDir()+constants.CONFIG_PATH,
+		common.GetCurrentDir()+constants.GPS_PID_PATH,
+	); err != nil {
+		log.Panic(err)
+	}
+
+	if err := ioutil.WriteFile(GpsPidFileName, []byte(strconv.Itoa(os.Getpid())), 0755); err != nil {
+		log.Panic(err)
+	}
+
 	Conf = new(Config)
 
 	loadYamlConfig()

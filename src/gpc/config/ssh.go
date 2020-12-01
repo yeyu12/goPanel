@@ -35,7 +35,7 @@ func (c *SshConfig) initialization() {
 
 	if !common.DirOrFileByIsExists(sshConfigPath) {
 		if !common.CreatePath(sshConfigPath) {
-			log.Panic("目录创建失败！")
+			log.Panic("Directory creation failed！")
 		}
 	}
 
@@ -43,7 +43,7 @@ func (c *SshConfig) initialization() {
 	if !common.DirOrFileByIsExists(sshConfigPathFileName) {
 		fileData, err := ioutil.ReadFile(exampleSshConfigPath)
 		if err != nil {
-			log.Info("默认配置文件不存在！#", err)
+			log.Info("The default profile does not exist！#", err)
 
 			fileData, err = yaml.Marshal(map[string]interface{}{
 				"ssh": DefaultSshConfig,
@@ -56,11 +56,11 @@ func (c *SshConfig) initialization() {
 
 		fp, err := os.Create(sshConfigPathFileName)
 		if err != nil {
-			log.Panic("文件创建失败！", err)
+			log.Panic("SSH configuration file creation failed！", err)
 		}
 
 		if err = ioutil.WriteFile(sshConfigPathFileName, fileData, 0755); err != nil {
-			log.Panic("ssh配置文件写入失败！", err)
+			log.Panic("SSH configuration file write failure！", err)
 		}
 
 		defer fp.Close()

@@ -10,6 +10,7 @@ import (
 
 func main() {
 	_, _ = time.LoadLocation("Asia/Shanghai")
+
 	conf := config.Conf.App
 	core_log.Initialization(
 		conf.LogOutputType,

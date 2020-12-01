@@ -4,13 +4,17 @@ import (
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/common"
+	"goPanel/src/constants"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
+	"strconv"
 )
 
 var (
 	Conf              *Config
-	GpcConfigFilePath = common.GetCurrentDir() + "/config/gpc.yaml"
+	GpcConfigFileName = common.GetCurrentDir() + constants.CONFIG_PATH + constants.GPC_CONFIG_FILENAME
+	GpcPidFileName    = common.GetCurrentDir() + constants.GPC_PID_PATH + constants.PID_FILENAME
 )
 
 type Config struct {
@@ -49,6 +53,18 @@ var DefaultAppConfig = map[string]interface{}{
 }
 
 func init() {
+	if err := common.InitDir(
+		common.GetCurrentDir()+constants.RUNTIME_PATH,
+		common.GetCurrentDir()+constants.CONFIG_PATH,
+		common.GetCurrentDir()+constants.GPC_PID_PATH,
+	); err != nil {
+		log.Panic(err)
+	}
+
+	if err := ioutil.WriteFile(GpcPidFileName, []byte(strconv.Itoa(os.Getpid())), 0755); err != nil {
+		log.Panic(err)
+	}
+
 	Conf = new(Config)
 
 	loadYamlConfig()
@@ -64,7 +80,7 @@ func init() {
 }
 
 func loadYamlConfig() {
-	if !common.DirOrFileByIsExists(GpcConfigFilePath) {
+	if !common.DirOrFileByIsExists(GpcConfigFileName) {
 		c, err := yaml.Marshal(map[string]interface{}{
 			"app": DefaultAppConfig,
 		})
@@ -74,13 +90,13 @@ func loadYamlConfig() {
 		}
 
 		// 写配置文件
-		err = ioutil.WriteFile(GpcConfigFilePath, c, 0755)
+		err = ioutil.WriteFile(GpcConfigFileName, c, 0755)
 		if err != nil {
 			log.Panic("配置文件写入错误！", err)
 		}
 	}
 
-	yamlFile, err := ioutil.ReadFile(GpcConfigFilePath)
+	yamlFile, err := ioutil.ReadFile(GpcConfigFileName)
 	if err != nil {
 		log.Panic("yamlFile.Get err #", err)
 	}

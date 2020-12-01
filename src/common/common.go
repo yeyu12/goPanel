@@ -92,11 +92,22 @@ func DirOrFileByIsExists(path string) bool {
 func CreatePath(path string) bool {
 	err := os.MkdirAll(path, 0755)
 	if err != nil {
-		log.Error("%s", err)
+		log.Errorf("%s", err)
 		return false
 	}
 
 	return true
+}
+
+// 初始化系统需要的目录
+func InitDir(dir ...string) error {
+	for _, item := range dir {
+		if !DirOrFileByIsExists(item) && !CreatePath(item) {
+			return errors.New("Failed to initialize system '" + item + "' directory! ")
+		}
+	}
+
+	return nil
 }
 
 // 获取当前工作目录
@@ -330,23 +341,18 @@ func UserDir() (string, error) {
 		return user.HomeDir, nil
 	}
 
-	// cross compile support
-
 	if constants.SYSTEM_WINDOWS == runtime.GOOS {
 		return homeWindows()
 	}
 
-	// Unix-like system, so just assume Unix
 	return homeUnix()
 }
 
 func homeUnix() (string, error) {
-	// First prefer the HOME environmental variable
 	if home := os.Getenv("HOME"); home != "" {
 		return home, nil
 	}
 
-	// If that fails, try the shell
 	var stdout bytes.Buffer
 	cmd := exec.Command("sh", "-c", "eval echo ~$USER")
 	cmd.Stdout = &stdout

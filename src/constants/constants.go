@@ -16,3 +16,13 @@ const (
 	SYSTEM_LINUX   = "linux"
 	SYSTEM_WINDOWS = "windows"
 )
+
+const (
+	RUNTIME_PATH        = "/runtime/"
+	CONFIG_PATH         = "/config/"
+	GPC_CONFIG_FILENAME = "gpc.yaml"
+	GPS_CONFIG_FILENAME = "gps.yaml"
+	GPC_PID_PATH        = RUNTIME_PATH + "gpc_pid/"
+	GPS_PID_PATH        = RUNTIME_PATH + "gps_pid/"
+	PID_FILENAME        = "pid"
+)

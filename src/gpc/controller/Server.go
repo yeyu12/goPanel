@@ -74,7 +74,7 @@ func SettingClientInfo(conn *net.TCPConn, message interface{}) {
 		return
 	}
 
-	err = ioutil.WriteFile(config.GpcConfigFilePath, c, 0755)
+	err = ioutil.WriteFile(config.GpcConfigFileName, c, 0755)
 	if err != nil {
 		log.Error("配置文件写入错误！")
 	}
