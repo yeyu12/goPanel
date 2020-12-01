@@ -394,12 +394,24 @@
                 console.log("重启服务中...")
             },
             reboot() {
-                console.log("重启主机中...")
-                reboot(this.dirData.id).then(res=>{
-                    console.log(res)
-                }).catch(err=>{
-                    console.log(err)
-                    this.$message.error('服务器出小差！');
+                this.$confirm('确定重启主机吗？', '重启', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    reboot(this.dirData.id).then(res => {
+                        if (res.code === 200) {
+                            this.$message({
+                                message: res.message,
+                                type: 'success'
+                            });
+                        } else {
+                            this.$message.error(res.message);
+                        }
+                    }).catch(err => {
+                        console.log(err)
+                        this.$message.error('服务器出小差！');
+                    })
                 })
             }
         },

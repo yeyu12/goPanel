@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net"
+	"os/exec"
 	"strconv"
 )
 
@@ -94,7 +95,16 @@ func SettingClientInfo(conn *net.TCPConn, message interface{}) {
 
 // 重启客户端主机
 func Reboot(conn *net.TCPConn, message interface{}) {
-	log.Error("重启客户端")
+	cmd := exec.Command("reboot")
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Error(err)
+	}
+	defer stdout.Close()
+
+	if err := cmd.Start(); err != nil {
+		log.Error(err)
+	}
 }
 
 // 重启服务
