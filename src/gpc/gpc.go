@@ -1,24 +1,24 @@
 package main
 
 import (
-	core_log "goPanel/src/core/log"
-	"goPanel/src/gpc/config"
-	"goPanel/src/gpc/service"
-	"goPanel/src/gpc/service/socket"
-	"time"
+	"github.com/urfave/cli"
+	"goPanel/src/constants"
+	"goPanel/src/gpc/cmd"
+	"log"
+	"os"
 )
 
 func main() {
-	_, _ = time.LoadLocation("Asia/Shanghai")
+	app := cli.NewApp()
+	app.Name = "gpc"
+	app.Version = constants.GPC_VERSION
+	app.Usage = "Control panel client based on go"
+	app.Commands = []cli.Command{
+		cmd.StartCmd,
+		cmd.KillCmd,
+	}
 
-	conf := config.Conf.App
-	core_log.Initialization(
-		conf.LogOutputType,
-		conf.Debug,
-		conf.LogLevel,
-	)
-	core_log.LogSetOutput(conf.LogPath, conf.LogOutputFlag)
-
-	service.ControlAddr = conf.ServerHost + ":" + conf.ServerPort
-	socket.StartClientTcp()
+	if err := app.Run(os.Args); err != nil {
+		log.Panic(err)
+	}
 }

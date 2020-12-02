@@ -1,6 +1,11 @@
 package constants
 
 const (
+	GPC_VERSION = "0.0.1"
+	GPS_VERSION = "0.0.1"
+)
+
+const (
 	WS_EVENT_INIT = "init"
 	WS_EVENT_DATA = "data"
 	WS_EVENT_ERR  = "err"

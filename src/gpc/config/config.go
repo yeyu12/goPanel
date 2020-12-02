@@ -7,8 +7,6 @@ import (
 	"goPanel/src/constants"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"os"
-	"strconv"
 )
 
 var (
@@ -58,10 +56,6 @@ func init() {
 		common.GetCurrentDir()+constants.CONFIG_PATH,
 		common.GetCurrentDir()+constants.GPC_PID_PATH,
 	); err != nil {
-		log.Panic(err)
-	}
-
-	if err := ioutil.WriteFile(GpcPidFileName, []byte(strconv.Itoa(os.Getpid())), 0755); err != nil {
 		log.Panic(err)
 	}
 
