@@ -38,6 +38,7 @@ func (r *RelayClient) RelayConn(ctx context.Context, addr string, flag uint, col
 
 	r.Conn = relayConn
 
+	go r.closeTcp(ctx)
 	go r.relayClientRead()
 	go r.relayClientWrite()
 
@@ -130,7 +131,7 @@ func (r *RelayClient) relayClientRead() {
 			}
 			r.closeRelay()
 
-			break
+			return
 		}
 
 		r.Read <- data[:size]
@@ -146,6 +147,8 @@ func (r *RelayClient) relayClientWrite() {
 			if err != nil {
 				log.Error(err)
 				r.closeRelay()
+
+				return
 			}
 		}
 	}
@@ -153,9 +156,19 @@ func (r *RelayClient) relayClientWrite() {
 
 func (r *RelayClient) closeRelay() {
 	if r.Conn != nil {
-		r.Conn.Close()
+		_ = r.Conn.Close()
 	}
 	if r.sshChan != nil {
 		_ = r.sshChan.Close()
+	}
+}
+
+func (r *RelayClient) closeTcp(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			r.closeRelay()
+			return
+		}
 	}
 }

@@ -15,9 +15,9 @@ func HandleSignal() {
 		sig := <-ch
 		switch sig {
 		case syscall.SIGUSR2: // 重启
-			log.Error("reboot service!")
+			log.Info("reboot service!")
 			socket.Cancel()
-			log.Error("reboot service success!")
+			log.Info("reboot service success!")
 		}
 	}
 }

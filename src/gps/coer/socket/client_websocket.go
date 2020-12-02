@@ -18,6 +18,7 @@ type Client struct {
 	RelayListener *net.TCPListener
 	RelayConn     *net.TCPConn
 	RelayPort     int
+	ClientId      string
 }
 
 var userService = new(services.UserService)
@@ -165,6 +166,7 @@ func (c *Client) handleWsMess(req *Message) {
 			}
 			c.RelayListener = relayListener
 			c.RelayPort = relayPort
+			c.ClientId = sshInitData.Id
 			go c.bindRelayConn(relayConnCh)
 
 			// 通知客户端创建本地ssh，连接中间端

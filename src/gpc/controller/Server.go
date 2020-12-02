@@ -114,6 +114,4 @@ func RestartService(ctx context.Context, conn *net.TCPConn, message interface{})
 	if err := common.SendPidRestart(os.Getpid()); err != nil {
 		log.Error(err)
 	}
-
-	log.Error(os.Getpid())
 }

@@ -25,6 +25,8 @@ var StartCmd = cli.Command{
 func startRun(c *cli.Context) {
 	go signal.HandleSignal()
 
+	// TODO 重载服务的时候，需要重载配置
+
 	_, _ = time.LoadLocation("Asia/Shanghai")
 
 	conf := config.Conf.App

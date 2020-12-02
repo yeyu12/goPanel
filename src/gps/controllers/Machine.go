@@ -91,6 +91,13 @@ func (c *MachineController) RestartService(g *gin.Context) {
 		cli.Write <- msg
 	}
 
+	// 停止监听指定中继端口
+	for conn, _ := range socket.ServerWsManager.Clients {
+		if conn.ClientId == clientId {
+			socket.ServerWsManager.UnRegister <- conn
+		}
+	}
+
 	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, "")
 	return
 }
