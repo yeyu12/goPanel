@@ -18,3 +18,9 @@ export function reboot(id) {
         return ret.data
     })
 }
+
+export function restartService(id) {
+    return get(`/machine/restartService?id=${id}`).then((ret) => {
+        return ret.data
+    })
+}

@@ -1,11 +1,12 @@
 package router
 
 import (
+	"context"
 	"goPanel/src/gpc/controller"
 	"net"
 )
 
-type handle func(conn *net.TCPConn, message interface{})
+type handle func(context.Context, *net.TCPConn, interface{})
 
 var Route = make(map[string]handle)
 

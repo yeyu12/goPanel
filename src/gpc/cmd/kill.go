@@ -20,7 +20,7 @@ var KillCmd = cli.Command{
 func killRun(c *cli.Context) {
 	pidStr, err := ioutil.ReadFile(common.GetCurrentDir() + constants.GPC_PID_PATH + constants.PID_FILENAME)
 	if err != nil {
-		log.Error()
+		log.Error(err)
 	}
 
 	cmd := exec.Command("kill", "-9", string(pidStr))

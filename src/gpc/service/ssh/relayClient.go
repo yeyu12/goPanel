@@ -1,6 +1,7 @@
 package ssh
 
 import (
+	"context"
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/common"
@@ -29,7 +30,7 @@ func NewRelayClient() *RelayClient {
 	}
 }
 
-func (r *RelayClient) RelayConn(addr string, flag uint, cols, rows uint32) error {
+func (r *RelayClient) RelayConn(ctx context.Context, addr string, flag uint, cols, rows uint32) error {
 	relayConn, err := common.ConnTcp(addr)
 	if err != nil {
 		return err

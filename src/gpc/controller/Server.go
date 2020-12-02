@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"context"
 	log "github.com/sirupsen/logrus"
+	"goPanel/src/common"
 	"goPanel/src/constants"
 	"goPanel/src/gpc/config"
 	"goPanel/src/gpc/service"
@@ -9,19 +11,18 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net"
+	"os"
 	"os/exec"
 	"strconv"
 )
 
 // 连接中继端，和本地ssh连接
-func SshConnectRelay(conn *net.TCPConn, message interface{}) {
-	log.Info("进入执行器")
-
+func SshConnectRelay(ctx context.Context, conn *net.TCPConn, message interface{}) {
 	data := message.(service.Message).Data.(map[string]interface{})
 	relayClient := ssh.NewRelayClient()
 	relayAddr := config.Conf.App.ServerHost + ":" + strconv.Itoa(int(data["port"].(float64)))
 	log.Info("连接中继端，relayAddr:", relayAddr)
-	err := relayClient.RelayConn(relayAddr, constants.CLIENT_SHELL_TYPE, uint32(data["cols"].(float64)), uint32(data["rows"].(float64)))
+	err := relayClient.RelayConn(ctx, relayAddr, constants.CLIENT_SHELL_TYPE, uint32(data["cols"].(float64)), uint32(data["rows"].(float64)))
 	if err != nil {
 		log.Error(err)
 		return
@@ -29,8 +30,7 @@ func SshConnectRelay(conn *net.TCPConn, message interface{}) {
 }
 
 // 设置客户端信息
-func SettingClientInfo(conn *net.TCPConn, message interface{}) {
-	log.Info("设置客户端信息")
+func SettingClientInfo(ctx context.Context, conn *net.TCPConn, message interface{}) {
 	dataMap := message.(service.Message).Data.(map[string]interface{})
 	if dataMap["id"] != config.Conf.App.Uid {
 		return
@@ -90,11 +90,13 @@ func SettingClientInfo(conn *net.TCPConn, message interface{}) {
 		log.Error("配置文件写入错误！")
 	}
 
-	// 重启客户端
+	if err := common.SendPidRestart(os.Getpid()); err != nil {
+		log.Error(err)
+	}
 }
 
 // 重启客户端主机
-func Reboot(conn *net.TCPConn, message interface{}) {
+func Reboot(ctx context.Context, conn *net.TCPConn, message interface{}) {
 	cmd := exec.Command("reboot")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -108,6 +110,10 @@ func Reboot(conn *net.TCPConn, message interface{}) {
 }
 
 // 重启服务
-func RestartService(conn *net.TCPConn, message interface{}) {
+func RestartService(ctx context.Context, conn *net.TCPConn, message interface{}) {
+	if err := common.SendPidRestart(os.Getpid()); err != nil {
+		log.Error(err)
+	}
 
+	log.Error(os.Getpid())
 }

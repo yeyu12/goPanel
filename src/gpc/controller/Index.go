@@ -1,10 +1,11 @@
 package controller
 
 import (
+	"context"
 	log "github.com/sirupsen/logrus"
 	"net"
 )
 
-func Heartbeat(conn *net.TCPConn, message interface{}) {
+func Heartbeat(ctx context.Context, conn *net.TCPConn, message interface{}) {
 	log.Info("心跳")
 }

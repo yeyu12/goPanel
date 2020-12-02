@@ -78,6 +78,19 @@ func (c *MachineController) Reboot(g *gin.Context) {
 
 // 重启客户单服务
 func (c *MachineController) RestartService(g *gin.Context) {
+	clientId := g.Query("id")
+	cli := socket.ControlManager.FindClientIdByClientConn(clientId)
+	if cli != nil {
+		msg, _ := json.Marshal(socket.Message{
+			Type:  0,
+			Event: "restartService",
+			Data:  nil,
+			Code:  constants.SUCCESS,
+		})
+
+		cli.Write <- msg
+	}
+
 	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, "")
 	return
 }

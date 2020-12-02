@@ -146,7 +146,7 @@
 
 <script>
     import '@/static/css/index.css';
-    import {list, save, reboot} from '../../api/machine';
+    import {list, save, reboot, restartService} from '../../api/machine';
     import {addCommand} from '../../api/command';
     import shell from '../shell/index';
 
@@ -380,6 +380,10 @@
                             message: res.message,
                             type: 'success'
                         });
+
+                        window.setTimeout(() => {
+                            this.getMachineData()
+                        }, 10000)
                     } else {
                         this.$message.error(res.message);
                     }
@@ -391,7 +395,29 @@
                 })
             },
             restartService() {
-                console.log("重启服务中...")
+                this.$confirm('确定重启服务吗？重启成功后，服务会自动连接。', '重启', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    restartService(this.dirData.id).then(res => {
+                        if (res.code === 200) {
+                            this.$message({
+                                message: res.message,
+                                type: 'success'
+                            });
+
+                            window.setTimeout(() => {
+                                this.getMachineData()
+                            }, 10000)
+                        } else {
+                            this.$message.error(res.message);
+                        }
+                    }).catch(err => {
+                        console.log(err)
+                        this.$message.error('服务器出小差！');
+                    })
+                })
             },
             reboot() {
                 this.$confirm('确定重启主机吗？', '重启', {
