@@ -42,44 +42,40 @@ func closeClientTcp(ctx context.Context, conn *net.TCPConn) {
 	for true {
 		select {
 		case <-ctx.Done():
-			conn.Close()
+			_ = conn.Close()
 			return
 		}
 	}
 }
 
 // 心跳
-func heartbeat(ctx context.Context, conn *net.TCPConn) {
+func heartbeat(conn *net.TCPConn) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error(err)
-			conn.Close()
+			_ = conn.Close()
 		}
 	}()
 
 	for {
-		select {
-		case <-ctx.Done():
+		time.Sleep(time.Second * time.Duration(config.Conf.App.ControlHeartbeatTime))
+
+		write := service.RequestWsMessage{
+			Event: "heartbeat",
+			Data:  nil,
+		}
+		writeJson, err := json.Marshal(write)
+		if err != nil {
+			continue
+		}
+
+		log.Info("正在执行控制端心跳包")
+		if _, err = conn.Write(writeJson); err != nil {
+			log.Info(err)
 			return
-		default:
-			time.Sleep(time.Second * time.Duration(config.Conf.App.ControlHeartbeatTime))
-
-			write := service.RequestWsMessage{
-				Event: "heartbeat",
-				Data:  nil,
-			}
-			writeJson, err := json.Marshal(write)
-			if err != nil {
-				continue
-			}
-
-			log.Info("正在执行控制端心跳包")
-			if _, err = conn.Write(writeJson); err != nil {
-				log.Info(err)
-				return
-			}
 		}
 	}
+
 }
 
 // 注册本机数据
@@ -87,7 +83,7 @@ func registerLocalData(conn *net.TCPConn) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error(err)
-			conn.Close()
+			_ = conn.Close()
 		}
 	}()
 
@@ -155,44 +151,38 @@ func handelConnControlTcp(ctx context.Context) {
 	}
 
 	defer func() {
-		conn.Close()
+		_ = conn.Close()
 	}()
 
 	go closeClientTcp(ctx, conn)
 	registerLocalData(conn)
-	go heartbeat(ctx, conn)
+	go heartbeat(conn)
 	readControlTcpMess(ctx, conn)
 }
 
 func readControlTcpMess(ctx context.Context, conn *net.TCPConn) {
 	for {
-		select {
-		case <-ctx.Done():
+		var data = make([]byte, 10240)
+		size, err := conn.Read(data)
+		if err != nil || err == io.EOF {
 			isReconnControlTcp = true
-
-			return
-		default:
-			var data = make([]byte, 10240)
-			size, err := conn.Read(data)
-			if err != nil || err == io.EOF {
-				log.Error(err)
-				break
-			}
-			data = data[:size]
-
-			var message service.Message
-			err = json.Unmarshal(data, &message)
-			if err != nil {
-				log.Info(err)
-				continue
-			}
-
-			if _, ok := router.Route[message.Event]; ok {
-				router.Route[message.Event](ctx, conn, message)
-				continue
-			}
-
-			log.Error("请求路由不存在！")
+			log.Error(err)
+			break
 		}
+		data = data[:size]
+
+		var message service.Message
+		err = json.Unmarshal(data, &message)
+		if err != nil {
+			log.Info(err)
+			continue
+		}
+
+		if _, ok := router.Route[message.Event]; ok {
+			router.Route[message.Event](ctx, conn, message)
+			continue
+		}
+
+		log.Error("请求路由不存在！")
 	}
 }
