@@ -16,6 +16,7 @@ import (
 
 var isReconnControlTcp = true
 var Ctx, Cancel = context.WithCancel(context.Background())
+var conf = config.NewConf()
 
 func StartClientTcp() {
 	defer func() {
@@ -34,7 +35,7 @@ func StartClientTcp() {
 			log.Info("重连重试中！")
 		}
 
-		time.Sleep(time.Second * time.Duration(config.Conf.App.ControlReconnTcpTime))
+		time.Sleep(time.Second * time.Duration(conf.App.ControlReconnTcpTime))
 	}
 }
 
@@ -43,6 +44,7 @@ func closeClientTcp(ctx context.Context, conn *net.TCPConn) {
 		select {
 		case <-ctx.Done():
 			_ = conn.Close()
+			conf = config.NewConf(true)
 			return
 		}
 	}
@@ -58,7 +60,7 @@ func heartbeat(conn *net.TCPConn) {
 	}()
 
 	for {
-		time.Sleep(time.Second * time.Duration(config.Conf.App.ControlHeartbeatTime))
+		time.Sleep(time.Second * time.Duration(conf.App.ControlHeartbeatTime))
 
 		write := service.RequestWsMessage{
 			Event: "heartbeat",
@@ -88,7 +90,7 @@ func registerLocalData(conn *net.TCPConn) {
 	}()
 
 	// 获取本机id数据
-	uidFilePath := config.Conf.App.UidPath + "uid"
+	uidFilePath := conf.App.UidPath + "uid"
 	var uid []byte
 	var err error
 
@@ -100,8 +102,8 @@ func registerLocalData(conn *net.TCPConn) {
 	}
 
 	if len(uid) == 0 {
-		if !common.DirOrFileByIsExists(config.Conf.App.UidPath) {
-			if !common.CreatePath(config.Conf.App.UidPath) {
+		if !common.DirOrFileByIsExists(conf.App.UidPath) {
+			if !common.CreatePath(conf.App.UidPath) {
 				log.Error("uid目录创建失败!")
 			}
 		}
@@ -115,9 +117,9 @@ func registerLocalData(conn *net.TCPConn) {
 		}
 	}
 
-	config.Conf.App.Uid = string(uid)
+	conf.App.Uid = string(uid)
 	localComputerData := map[string]string{
-		"name": config.Conf.App.LocalName,
+		"name": conf.App.LocalName,
 		"uid":  string(uid),
 	}
 	write := service.RequestWsMessage{

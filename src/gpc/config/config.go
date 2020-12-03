@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	Conf              *Config
+	conf              *Config
 	GpcConfigFileName = common.GetCurrentDir() + constants.CONFIG_PATH + constants.GPC_CONFIG_FILENAME
 	GpcPidFileName    = common.GetCurrentDir() + constants.GPC_PID_PATH + constants.PID_FILENAME
 )
@@ -50,27 +50,38 @@ var DefaultAppConfig = map[string]interface{}{
 	"uid_path":                "./runtime/uid/",
 }
 
-func init() {
-	if err := common.InitDir(
-		common.GetCurrentDir()+constants.RUNTIME_PATH,
-		common.GetCurrentDir()+constants.CONFIG_PATH,
-		common.GetCurrentDir()+constants.GPC_PID_PATH,
-	); err != nil {
-		log.Panic(err)
+func NewConf(isReload ...bool) *Config {
+	for index, item := range isReload {
+		if index == 0 && item {
+			conf = nil
+			break
+		}
 	}
 
-	Conf = new(Config)
+	if conf == nil {
+		if err := common.InitDir(
+			common.GetCurrentDir()+constants.RUNTIME_PATH,
+			common.GetCurrentDir()+constants.CONFIG_PATH,
+			common.GetCurrentDir()+constants.GPC_PID_PATH,
+		); err != nil {
+			log.Panic(err)
+		}
 
-	loadYamlConfig()
-	loadEnvConfig()
+		conf = new(Config)
 
-	userDir, err := common.UserDir()
-	if err != nil {
-		log.Panic("获取用户目录失败！", err)
+		loadYamlConfig()
+		loadEnvConfig()
+
+		userDir, err := common.UserDir()
+		if err != nil {
+			log.Panic("获取用户目录失败！", err)
+		}
+		conf.App.UserDir = userDir
+
+		new(SshConfig).initialization()
 	}
-	Conf.App.UserDir = userDir
 
-	new(SshConfig).initialization()
+	return conf
 }
 
 func loadYamlConfig() {
@@ -95,7 +106,7 @@ func loadYamlConfig() {
 		log.Panic("yamlFile.Get err #", err)
 	}
 
-	if err = yaml.Unmarshal(yamlFile, Conf); err != nil {
+	if err = yaml.Unmarshal(yamlFile, conf); err != nil {
 		log.Panic("Unmarshal: %v", err)
 	}
 }

@@ -20,7 +20,8 @@ import (
 func SshConnectRelay(ctx context.Context, conn *net.TCPConn, message interface{}) {
 	data := message.(service.Message).Data.(map[string]interface{})
 	relayClient := ssh.NewRelayClient()
-	relayAddr := config.Conf.App.ServerHost + ":" + strconv.Itoa(int(data["port"].(float64)))
+	conf := config.NewConf()
+	relayAddr := conf.App.ServerHost + ":" + strconv.Itoa(int(data["port"].(float64)))
 	log.Info("连接中继端，relayAddr:", relayAddr)
 	err := relayClient.RelayConn(ctx, relayAddr, constants.CLIENT_SHELL_TYPE, uint32(data["cols"].(float64)), uint32(data["rows"].(float64)))
 	if err != nil {
@@ -32,39 +33,40 @@ func SshConnectRelay(ctx context.Context, conn *net.TCPConn, message interface{}
 // 设置客户端信息
 func SettingClientInfo(ctx context.Context, conn *net.TCPConn, message interface{}) {
 	dataMap := message.(service.Message).Data.(map[string]interface{})
-	if dataMap["id"] != config.Conf.App.Uid {
+	conf := config.NewConf()
+	if dataMap["id"] != conf.App.Uid {
 		return
 	}
 
 	// 更新配置
-	config.Conf.App.LocalName = dataMap["name"].(string)
-	config.Conf.Ssh.Username = dataMap["username"].(string)
-	config.Conf.Ssh.Password = dataMap["passwd"].(string)
-	config.Conf.Ssh.Port = int(dataMap["port"].(float64))
+	conf.App.LocalName = dataMap["name"].(string)
+	conf.Ssh.Username = dataMap["username"].(string)
+	conf.Ssh.Password = dataMap["passwd"].(string)
+	conf.Ssh.Port = int(dataMap["port"].(float64))
 
-	serverPort, _ := strconv.Atoi(config.Conf.App.ServerPort)
+	serverPort, _ := strconv.Atoi(conf.App.ServerPort)
 
 	confApp := map[string]interface{}{
 		"app": map[string]interface{}{
-			"debug":                   config.Conf.App.Debug,
-			"log_level":               config.Conf.App.LogLevel,
-			"log_output_type":         config.Conf.App.LogOutputType,
-			"log_output_flag":         config.Conf.App.LogOutputFlag,
-			"log_path":                config.Conf.App.LogPath,
-			"server_host":             config.Conf.App.ServerHost,
+			"debug":                   conf.App.Debug,
+			"log_level":               conf.App.LogLevel,
+			"log_output_type":         conf.App.LogOutputType,
+			"log_output_flag":         conf.App.LogOutputFlag,
+			"log_path":                conf.App.LogPath,
+			"server_host":             conf.App.ServerHost,
 			"server_port":             serverPort,
-			"local_name":              config.Conf.App.LocalName,
-			"control_heartbeat_time":  config.Conf.App.ControlHeartbeatTime,
-			"control_reconn_tcp_time": config.Conf.App.ControlReconnTcpTime,
-			"uid_path":                config.Conf.App.UidPath,
+			"local_name":              conf.App.LocalName,
+			"control_heartbeat_time":  conf.App.ControlHeartbeatTime,
+			"control_reconn_tcp_time": conf.App.ControlReconnTcpTime,
+			"uid_path":                conf.App.UidPath,
 		},
 	}
 
 	confSsh := map[string]interface{}{
 		"ssh": map[string]interface{}{
-			"username": config.Conf.Ssh.Username,
-			"password": config.Conf.Ssh.Password,
-			"port":     config.Conf.Ssh.Port,
+			"username": conf.Ssh.Username,
+			"password": conf.Ssh.Password,
+			"port":     conf.Ssh.Port,
 		},
 	}
 	// 写入配置文件

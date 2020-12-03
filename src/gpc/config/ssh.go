@@ -28,7 +28,8 @@ var DefaultSshConfig = map[string]interface{}{
 }
 
 func (c *SshConfig) initialization() {
-	sshConfigPath = Conf.App.UserDir + "/.config/"
+	conf := NewConf()
+	sshConfigPath = conf.App.UserDir + "/.config/"
 	sshConfigFileName = "gpc.yaml"
 	exampleSshConfigPath = common.GetCurrentDir() + "/script/client.gpc.yaml.example"
 	GpcSshConfigPath = sshConfigPath + sshConfigFileName
@@ -71,7 +72,7 @@ func (c *SshConfig) initialization() {
 		log.Panic("yamlFile.Get err #%v ", err)
 	}
 
-	if err = yaml.Unmarshal(yamlFile, Conf); err != nil {
+	if err = yaml.Unmarshal(yamlFile, conf); err != nil {
 		log.Panic("Unmarshal: %v", err)
 	}
 }

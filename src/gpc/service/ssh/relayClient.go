@@ -101,7 +101,8 @@ func (r *RelayClient) connSsh(cols, rows uint32) (*TcpSsh, error) {
 	var err error
 	host := "127.0.0.1"
 	tcpSsh := NewTcpSsh()
-	r.sh, r.sshChan, err = tcpSsh.SshConn(host, config.Conf.Ssh.Username, config.Conf.Ssh.Password, config.Conf.Ssh.Port, cols, rows)
+	conf := config.NewConf()
+	r.sh, r.sshChan, err = tcpSsh.SshConn(host, conf.Ssh.Username, conf.Ssh.Password, conf.Ssh.Port, cols, rows)
 	if err != nil {
 		m := service.Message{
 			Event: constants.WS_EVENT_ERR,
