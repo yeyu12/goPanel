@@ -99,7 +99,7 @@ func SettingClientInfo(ctx context.Context, conn *net.TCPConn, message interface
 
 // 重启客户端主机
 func Reboot(ctx context.Context, conn *net.TCPConn, message interface{}) {
-	cmd := exec.Command("reboot")
+	cmd := exec.Command("sudo", "reboot")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Error(err)
