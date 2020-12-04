@@ -286,7 +286,13 @@
                     passwd: {}
                 }
 
+                if(!this.multipleTableSelection.length) {
+                    this.$message.error('请选择主机！');
+                    return
+                }
+
                 this.isShowAddCommand = true;
+                this.isShowAddCommandComputerList = false;
             },
             showAddCommands() {
                 this.isShowAddCommandComputerList = true;

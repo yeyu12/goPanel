@@ -43,9 +43,8 @@ func (c *CommandController) Add(g *gin.Context) {
 		tmpAddCommandData.Flag = flag
 		tmpAddCommandData.CreateUid = userinfo.Id
 		tmpAddCommandData.PlanExecTime = time.Now()
-		tmpAddCommandData.MachineId = int64(item)
+		tmpAddCommandData.MachineId = item
 		tmpAddCommandData.CreateTime = time.Now()
-		tmpAddCommandData.Passwd = addVail.Passwd[item]
 
 		if flag == 2 {
 			tmpAddCommandData.PlanExecTime, _ = time.ParseInLocation(constants.TIME_TEMPLATE, addVail.PlanExecTime, time.Local)

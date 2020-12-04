@@ -8,8 +8,7 @@ import (
 // 要执行的命令
 type CommandModel struct {
 	Id           int64     `json:"id"`
-	MachineId    int64     `json:"machine_id" xorm:"index notnull"` // 主机id
-	Passwd       string    `json:"passwd"`                          // 要执行的主机密码，执行完成后，需要删除
+	MachineId    string    `json:"machine_id" xorm:"index notnull"` // 主机id
 	Flag         int       `json:"flag" xorm:"default(1)"`          // 执行方式，1立即执行，2定时(计划执行)执行
 	Command      string    `json:"command"`                         // 要执行的命令
 	ExecTime     time.Time `json:"exec_time"`                       // 执行时间

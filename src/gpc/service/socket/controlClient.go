@@ -3,6 +3,7 @@ package socket
 import (
 	"context"
 	"encoding/json"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/common"
 	"goPanel/src/gpc/config"
@@ -108,10 +109,8 @@ func registerLocalData(conn *net.TCPConn) {
 			}
 		}
 
-		id, _ := common.GenToken()
-		uid = []byte(id)
-
-		err = ioutil.WriteFile(uidFilePath, uid, 0755)
+		uid := uuid.NewV4().String()
+		err = ioutil.WriteFile(uidFilePath, []byte(uid), 0755)
 		if err != nil {
 			log.Error("uid写文件出错！", err)
 		}
