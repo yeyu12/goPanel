@@ -18,8 +18,14 @@
                     >
                         <span slot-scope="{ node, data }">
                             <svg class="icon" aria-hidden="true">
-                                <use :xlink:href="'#el-icon-'+data.system_type"></use>
+                                <template v-if="data.system_type === 'darwin'">
+                                    <use :xlink:href="'#el-icon-mac'"></use>
+                                </template>
+                                <template v-else>
+                                    <use :xlink:href="'#el-icon-'+data.system_type"></use>
+                                </template>
                             </svg>
+
                             <span style="padding-left: 4px;">{{node.label}}</span>
                         </span>
                     </el-tree>
