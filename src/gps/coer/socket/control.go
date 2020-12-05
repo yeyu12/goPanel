@@ -10,11 +10,12 @@ import (
 )
 
 type Control struct {
-	Conn     *net.TCPConn
-	Write    chan []byte
-	Uuid     string
-	Name     string
-	ClientId string
+	Conn       *net.TCPConn
+	Write      chan []byte
+	Uuid       string
+	Name       string
+	ClientId   string // 客户端uid
+	SystemType string // 系统信息
 }
 
 func (c *Control) read() {

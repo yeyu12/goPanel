@@ -12,6 +12,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net"
+	"runtime"
 	"time"
 )
 
@@ -118,8 +119,9 @@ func registerLocalData(conn *net.TCPConn) {
 
 	conf.App.Uid = string(uid)
 	localComputerData := map[string]string{
-		"name": conf.App.LocalName,
-		"uid":  string(uid),
+		"name":        conf.App.LocalName,
+		"uid":         string(uid),
+		"system_type": runtime.GOOS,
 	}
 	write := service.RequestWsMessage{
 		Event: "local_register",

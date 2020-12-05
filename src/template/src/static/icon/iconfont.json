@@ -1,0 +1,30 @@
+{
+  "id": "2249883",
+  "name": "goPanel",
+  "font_family": "iconfont",
+  "css_prefix_text": "el-icon-",
+  "description": "控制面板图标",
+  "glyphs": [
+    {
+      "icon_id": "1111274",
+      "name": "mac",
+      "font_class": "mac",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    },
+    {
+      "icon_id": "3846904",
+      "name": "Windows",
+      "font_class": "Windows",
+      "unicode": "e6a0",
+      "unicode_decimal": 59040
+    },
+    {
+      "icon_id": "12463174",
+      "name": "linux",
+      "font_class": "linux",
+      "unicode": "e80b",
+      "unicode_decimal": 59403
+    }
+  ]
+}

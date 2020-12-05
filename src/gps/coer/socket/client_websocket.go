@@ -10,26 +10,26 @@ import (
 )
 
 type Client struct {
-	UID           string
-	Socket        *websocket.Conn
-	Send          chan []byte
-	wsRead        chan []byte
-	ClientType    int
-	RelayListener *net.TCPListener
-	RelayConn     *net.TCPConn
-	RelayPort     int
-	ClientId      string
+	UID    string
+	Socket *websocket.Conn
+	Send   chan []byte
+	wsRead chan []byte
+	//ClientType    int
+	RelayListener *net.TCPListener // 中继监听端口
+	RelayConn     *net.TCPConn     // 中继连接信息
+	RelayPort     int              // 中继端口
+	ClientId      string           // 客户端节点uid
 }
 
 var userService = new(services.UserService)
 
 func NewClientWs(uid string, socket *websocket.Conn) *Client {
 	return &Client{
-		UID:        uid,
-		Socket:     socket,
-		Send:       make(chan []byte, 1024),
-		ClientType: 0,
-		wsRead:     make(chan []byte, 1024),
+		UID:    uid,
+		Socket: socket,
+		Send:   make(chan []byte, 1024),
+		//ClientType: 0,
+		wsRead: make(chan []byte, 1024),
 	}
 }
 

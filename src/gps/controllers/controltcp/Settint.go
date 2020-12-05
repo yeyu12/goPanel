@@ -22,4 +22,5 @@ func RegisterNode(cli unsafe.Pointer, message interface{}) {
 
 	controlTcpCli.Name = messBody["name"].(string)
 	controlTcpCli.ClientId = messBody["uid"].(string)
+	controlTcpCli.SystemType = messBody["system_type"].(string)
 }

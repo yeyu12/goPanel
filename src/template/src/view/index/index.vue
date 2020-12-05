@@ -16,6 +16,12 @@
                             default-expand-all
                             @node-click="treeDoubleClick"
                     >
+                        <span slot-scope="{ node, data }">
+                            <svg class="icon" aria-hidden="true">
+                                <use :xlink:href="'#el-icon-'+data.system_type"></use>
+                            </svg>
+                            <span style="padding-left: 4px;">{{node.label}}</span>
+                        </span>
                     </el-tree>
                 </div>
             </el-aside>
@@ -286,7 +292,7 @@
                     passwd: {}
                 }
 
-                if(!this.multipleTableSelection.length) {
+                if (!this.multipleTableSelection.length) {
                     this.$message.error('请选择主机！');
                     return
                 }

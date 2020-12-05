@@ -7,6 +7,8 @@ import Md5 from 'js-md5';
 // import Sha1 from 'js-sha1';
 import {Base64} from 'js-base64';
 
+import "./static/icon/iconfont";
+
 import 'element-ui/lib/theme-chalk/index.css';
 import './static/css/style.css';
 
