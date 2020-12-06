@@ -55,6 +55,8 @@ func (c *CommandController) Add(g *gin.Context) {
 			common.RetJson(g, constants.ERROR_FAIL, constants.ERROR_FAIL_MSG, "")
 			return
 		}
+
+		// 下发要跑的命令
 	}
 
 	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, "")

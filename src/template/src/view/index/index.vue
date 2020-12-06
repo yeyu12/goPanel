@@ -94,8 +94,8 @@
                     v-model="menuVisible">
                 <a class="menu-button" @click="editTree">编辑信息</a>
                 <a class="menu-button" @click="openShell" v-if="!isDir">打开终端</a>
-                <a class="menu-button" v-if="!isDir">文件管理</a>
-                <a class="menu-button" v-if="!isDir">桌面管理</a>
+                <!--                <a class="menu-button" v-if="!isDir">文件管理</a>-->
+                <!--                <a class="menu-button" v-if="!isDir">桌面管理</a>-->
                 <a class="menu-button" @click="showAddCommand(1)" v-if="!isDir">执行命令</a>
                 <a class="menu-button" @click="restartService" v-if="!isDir">重启服务</a>
                 <a class="menu-button" @click="reboot" v-if="!isDir">重启主机</a>
@@ -298,7 +298,7 @@
                     passwd: {}
                 }
 
-                if (!this.multipleTableSelection.length) {
+                if (isType === 2 && !this.multipleTableSelection.length) {
                     this.$message.error('请选择主机！');
                     return
                 }

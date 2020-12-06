@@ -14,7 +14,7 @@
         data() {
             return {
                 rfb: null,
-                url: undefined, //链接的url
+                url: "vnc://192.168.3.32/", //链接的url
                 IsClean: false, //是否已断开并不可重新连接
                 connectNum: 0 //重连次数
             }
