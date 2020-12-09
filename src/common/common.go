@@ -22,7 +22,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 )
 
@@ -381,9 +380,4 @@ func homeWindows() (string, error) {
 	}
 
 	return home, nil
-}
-
-// 给pid发送重启信号
-func SendPidRestart(pid int) error {
-	return syscall.Kill(pid, syscall.SIGUSR2)
 }

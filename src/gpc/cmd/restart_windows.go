@@ -1,5 +1,3 @@
-// +build !windows
-
 package cmd
 
 import (
@@ -9,7 +7,6 @@ import (
 	"goPanel/src/constants"
 	"io/ioutil"
 	"strconv"
-	"syscall"
 )
 
 var RestartCmd = cli.Command{
@@ -31,5 +28,5 @@ func restartRun(c *cli.Context) {
 		log.Panic(err)
 	}
 
-	_ = syscall.Kill(pid, syscall.SIGUSR2)
+	log.Info("windows平台，暂时不支持自重启。", pid)
 }

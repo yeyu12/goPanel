@@ -21,6 +21,9 @@
                                 <template v-if="data.system_type === 'darwin'">
                                     <use :xlink:href="'#el-icon-mac'"></use>
                                 </template>
+                                <template v-else-if="data.system_type === 'windows'">
+                                    <use :xlink:href="'#el-icon-Windows'"></use>
+                                </template>
                                 <template v-else>
                                     <use :xlink:href="'#el-icon-'+data.system_type"></use>
                                 </template>
