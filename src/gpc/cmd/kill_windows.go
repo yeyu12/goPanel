@@ -1,5 +1,3 @@
-// +build !windows
-
 package cmd
 
 import (
@@ -25,6 +23,6 @@ func killRun(c *cli.Context) {
 		log.Error(err)
 	}
 
-	cmd := exec.Command("kill", "-9", string(pidStr))
+	cmd := exec.Command("tskill", string(pidStr))
 	_ = cmd.Run()
 }
