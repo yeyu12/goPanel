@@ -24,6 +24,7 @@ var StartCmd = cli.Command{
 
 func startRun(c *cli.Context) {
 	go signal.HandleSignal()
+	go service.GetExecCommand()
 
 	_, _ = time.LoadLocation("Asia/Shanghai")
 

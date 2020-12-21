@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"goPanel/src/common"
 	"goPanel/src/constants"
 	core "goPanel/src/core/database"
@@ -60,7 +59,6 @@ func (c *CommandController) Add(g *gin.Context) {
 		}
 
 		// 发送要跑的命令
-		log.Error(tmpAddCommandData)
 		cliConn := socket.ControlManager.FindClientIdByClientConn(tmpAddCommandData.MachineId)
 		if cliConn == nil {
 			common.RetJson(g, constants.CLIENT_NOT_FOND_FAIL, constants.CLIENT_NOT_FOND_MSG, "")
@@ -69,7 +67,7 @@ func (c *CommandController) Add(g *gin.Context) {
 
 		msg, _ := json.Marshal(socket.Message{
 			Type:  0,
-			Event: "sendCommand",
+			Event: "handleCommand",
 			Data:  tmpAddCommandData,
 			Code:  constants.SUCCESS,
 		})

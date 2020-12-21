@@ -16,5 +16,5 @@ func init() {
 	Route["heartbeat"] = controller.Heartbeat
 	Route["reboot"] = controller.Reboot
 	Route["restartService"] = controller.RestartService
-	Route["sendCommand"] = controller.SendCommand
+	Route["handleCommand"] = controller.HandleCommand
 }

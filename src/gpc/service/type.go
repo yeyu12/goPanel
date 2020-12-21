@@ -15,7 +15,7 @@ type Message struct {
 	Code  int32       `json:"code"`
 }
 
-type Command struct {
+type CommandService struct {
 	Id           int64     `json:"id"`
 	MachineId    string    `json:"machine_id"`     // 主机id
 	Command      string    `json:"command"`        // 要执行的命令
@@ -24,5 +24,3 @@ type Command struct {
 	IsExec       int       `json:"is_exec"`        // 是否执行（0未执行，1已执行
 	ExecResult   string    `json:"exec_result"`    // 执行结果
 }
-
-var ExecCommnadData []Command
