@@ -5,11 +5,11 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	jsoniter "github.com/json-iterator/go"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/constants"
 	"goPanel/src/library/snowFlake"
@@ -259,6 +259,7 @@ func RsaDecrypt(cipherText []byte, path string) ([]byte, error) {
 
 // 结构体转map
 func StructToJson(data interface{}) (dataMap map[string]interface{}) {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	dataJson, _ := json.Marshal(data)
 	_ = json.Unmarshal(dataJson, &dataMap)
 
@@ -321,6 +322,7 @@ func ConnTcp(addr string) (*net.TCPConn, error) {
 
 // interface转map
 func InterfaceByMapStr(data interface{}) (map[string]interface{}, error) {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	dataJson, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
@@ -380,4 +382,14 @@ func homeWindows() (string, error) {
 	}
 
 	return home, nil
+}
+
+// 转义符处理
+func JSONMarshal(t interface{}) ([]byte, error) {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+	buffer := &bytes.Buffer{}
+	encoder := json.NewEncoder(buffer)
+	encoder.SetEscapeHTML(true)
+	err := encoder.Encode(t)
+	return buffer.Bytes(), err
 }

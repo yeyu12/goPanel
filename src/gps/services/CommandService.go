@@ -12,3 +12,11 @@ type CommandService struct {
 func (s *CommandService) Add(db *xorm.Engine, data *models.CommandModel) (int64, error) {
 	return s.commandModel.Add(db, data)
 }
+
+func (s *CommandService) IdByDetails(db *xorm.Engine, id int64) models.CommandModel {
+	return s.commandModel.IdByDetails(db, id)
+}
+
+func (s *CommandService) Update(db *xorm.Engine, data models.CommandModel) (int64, error) {
+	return s.commandModel.Update(db, data)
+}

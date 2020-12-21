@@ -1,7 +1,7 @@
 package socket
 
 import (
-	"encoding/json"
+	jsoniter "github.com/json-iterator/go"
 	log "github.com/sirupsen/logrus"
 	"goPanel/src/gps/coer/router"
 	"io"
@@ -40,6 +40,7 @@ func (c *Control) read() {
 		data = data[:size]
 
 		var ret Message
+		var json = jsoniter.ConfigCompatibleWithStandardLibrary
 		err = json.Unmarshal(data, &ret)
 		if err != nil {
 			log.Error(err)

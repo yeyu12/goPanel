@@ -15,6 +15,7 @@ type CommandModel struct {
 	PlanExecTime time.Time `json:"plan_exec_time"`                  // 计划执行时间
 	IsExec       int       `json:"is_exec" xorm:"default(0)"`       // 是否执行（0未执行，1已执行
 	ExecResult   string    `json:"exec_result"`                     // 执行结果
+	HandleTime   int64     `json:"handle_time"`                     // 执行耗时
 	CreateTime   time.Time `json:"create_time"`
 	CreateUid    int64     `json:"create_uid"`
 	UpdateTime   time.Time `json:"update_time"`
@@ -22,4 +23,15 @@ type CommandModel struct {
 
 func (m *CommandModel) Add(db *xorm.Engine, data *CommandModel) (int64, error) {
 	return db.InsertOne(data)
+}
+
+func (m *CommandModel) IdByDetails(db *xorm.Engine, id int64) CommandModel {
+	var commandModel CommandModel
+	_, _ = db.Where("id = ?", id).Get(&commandModel)
+
+	return commandModel
+}
+
+func (m *CommandModel) Update(db *xorm.Engine, data CommandModel) (int64, error) {
+	return db.Where("id = ?", data.Id).Update(data)
 }
