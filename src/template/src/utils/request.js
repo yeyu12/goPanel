@@ -25,6 +25,7 @@ axiosObj.interceptors.request.use(
 axiosObj.interceptors.response.use(
     response => {
         if (loginStatus.indexOf(response.data.code) > -1) {
+            window.sessionStorage.clear()
             router.app.$router.push('/login')
         }
 
