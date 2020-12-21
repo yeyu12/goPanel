@@ -43,16 +43,19 @@ func (c *MachineController) Save(g *gin.Context) {
 	}
 
 	cli := socket.ControlManager.FindClientIdByClientConn(machineSaveComputerVail.Id)
-	if cli != nil {
-		msg, _ := json.Marshal(socket.Message{
-			Type:  0,
-			Event: "settingClientInfo",
-			Data:  machineSaveComputerVail,
-			Code:  constants.SUCCESS,
-		})
-
-		cli.Write <- msg
+	if cli == nil {
+		common.RetJson(g, constants.CLIENT_NOT_FOND_FAIL, constants.CLIENT_NOT_FOND_MSG, "")
+		return
 	}
+
+	msg, _ := json.Marshal(socket.Message{
+		Type:  0,
+		Event: "settingClientInfo",
+		Data:  machineSaveComputerVail,
+		Code:  constants.SUCCESS,
+	})
+
+	cli.Write <- msg
 
 	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, "")
 	return
@@ -62,16 +65,19 @@ func (c *MachineController) Save(g *gin.Context) {
 func (c *MachineController) Reboot(g *gin.Context) {
 	clientId := g.Query("id")
 	cli := socket.ControlManager.FindClientIdByClientConn(clientId)
-	if cli != nil {
-		msg, _ := json.Marshal(socket.Message{
-			Type:  0,
-			Event: "reboot",
-			Data:  nil,
-			Code:  constants.SUCCESS,
-		})
-
-		cli.Write <- msg
+	if cli == nil {
+		common.RetJson(g, constants.CLIENT_NOT_FOND_FAIL, constants.CLIENT_NOT_FOND_MSG, "")
+		return
 	}
+
+	msg, _ := json.Marshal(socket.Message{
+		Type:  0,
+		Event: "reboot",
+		Data:  nil,
+		Code:  constants.SUCCESS,
+	})
+
+	cli.Write <- msg
 
 	common.RetJson(g, constants.SUCCESS, constants.SUCCESS_MSG, "")
 	return
@@ -80,17 +86,20 @@ func (c *MachineController) Reboot(g *gin.Context) {
 // 重启客户单服务
 func (c *MachineController) RestartService(g *gin.Context) {
 	clientId := g.Query("id")
-	cli := socket.ControlManager.FindClientIdByClientConn(clientId)
-	if cli != nil {
-		msg, _ := json.Marshal(socket.Message{
-			Type:  0,
-			Event: "restartService",
-			Data:  nil,
-			Code:  constants.SUCCESS,
-		})
-
-		cli.Write <- msg
+	cliConn := socket.ControlManager.FindClientIdByClientConn(clientId)
+	if cliConn == nil {
+		common.RetJson(g, constants.CLIENT_NOT_FOND_FAIL, constants.CLIENT_NOT_FOND_MSG, "")
+		return
 	}
+
+	msg, _ := json.Marshal(socket.Message{
+		Type:  0,
+		Event: "restartService",
+		Data:  nil,
+		Code:  constants.SUCCESS,
+	})
+
+	cliConn.Write <- msg
 
 	// 停止监听指定中继端口
 	for conn, _ := range socket.ServerWsManager.Clients {

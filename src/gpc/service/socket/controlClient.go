@@ -79,7 +79,6 @@ func heartbeat(conn *net.TCPConn) {
 			return
 		}
 	}
-
 }
 
 // 注册本机数据
