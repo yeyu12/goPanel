@@ -31,3 +31,5 @@ const (
 	GPS_PID_PATH        = RUNTIME_PATH + "gps_pid/"
 	PID_FILENAME        = "pid"
 )
+
+const DEFAULT_SUBPACKAGE = 128 // 默认分包大小

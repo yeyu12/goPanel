@@ -1,6 +1,8 @@
 package common
 
 import (
+	"bytes"
+	"compress/gzip"
 	"crypto/hmac"
 	"crypto/md5"
 	"crypto/sha1"
@@ -8,6 +10,7 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/hex"
+	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
@@ -184,4 +187,40 @@ func (s StringUtils) Base64Encode() string {
 func (s StringUtils) Base64Decode() (string, error) {
 	v, err := base64.StdEncoding.DecodeString(s.String())
 	return string(v), err
+}
+
+// GZIP压缩
+func (s StringUtils) GzipEncode() (string, error) {
+	var b bytes.Buffer
+	gW, err := gzip.NewWriterLevel(&b, gzip.HuffmanOnly)
+	defer gW.Close()
+	if err != nil {
+		return "", err
+	}
+
+	_, err = gW.Write([]byte(s.String()))
+	if err != nil {
+		return "", err
+	}
+	err = gW.Flush()
+	if err != nil {
+		return "", err
+	}
+
+	return b.String(), nil
+}
+
+// GZIP 解压
+func (s StringUtils) GzipDecode() (string, error) {
+	gRead, err := gzip.NewReader(strings.NewReader(s.String()))
+	if err != nil {
+		return "", err
+	}
+	defer gRead.Close()
+	rBuf, err := ioutil.ReadAll(gRead)
+	if err != nil {
+		return "", err
+	}
+
+	return string(rBuf), nil
 }
