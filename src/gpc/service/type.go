@@ -30,3 +30,7 @@ type CommandService struct {
 	IsLock       bool         // 锁
 	Conn         *net.TCPConn // 连接信息
 }
+
+type TcpService struct {
+	Conn *net.TCPConn // 连接信息
+}

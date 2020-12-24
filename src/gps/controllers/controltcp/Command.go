@@ -20,7 +20,7 @@ func ExecCommandResult(cli unsafe.Pointer, message interface{}) {
 	commandService := services.CommandService{}
 	oldCommandData := commandService.IdByDetails(core.Db, int64(messBody["id"].(float64)))
 	if oldCommandData.Id == 0 {
-		log.Errorf("执行的命令数据不存在！ %+v ", messBody)
+		log.Errorf("The executed command data does not exist！ %+v ", messBody)
 		return
 	}
 
@@ -33,7 +33,7 @@ func ExecCommandResult(cli unsafe.Pointer, message interface{}) {
 
 	_, err = commandService.Update(core.Db, oldCommandData)
 	if err != nil {
-		log.Errorf("执行命令，数据库状态更新失败！ %s ", err.Error())
+		log.Errorf("Execute command, database status update failed！ %s ", err.Error())
 		return
 	}
 }

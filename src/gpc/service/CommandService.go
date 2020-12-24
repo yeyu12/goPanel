@@ -1,8 +1,8 @@
 package service
 
 import (
+	"encoding/json"
 	log "github.com/sirupsen/logrus"
-	"goPanel/src/common"
 	"goPanel/src/constants"
 	"os/exec"
 	"time"
@@ -64,10 +64,8 @@ func execCommand(data *CommandService) {
 		Code:  constants.SUCCESS,
 	}
 
-	resJson, _ := common.JSONMarshal(res)
-	//resJson, _ := json.Marshal(&res)
-	//ioutil.WriteFile("./1.txt", resJson, 0755)
-	_, err = data.Conn.Write(resJson)
+	resJson, _ := json.Marshal(res)
+	err = NewTcpService(data.Conn).Send(resJson)
 	if err != nil {
 		log.Error(err)
 		return

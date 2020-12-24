@@ -74,7 +74,7 @@ func heartbeat(conn *net.TCPConn) {
 		}
 
 		log.Info("正在执行控制端心跳包")
-		if _, err = conn.Write(writeJson); err != nil {
+		if err = service.NewTcpService(conn).Send(writeJson); err != nil {
 			log.Info(err)
 			return
 		}
@@ -131,7 +131,8 @@ func registerLocalData(conn *net.TCPConn) {
 		log.Error(err)
 		return
 	}
-	if _, err = conn.Write(writeJson); err != nil {
+	err = service.NewTcpService(conn).Send(writeJson)
+	if err != nil {
 		log.Error(err)
 		return
 	}
@@ -185,6 +186,6 @@ func readControlTcpMess(ctx context.Context, conn *net.TCPConn) {
 			continue
 		}
 
-		log.Error("请求路由不存在！")
+		log.Error("Route does not exist！")
 	}
 }

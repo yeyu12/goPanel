@@ -32,4 +32,4 @@ const (
 	PID_FILENAME        = "pid"
 )
 
-const DEFAULT_SUBPACKAGE = 128 // 默认分包大小
+const DEFAULT_SUBPACKAGE = 4096 // 默认分包大小

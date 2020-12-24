@@ -3,6 +3,7 @@ package socket
 import (
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
+	"goPanel/src/core/tcp_package"
 	"net"
 )
 
@@ -58,9 +59,10 @@ func (cm *ControlTcpManager) conn(controlListen *net.TCPListener) {
 		log.Info("控制端有连接进来（新客户端）：", controlConn.RemoteAddr().String())
 
 		client := Control{
-			Conn:  controlConn.(*net.TCPConn),
-			Write: make(chan []byte, 1024),
-			Uuid:  uuid.NewV4().String(),
+			Conn:    controlConn.(*net.TCPConn),
+			Write:   make(chan []byte, 1024),
+			Uuid:    uuid.NewV4().String(),
+			TcpBody: make(map[int64]map[int64]*tcp_package.PackageContent),
 		}
 
 		ControlManager.Register <- &client

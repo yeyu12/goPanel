@@ -399,7 +399,7 @@ func JSONMarshal(data interface{}) (string, error) {
 }
 
 //整形转换成字节
-func IntToBytes(n int64) ([]byte, error) {
+func IntToBytes(n interface{}) ([]byte, error) {
 	bytesBuffer := bytes.NewBuffer([]byte{})
 	err := binary.Write(bytesBuffer, binary.BigEndian, n)
 	if err != nil {
