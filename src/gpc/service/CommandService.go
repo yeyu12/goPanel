@@ -71,5 +71,5 @@ func execCommand(data *CommandService) {
 		return
 	}
 
-	log.Info(data)
+	//log.Info(data)
 }

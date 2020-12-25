@@ -1,6 +1,7 @@
 package service
 
 import (
+	log "github.com/sirupsen/logrus"
 	"goPanel/src/constants"
 	"goPanel/src/core/tcp_package"
 	"net"
@@ -21,14 +22,15 @@ func (s *TcpService) Send(data []byte) error {
 	}
 
 	for _, item := range subpackageData {
-		if _, err = s.Conn.Write([]byte(item)); err != nil {
+		size, err := s.Conn.Write([]byte(item))
+		if err != nil {
 			return err
 		}
 
-		time.Sleep(time.Microsecond * 100)
+		log.Error(size, err)
+
+		//time.Sleep(time.Microsecond * 100)
 	}
 
 	return nil
 }
-
-// 接收

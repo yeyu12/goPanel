@@ -31,6 +31,7 @@ func (c *Control) read() {
 	}()
 
 	tcpPackageObj := tcp_package.NewTcpPackage(constants.DEFAULT_SUBPACKAGE, time.Now().UnixNano())
+	go c.tcpBodyReceiveTimeout()
 
 	for {
 		var data = make([]byte, 10240)
@@ -59,9 +60,11 @@ func (c *Control) read() {
 
 		body, err := tcpPackageObj.TcpJoinPackage(c.TcpBody[unPackingData.PackageId])
 		if err != nil {
-			log.Debug(err)
+			//log.Debug(err)
 			continue
 		}
+
+		delete(c.TcpBody, unPackingData.PackageId)
 
 		var ret Message
 		err = json.Unmarshal(body, &ret)
@@ -72,6 +75,22 @@ func (c *Control) read() {
 
 		if err = router.HandleRoute(ret.Event, unsafe.Pointer(c), &ret); err != nil {
 			log.Error(err)
+		}
+	}
+}
+
+// 包体超时处理
+func (c *Control) tcpBodyReceiveTimeout() {
+	ticker := time.NewTicker(time.Second * 3)
+
+	for {
+		select {
+		case <-ticker.C:
+			for index, _ := range c.TcpBody {
+				if (time.Now().Unix() - (index / 1e9)) >= 60 {
+					delete(c.TcpBody, index)
+				}
+			}
 		}
 	}
 }
@@ -93,6 +112,5 @@ func (c *Control) send() {
 				return
 			}
 		}
-
 	}
 }
