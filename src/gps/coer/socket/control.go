@@ -34,7 +34,7 @@ func (c *Control) read() {
 	go c.tcpBodyReceiveTimeout()
 
 	for {
-		var data = make([]byte, 10240)
+		var data = make([]byte, 1024)
 		size, err := (*c.Conn).Read(data)
 		if err != nil || err == io.EOF {
 			if err != io.EOF {
@@ -60,7 +60,7 @@ func (c *Control) read() {
 
 		body, err := tcpPackageObj.TcpJoinPackage(c.TcpBody[unPackingData.PackageId])
 		if err != nil {
-			//log.Debug(err)
+			log.Debug(err)
 			continue
 		}
 

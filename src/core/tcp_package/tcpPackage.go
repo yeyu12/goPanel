@@ -2,7 +2,7 @@ package tcp_package
 
 import (
 	"errors"
-	"fmt"
+	log "github.com/sirupsen/logrus"
 	"goPanel/src/common"
 	"math"
 	"sort"
@@ -96,7 +96,7 @@ func (t *TcpPackage) TcpJoinPackage(data map[int64]*PackageContent) ([]byte, err
 		dataIndex = append(dataIndex, int(index))
 	}
 	sort.Ints(dataIndex)
-	fmt.Println(dataIndex)
+	log.Info(dataIndex)
 
 	// 计算包体数据是否完整
 	subpackageIndex := math.Ceil(float64(data[int64(dataIndex[0])].PackageSize) / float64(t.SubpackageSize))

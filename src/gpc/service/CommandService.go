@@ -56,7 +56,9 @@ func execCommand(data *CommandService) {
 		}
 	}
 	// 删除
-	WaitExecCommandData = append(WaitExecCommandData[:index], WaitExecCommandData[index+1:]...)
+	if len(WaitExecCommandData) > 0 {
+		WaitExecCommandData = append(WaitExecCommandData[:index], WaitExecCommandData[index+1:]...)
+	}
 
 	res := Message{
 		Event: "execCommandResult",
